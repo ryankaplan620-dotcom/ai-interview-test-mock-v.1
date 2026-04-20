@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================
+   Folio base styles
+   =========================================== */
+
+:root {
+  --folio-ease-brand: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --folio-ease-settle: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --folio-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: theme("colors.ink.DEFAULT");
+  color: theme("colors.text.primary");
+  font-family: theme("fontFamily.sans");
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
+}
+
+::selection {
+  background-color: theme("colors.accent.DEFAULT");
+  color: theme("colors.text.onAccent");
+}
+
+/* Atmospheric grid overlay — subtle */
+.grid-overlay {
+  background-image: linear-gradient(rgba(42, 49, 57, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42, 49, 57, 0.35) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: -1px -1px;
+}
+
+/* Focus ring — brand-specific */
+*:focus-visible {
+  outline: 2px solid theme("colors.accent.DEFAULT");
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Disable focus ring on mouse clicks, keep on keyboard */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Shimmer effect for CTA buttons */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.btn-shimmer { position: relative; overflow: hidden; }
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Tagline pulse animation */
+@keyframes tagline-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-tagline-pulse {
+  animation: tagline-pulse 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
