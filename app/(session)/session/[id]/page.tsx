@@ -3,6 +3,7 @@ import { requireUser, getUserTier } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { PERSONAS } from "@/lib/personas";
 import { resolveRuntimeFeatures } from "@/lib/gates/session";
+import { shouldMock } from "@/lib/pipeline/env";
 import type { Session } from "@/types/supabase";
 import { SessionView, type SessionViewPersona } from "./session-view";
 
@@ -58,6 +59,14 @@ export default async function SessionPage({ params }: PageProps) {
   const tier = await getUserTier();
   const runtime = resolveRuntimeFeatures(tier?.effective_tier ?? "trial");
 
+  // ---- 6. Pipeline capabilities — which real voice services are online?
+  // The client mirrors mock-vs-real logic from the server by reading these flags.
+  const pipelineCapabilities = {
+    deepgram: !shouldMock("deepgram"),
+    elevenlabs: !shouldMock("elevenlabs"),
+    simli: !shouldMock("simli"),
+  };
+
   return (
     <SessionView
       session={toClientSession(session)}
@@ -69,6 +78,7 @@ export default async function SessionPage({ params }: PageProps) {
         nonVerbalFeedback: runtime.nonVerbalFeedback,
         voiceAcousticAnalysis: runtime.voiceAcousticAnalysis,
       }}
+      pipelineCapabilities={pipelineCapabilities}
     />
   );
 }

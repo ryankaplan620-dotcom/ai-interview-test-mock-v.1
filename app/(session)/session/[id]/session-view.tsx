@@ -10,6 +10,8 @@ import { createOrchestrator } from "@/lib/client-pipeline/orchestrator";
 import { MockSTTClient } from "@/lib/client-pipeline/mock-stt";
 import { MockTTSClient } from "@/lib/client-pipeline/mock-tts";
 import { MockAvatarClient } from "@/lib/client-pipeline/mock-avatar";
+import { DeepgramSTTClient } from "@/lib/client-pipeline/deepgram-stt";
+import type { STTClient, TTSClient, AvatarClient } from "@/lib/client-pipeline/types";
 
 // --------------------------------------------------------------------------
 // Prop types (all client-safe — no prompts, no env IDs)
@@ -44,10 +46,17 @@ export interface RuntimeFeatureFlagsClient {
   voiceAcousticAnalysis: boolean;
 }
 
+export interface PipelineCapabilities {
+  deepgram: boolean;
+  elevenlabs: boolean;
+  simli: boolean;
+}
+
 export interface SessionViewProps {
   session: SessionViewSession;
   persona: SessionViewPersona;
   runtimeFeatures: RuntimeFeatureFlagsClient;
+  pipelineCapabilities: PipelineCapabilities;
 }
 
 type Phase = "permissions" | "pre-call" | "live" | "ending";
@@ -57,7 +66,7 @@ type MediaState = "idle" | "requesting" | "granted" | "denied" | "error";
 // Component
 // --------------------------------------------------------------------------
 
-export function SessionView({ session, persona, runtimeFeatures }: SessionViewProps) {
+export function SessionView({ session, persona, runtimeFeatures, pipelineCapabilities }: SessionViewProps) {
   const router = useRouter();
 
   // Phase: skip pre-call if the session was already started
@@ -209,16 +218,22 @@ export function SessionView({ session, persona, runtimeFeatures }: SessionViewPr
     setCallStartedAtMs(Date.now());
     setPhase("live");
 
-    // Build the orchestrator. Phase C.1 uses mock clients everywhere except Claude,
-    // which is real when ANTHROPIC_API_KEY is set (the route falls back to mock itself).
-    const stt = new MockSTTClient();
-    const tts = new MockTTSClient();
-    const avatar = new MockAvatarClient();
-    mockSttRef.current = stt;
-    mockAvatarRef.current = avatar;
+    // Build the orchestrator. Real services are used when the server advertises
+    // capability (key present); otherwise mock. Each service degrades independently.
+    const stt: STTClient = pipelineCapabilities.deepgram
+      ? new DeepgramSTTClient()
+      : new MockSTTClient();
+    const tts: TTSClient = new MockTTSClient(); // C.3 will swap for ElevenLabs
+    const avatar: AvatarClient = new MockAvatarClient(); // C.4 will swap for Simli
 
-    // Drive the pulse on the persona frame from the mock avatar's speaking state
-    avatar.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
+    // Keep a typed handle to the mock avatar for speaking-state subscription.
+    // (Only mock avatar exposes onSpeakingChange — real Simli drives the <video> directly.)
+    mockAvatarRef.current = avatar instanceof MockAvatarClient ? avatar : null;
+    mockSttRef.current = stt instanceof MockSTTClient ? stt : null;
+
+    if (mockAvatarRef.current) {
+      mockAvatarRef.current.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
+    }
 
     const orchestrator = createOrchestrator({
       ctx: {
