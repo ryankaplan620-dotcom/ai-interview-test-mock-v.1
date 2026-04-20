@@ -4,8 +4,10 @@ import { createServerClient } from "@/lib/db/server";
 import { PERSONAS } from "@/lib/personas";
 import { resolveRuntimeFeatures } from "@/lib/gates/session";
 import { shouldMock } from "@/lib/pipeline/env";
+import { tavusConfigured } from "@/lib/pipeline/tavus-registry";
 import type { Session } from "@/types/supabase";
 import { SessionView, type SessionViewPersona } from "./session-view";
+import { TavusSessionView } from "./tavus-session-view";
 
 interface PageProps {
   params: { id: string };
@@ -18,7 +20,6 @@ export default async function SessionPage({ params }: PageProps) {
   const supabase = createServerClient();
 
   // ---- 1. Load the session
-  // Cast: hand-rolled Database types don't flow through select generics. Same pattern as dashboard.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sessionRaw, error } = await (supabase.from("sessions") as any)
     .select("*")
@@ -50,13 +51,27 @@ export default async function SessionPage({ params }: PageProps) {
     title: persona.title,
   };
 
-  // ---- 5. Runtime feature flags for this tier — the orchestrator (Phase C)
-  // will read these to decide whether to inject session memory, firm calibration, etc.
+  // ---- 5. If Tavus is configured, use the new CVI pipeline
+  if (tavusConfigured()) {
+    return (
+      <TavusSessionView
+        session={{
+          id: session.id,
+          persona: session.persona,
+          interview_type: session.interview_type,
+          mode: session.mode,
+          target_firm: session.target_firm,
+          target_role: session.target_role,
+          duration_seconds: session.duration_seconds,
+        }}
+        persona={personaView}
+      />
+    );
+  }
+
+  // ---- 6. Fallback: legacy Simli/ElevenLabs/Deepgram pipeline from Phases C.1–C.3
   const tier = await getUserTier();
   const runtime = resolveRuntimeFeatures(tier?.effective_tier ?? "trial");
-
-  // ---- 6. Pipeline capabilities — which real voice services are online?
-  // The client mirrors mock-vs-real logic from the server by reading these flags.
   const pipelineCapabilities = {
     deepgram: !shouldMock("deepgram"),
     elevenlabs: !shouldMock("elevenlabs"),
