@@ -28,7 +28,7 @@ export function Footer() {
             <Link href="/" className="inline-flex items-center gap-2">
               <FolioMark className="h-5 w-5" color="#00F590" />
               <span className="font-display text-[14px] font-semibold tracking-[-0.025em] text-text-primary">
-                folio
+                Folio
               </span>
             </Link>
             <p className="mt-3 max-w-[240px] font-sans text-[13px] leading-relaxed text-text-tertiary">

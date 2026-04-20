@@ -37,7 +37,7 @@ export function Nav() {
         <Link href="/" className="flex items-center gap-2.5 transition-all duration-300 hover:opacity-80" aria-label="Folio home">
           <FolioMark className="h-6 w-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(0,245,144,0.3)]" color="#00F590" />
           <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">
-            folio
+            Folio
           </span>
         </Link>
 

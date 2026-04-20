@@ -33,10 +33,8 @@ function SectionDots() {
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen bg-ink text-text-primary">
-      {/* Atmospheric layers — fixed behind everything */}
-      <div className="pointer-events-none fixed inset-0 grid-overlay opacity-[0.35]" aria-hidden />
-      <div className="pointer-events-none fixed inset-0 bg-depth-glow" aria-hidden />
-      <div className="pointer-events-none fixed inset-0 bg-ambient-glow" aria-hidden />
+      {/* Subtle ambient glow — no grid */}
+      <div className="pointer-events-none fixed inset-0 bg-depth-glow opacity-50" aria-hidden />
 
       {/* Content layers */}
       <div className="relative">
