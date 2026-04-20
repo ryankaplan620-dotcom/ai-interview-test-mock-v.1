@@ -11,6 +11,9 @@ import { MockSTTClient } from "@/lib/client-pipeline/mock-stt";
 import { MockTTSClient } from "@/lib/client-pipeline/mock-tts";
 import { MockAvatarClient } from "@/lib/client-pipeline/mock-avatar";
 import { DeepgramSTTClient } from "@/lib/client-pipeline/deepgram-stt";
+import { ElevenLabsTTSClient } from "@/lib/client-pipeline/elevenlabs-tts";
+import { SimliAvatarClient } from "@/lib/client-pipeline/simli-avatar";
+import { createAudioSink, type AudioSink } from "@/lib/client-pipeline/audio-sink";
 import type { STTClient, TTSClient, AvatarClient } from "@/lib/client-pipeline/types";
 
 // --------------------------------------------------------------------------
@@ -87,6 +90,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
   // Transcript + interviewer line are driven by the orchestrator once the call is live.
   const [orchestratorState, setOrchestratorState] = useState<OrchestratorState | null>(null);
   const [avatarSpeaking, setAvatarSpeaking] = useState(false);
+  const [remoteAvatarStream, setRemoteAvatarStream] = useState<MediaStream | null>(null);
 
   // Derived: what the UI actually shows
   const transcript = orchestratorState?.transcript ?? [];
@@ -98,6 +102,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
   const orchestratorRef = useRef<OrchestratorHandle | null>(null);
   const mockSttRef = useRef<MockSTTClient | null>(null);
   const mockAvatarRef = useRef<MockAvatarClient | null>(null);
+  const audioSinkRef = useRef<AudioSink | null>(null);
 
   // Callback ref: re-binds srcObject every time a <video> element mounts.
   // Needed because pre-call and live render different <video> nodes, and a plain
@@ -218,21 +223,53 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
     setCallStartedAtMs(Date.now());
     setPhase("live");
 
-    // Build the orchestrator. Real services are used when the server advertises
-    // capability (key present); otherwise mock. Each service degrades independently.
+    // Build the pipeline. Real services used when the server advertises capability
+    // (key present); otherwise mock. TTS + avatar share an AudioSink in real mode —
+    // ElevenLabs writes PCM into it, Simli sends that stream's audio track upstream
+    // over WebRTC. The user hears Simli's returned (lip-synced) audio, not local playback.
+
+    const useRealTts = pipelineCapabilities.elevenlabs;
+    const useRealAvatar = pipelineCapabilities.simli;
+
+    // Audio sink only needed if *either* real TTS or real avatar is active — both
+    // share it in full-real mode; a real-TTS-only mode would play through it locally
+    // but we don't support that (Option B — audio only via Simli).
+    let audioSink: AudioSink | null = null;
+    if (useRealTts && useRealAvatar) {
+      audioSink = await createAudioSink({ sampleRate: 22050 });
+      audioSinkRef.current = audioSink;
+    }
+
     const stt: STTClient = pipelineCapabilities.deepgram
       ? new DeepgramSTTClient()
       : new MockSTTClient();
-    const tts: TTSClient = new MockTTSClient(); // C.3 will swap for ElevenLabs
-    const avatar: AvatarClient = new MockAvatarClient(); // C.4 will swap for Simli
 
-    // Keep a typed handle to the mock avatar for speaking-state subscription.
-    // (Only mock avatar exposes onSpeakingChange — real Simli drives the <video> directly.)
+    const tts: TTSClient =
+      useRealTts && audioSink
+        ? new ElevenLabsTTSClient({ sessionId: session.id, audioSink })
+        : new MockTTSClient();
+
+    const avatar: AvatarClient =
+      useRealAvatar && audioSink
+        ? new SimliAvatarClient({
+            sessionId: session.id,
+            audioSink,
+            onRemoteStream: (stream) => {
+              setRemoteAvatarStream(stream);
+            },
+            onError: (err) => {
+              console.error("[simli]", err);
+            },
+          })
+        : new MockAvatarClient();
+
     mockAvatarRef.current = avatar instanceof MockAvatarClient ? avatar : null;
     mockSttRef.current = stt instanceof MockSTTClient ? stt : null;
 
     if (mockAvatarRef.current) {
       mockAvatarRef.current.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
+    } else if (avatar instanceof SimliAvatarClient) {
+      avatar.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
     }
 
     const orchestrator = createOrchestrator({
@@ -256,7 +293,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
     (orchestratorRef as any).unsub = unsub;
 
     void orchestrator.start();
-  }, [mediaState, session]);
+  }, [mediaState, session, pipelineCapabilities]);
 
   // ---- End call ---------------------------------------------------------
 
@@ -275,6 +312,15 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       const unsub = (orchestratorRef as any).unsub as (() => void) | undefined;
       unsub?.();
       orchestratorRef.current = null;
+
+      // Tear down shared audio sink (AudioContext)
+      try {
+        audioSinkRef.current?.close();
+      } catch {
+        /* noop */
+      }
+      audioSinkRef.current = null;
+      setRemoteAvatarStream(null);
 
       startEndTransition(async () => {
         await endSession({ sessionId: session.id, finalStatus, actualDurationSeconds: duration });
@@ -334,6 +380,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       currentInterviewerLine={currentInterviewerLine}
       currentUserInterim={currentUserInterim}
       avatarSpeaking={avatarSpeaking}
+      remoteAvatarStream={remoteAvatarStream}
       orchestratorPhase={orchestratorState?.phase ?? "idle"}
       onMockSubmit={(text) => orchestratorRef.current?.mockSubmitUserTurn(text)}
       isMockMode={mockSttRef.current?.isMock ?? true}
@@ -484,6 +531,7 @@ function LiveCallScreen({
   currentInterviewerLine,
   currentUserInterim,
   avatarSpeaking,
+  remoteAvatarStream,
   orchestratorPhase,
   onMockSubmit,
   isMockMode,
@@ -502,6 +550,7 @@ function LiveCallScreen({
   currentInterviewerLine: string | null;
   currentUserInterim: string | null;
   avatarSpeaking: boolean;
+  remoteAvatarStream: MediaStream | null;
   orchestratorPhase: string;
   onMockSubmit: (text: string) => void;
   isMockMode: boolean;
@@ -537,7 +586,7 @@ function LiveCallScreen({
 
       {/* Stage */}
       <div className="relative flex-1 overflow-hidden">
-        <PersonaFrame persona={persona} speaking={avatarSpeaking} />
+        <PersonaFrame persona={persona} speaking={avatarSpeaking} remoteStream={remoteAvatarStream} />
 
         {/* Listening-phase indicator */}
         {orchestratorPhase === "listening" && !currentInterviewerLine && (
@@ -697,13 +746,30 @@ function EndingScreen() {
 // SUB-COMPONENTS
 // ==========================================================================
 
-function PersonaFrame({ persona, speaking = false }: { persona: SessionViewPersona; speaking?: boolean }) {
-  // Phase C.1 placeholder. Phase C.5 replaces the inner block with <video ref={simliVideoRef}>.
+function PersonaFrame({
+  persona,
+  speaking = false,
+  remoteStream = null,
+}: {
+  persona: SessionViewPersona;
+  speaking?: boolean;
+  remoteStream?: MediaStream | null;
+}) {
+  // Callback ref rebinds srcObject when the <video> mounts (same pattern as self-view).
+  const attachVideo = useCallback(
+    (el: HTMLVideoElement | null) => {
+      if (el && remoteStream) {
+        el.srcObject = remoteStream;
+      }
+    },
+    [remoteStream],
+  );
+
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div
         className={[
-          "relative flex h-[420px] w-[560px] items-center justify-center rounded-3xl border transition-colors",
+          "relative flex h-[420px] w-[560px] items-center justify-center overflow-hidden rounded-3xl border transition-colors",
           speaking ? "border-accent/60" : "border-ink-border",
         ].join(" ")}
         style={{
@@ -712,36 +778,58 @@ function PersonaFrame({ persona, speaking = false }: { persona: SessionViewPerso
         }}
         aria-label={`${persona.name} frame`}
       >
-        {/* Speaking pulse ring */}
+        {/* Speaking pulse ring (shows regardless of video presence) */}
         {speaking && (
           <div className="pointer-events-none absolute inset-0 rounded-3xl">
             <div className="absolute inset-0 animate-pulse rounded-3xl ring-2 ring-accent/30" />
           </div>
         )}
-        <div className="flex flex-col items-center">
-          <div
-            className={[
-              "flex h-44 w-44 items-center justify-center rounded-full border transition-all duration-500",
-              speaking
-                ? "scale-105 border-accent/60 shadow-[0_0_60px_rgba(0,245,144,0.25)]"
-                : "scale-100 border-accent/30",
-            ].join(" ")}
-            style={{
-              background: "radial-gradient(circle at 30% 30%, rgba(0,245,144,0.25), rgba(13,17,23,0.9) 70%)",
-            }}
-          >
-            <span className="font-serif text-[64px] font-semibold italic text-accent">
-              {persona.firstName[0]}
-            </span>
+
+        {remoteStream ? (
+          // Real avatar — Simli's returned video + audio (audio plays through this element)
+          <>
+            <video
+              ref={attachVideo}
+              autoPlay
+              playsInline
+              // Do NOT mute — this element is the only audio path in Option B
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            {/* Name strip overlay */}
+            <div className="pointer-events-none absolute bottom-4 left-4 rounded-md bg-ink/70 px-3 py-1.5 backdrop-blur-sm">
+              <p className="font-sans text-[13px] font-semibold text-text-primary">{persona.name}</p>
+              <p className="font-sans text-[10px] text-text-secondary">
+                {persona.title} · {persona.firm}
+              </p>
+            </div>
+          </>
+        ) : (
+          // Placeholder — used in mock avatar mode, or while Simli is still connecting
+          <div className="flex flex-col items-center">
+            <div
+              className={[
+                "flex h-44 w-44 items-center justify-center rounded-full border transition-all duration-500",
+                speaking
+                  ? "scale-105 border-accent/60 shadow-[0_0_60px_rgba(0,245,144,0.25)]"
+                  : "scale-100 border-accent/30",
+              ].join(" ")}
+              style={{
+                background: "radial-gradient(circle at 30% 30%, rgba(0,245,144,0.25), rgba(13,17,23,0.9) 70%)",
+              }}
+            >
+              <span className="font-serif text-[64px] font-semibold italic text-accent">
+                {persona.firstName[0]}
+              </span>
+            </div>
+            <p className="mt-6 font-display text-[18px] font-semibold text-text-primary">{persona.name}</p>
+            <p className="mt-0.5 font-sans text-[12px] text-text-secondary">
+              {persona.title} · {persona.firm}
+            </p>
+            {speaking && (
+              <p className="mt-3 font-mono text-[10px] tracking-label text-accent/80">SPEAKING</p>
+            )}
           </div>
-          <p className="mt-6 font-display text-[18px] font-semibold text-text-primary">{persona.name}</p>
-          <p className="mt-0.5 font-sans text-[12px] text-text-secondary">
-            {persona.title} · {persona.firm}
-          </p>
-          {speaking && (
-            <p className="mt-3 font-mono text-[10px] tracking-label text-accent/80">SPEAKING</p>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
