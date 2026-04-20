@@ -57,10 +57,18 @@ export async function markSessionStarted(sessionId: string) {
 // End session
 // --------------------------------------------------------------------------
 
+const TranscriptTurn = z.object({
+  role: z.enum(["interviewer", "candidate"]),
+  content: z.string(),
+  startedAtMs: z.number().optional(),
+  endedAtMs: z.number().optional(),
+});
+
 const EndSessionInput = z.object({
   sessionId: z.string().uuid(),
   finalStatus: z.enum(["completed", "abandoned", "failed"]),
   actualDurationSeconds: z.number().int().nonnegative().max(60 * 60 * 6).optional(),
+  transcript: z.array(TranscriptTurn).optional(),
 });
 
 export async function endSession(input: z.infer<typeof EndSessionInput>) {

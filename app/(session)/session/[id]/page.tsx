@@ -35,13 +35,9 @@ export default async function SessionPage({ params }: PageProps) {
     notFound();
   }
 
-  // ---- 3. Terminal-status redirect — completed sessions go to feedback (stubbed to dashboard for now)
-  if (session.status === "completed") {
-    // Phase D will point this at /session/[id]/feedback. For now, back to dashboard.
-    redirect(`/dashboard?session=${session.id}`);
-  }
-  if (session.status === "failed" || session.status === "abandoned") {
-    redirect(`/dashboard?session=${session.id}&state=${session.status}`);
+  // ---- 3. Terminal-status redirect — go to feedback page (it handles each status)
+  if (session.status === "completed" || session.status === "failed" || session.status === "abandoned") {
+    redirect(`/session/${session.id}/feedback`);
   }
 
   // ---- 4. Build client-safe persona view

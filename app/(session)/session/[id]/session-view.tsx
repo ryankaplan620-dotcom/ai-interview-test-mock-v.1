@@ -194,19 +194,31 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
     };
   }, []);
 
-  // ---- Abandonment on unload (best-effort) -----------------------------
+  // ---- Abandonment on unload (sendBeacon to /api/session/abandon) -----
 
   useEffect(() => {
     if (phase !== "live") return;
     const handler = () => {
-      // Best-effort; sendBeacon is the reliable path but requires an edge route.
-      // For Phase B, we rely on the server action call when the user clicks End.
-      // Leaving this effect in place as a hook point for a /api/session/abandon route in Phase C.
-      void 0;
+      // pagehide fires in more cases than beforeunload (mobile background,
+      // bfcache, page-replace). sendBeacon is the only reliable way to
+      // post during unload — regular fetch gets cancelled.
+      try {
+        const body = new Blob([JSON.stringify({ sessionId: session.id })], {
+          type: "application/json",
+        });
+        navigator.sendBeacon?.("/api/session/abandon", body);
+      } catch {
+        /* silent — unload path */
+      }
     };
+    window.addEventListener("pagehide", handler);
+    // beforeunload kept for browsers where pagehide doesn't fire reliably on tab close
     window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [phase]);
+    return () => {
+      window.removeEventListener("pagehide", handler);
+      window.removeEventListener("beforeunload", handler);
+    };
+  }, [phase, session.id]);
 
   // ---- Start call -------------------------------------------------------
 
@@ -302,6 +314,10 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       setPhase("ending");
       const duration = callStartedAtMs ? Math.floor((Date.now() - callStartedAtMs) / 1000) : 0;
 
+      // Capture transcript BEFORE tearing down the orchestrator so we're
+      // working from a stable snapshot.
+      const transcriptSnapshot = orchestratorRef.current?.getState().transcript ?? [];
+
       // Tear down orchestrator first so it stops any in-flight streams
       try {
         await orchestratorRef.current?.end(finalStatus === "completed" ? "completed" : "abandoned");
@@ -323,9 +339,19 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       setRemoteAvatarStream(null);
 
       startEndTransition(async () => {
-        await endSession({ sessionId: session.id, finalStatus, actualDurationSeconds: duration });
+        await endSession({
+          sessionId: session.id,
+          finalStatus,
+          actualDurationSeconds: duration,
+          transcript: transcriptSnapshot.map((t) => ({
+            role: t.role === "assistant" ? "interviewer" as const : "candidate" as const,
+            content: t.content,
+            startedAtMs: t.startedAtMs,
+            endedAtMs: t.endedAtMs ?? undefined,
+          })),
+        });
         streamRef.current?.getTracks().forEach((t) => t.stop());
-        router.push("/dashboard?session=" + session.id);
+        router.push(`/session/${session.id}/feedback`);
       });
     },
     [callStartedAtMs, session.id, router],

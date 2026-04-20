@@ -1,0 +1,177 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { FeedbackPayload } from "@/lib/pipeline/feedback-types";
+import { FeedbackView, type SessionMeta } from "./feedback-view";
+
+interface Props {
+  sessionId: string;
+  sessionMeta: SessionMeta;
+}
+
+type Phase = "generating" | "ready" | "error";
+
+const STAGES = [
+  "Reading transcript",
+  "Analyzing structure",
+  "Checking specificity",
+  "Drafting coaching moments",
+  "Finalizing",
+];
+
+export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
+  const router = useRouter();
+  const [phase, setPhase] = useState<Phase>("generating");
+  const [feedback, setFeedback] = useState<FeedbackPayload | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [stageIdx, setStageIdx] = useState(0);
+  const startedRef = useRef(false);
+
+  // Trigger generation once on mount
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const res = await fetch("/api/feedback/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        });
+        const body = (await res.json().catch(() => null)) as
+          | { feedback?: unknown; error?: string }
+          | null;
+
+        if (cancelled) return;
+
+        if (!res.ok || !body?.feedback) {
+          setError(body?.error ?? `Request failed (${res.status})`);
+          setPhase("error");
+          return;
+        }
+
+        // The API returns the DB row shape — coerce to FeedbackPayload
+        const row = body.feedback as Record<string, unknown>;
+        setFeedback({
+          overall_score: (row.overall_score as number) ?? 0,
+          structure_score: (row.structure_score as number) ?? 0,
+          specificity_score: (row.specificity_score as number) ?? 0,
+          delivery_score: (row.delivery_score as number) ?? 0,
+          summary: (row.summary as string) ?? "",
+          strengths: (row.strengths as string[]) ?? [],
+          improvements: (row.improvements as string[]) ?? [],
+          feedback_quotes: (row.feedback_quotes as FeedbackPayload["feedback_quotes"]) ?? [],
+        });
+        setPhase("ready");
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Something went wrong.");
+        setPhase("error");
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId]);
+
+  // Cycle through stage labels while generating
+  useEffect(() => {
+    if (phase !== "generating") return;
+    const interval = setInterval(() => {
+      setStageIdx((i) => Math.min(i + 1, STAGES.length - 1));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  if (phase === "ready" && feedback) {
+    return <FeedbackView feedback={feedback} sessionMeta={sessionMeta} />;
+  }
+
+  if (phase === "error") {
+    return (
+      <div className="mx-auto max-w-[720px] px-6 py-16 sm:px-10">
+        <p className="font-mono text-[11px] tracking-label text-rose-300/80">FEEDBACK FAILED</p>
+        <h1 className="mt-3 font-display text-[28px] font-semibold text-text-primary">
+          We couldn&rsquo;t generate feedback for this session.
+        </h1>
+        <p className="mt-3 font-sans text-[14px] text-text-secondary">
+          {error ?? "Unknown error."}
+        </p>
+        <div className="mt-8 flex gap-3">
+          <button
+            onClick={() => {
+              startedRef.current = false;
+              setError(null);
+              setPhase("generating");
+              setStageIdx(0);
+              router.refresh();
+            }}
+            className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-ink transition-all hover:bg-accent-light"
+          >
+            Try again
+          </button>
+          <a
+            href="/dashboard"
+            className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60"
+          >
+            Back to dashboard
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Generating state
+  return (
+    <div className="mx-auto flex min-h-[60vh] max-w-[720px] flex-col items-center justify-center px-6 py-16 text-center sm:px-10">
+      <div className="relative h-12 w-12">
+        <div className="absolute inset-0 rounded-full border-2 border-ink-border" />
+        <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent" />
+      </div>
+
+      <p className="mt-8 font-mono text-[11px] tracking-label text-accent/80">
+        FEEDBACK IN PROGRESS
+      </p>
+      <h1 className="mt-2 font-display text-[26px] font-semibold text-text-primary">
+        Reviewing your session with {sessionMeta.personaFirstName}
+      </h1>
+
+      <div className="mt-6 flex h-5 items-center justify-center">
+        <p
+          key={stageIdx}
+          className="animate-fade-in font-sans text-[14px] text-text-secondary"
+        >
+          {STAGES[stageIdx]}&hellip;
+        </p>
+      </div>
+
+      <p className="mt-10 max-w-[460px] font-sans text-[12px] leading-[1.55] text-text-tertiary">
+        Usually 15-30 seconds. We&rsquo;re reading the transcript carefully and
+        drafting feedback that points to specific moments instead of generic advice.
+      </p>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-out;
+        }
+      `}</style>
+    </div>
+  );
+}
