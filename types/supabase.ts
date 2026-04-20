@@ -84,11 +84,15 @@ export interface StudentVerification {
   updated_at: string;
 }
 
+export type SessionMode = "easy" | "standard" | "hard";
+
 export interface Session {
   id: string;
   user_id: string;
   persona: PersonaId;
   interview_type: InterviewType;
+  mode: SessionMode;
+  is_panel: boolean;
   target_firm: string | null;
   target_role: string | null;
   duration_seconds: number;
