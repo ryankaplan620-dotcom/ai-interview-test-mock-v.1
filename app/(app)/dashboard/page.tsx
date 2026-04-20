@@ -76,29 +76,49 @@ export default async function DashboardPage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main column */}
         <div className="space-y-8">
-          {/* Primary CTA card */}
-          <div className="relative overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-ink-surface to-ink-raised p-8">
-            <div
-              className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-accent/10 blur-3xl"
-              aria-hidden
-            />
-            <div className="relative">
-              <span className="font-mono text-[10px] font-medium tracking-label text-accent">
-                READY TO PRACTICE
-              </span>
-              <h2 className="mt-3 font-display text-[26px] font-semibold leading-tight tracking-heading text-text-primary">
-                Start your next session.
-              </h2>
-              <p className="mt-2 max-w-md font-sans text-[15px] leading-relaxed text-text-secondary">
-                Pick a persona, pick a firm, run the interview. Feedback lands the moment you end the call.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <LinkButton href="/session/new" size="md">
-                  Start practice →
-                </LinkButton>
-                <LinkButton href="/session/new?type=hard_mode" variant="secondary" size="md">
-                  Try hard mode
-                </LinkButton>
+          {/* Primary CTA cards — interview + drill */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Full interview card */}
+            <div className="relative overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-ink-surface to-ink-raised p-7">
+              <div
+                className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-accent/10 blur-3xl"
+                aria-hidden
+              />
+              <div className="relative">
+                <span className="font-mono text-[10px] font-medium tracking-label text-accent">
+                  FULL INTERVIEW
+                </span>
+                <h2 className="mt-3 font-display text-[22px] font-semibold leading-tight tracking-heading text-text-primary">
+                  Run a full session.
+                </h2>
+                <p className="mt-2 font-sans text-[14px] leading-relaxed text-text-secondary">
+                  Pick a persona. Pick a firm. Real interview. Feedback the moment you end the call.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <LinkButton href="/session/new" size="md">
+                    Start interview →
+                  </LinkButton>
+                </div>
+              </div>
+            </div>
+
+            {/* Drill card */}
+            <div className="relative overflow-hidden rounded-2xl border border-ink-border bg-ink-surface p-7">
+              <div className="relative">
+                <span className="font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+                  DRILL
+                </span>
+                <h2 className="mt-3 font-display text-[22px] font-semibold leading-tight tracking-heading text-text-primary">
+                  Polish one answer.
+                </h2>
+                <p className="mt-2 font-sans text-[14px] leading-relaxed text-text-secondary">
+                  Five reps on one behavioral question. Between each, what worked and what didn't. Converge on tight.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <LinkButton href="/practice" variant="secondary" size="md">
+                    Pick a drill →
+                  </LinkButton>
+                </div>
               </div>
             </div>
           </div>

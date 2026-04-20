@@ -34,6 +34,44 @@ export type InterviewType =
 
 export type BillingCycle = "monthly" | "yearly";
 
+// ==========================================================================
+// Engine 2 — Practice drills (migration 0005)
+// ==========================================================================
+
+export type DrillType = "story_polishing" | "pitch_60s" | "pause_drill" | "pushback_drill";
+
+export type DrillStatus = "in_progress" | "completed" | "abandoned";
+
+export interface Drill {
+  id: string;
+  user_id: string;
+  drill_type: DrillType;
+  prompt_id: string;
+  prompt_text: string;
+  config: Record<string, unknown>;
+  status: DrillStatus;
+  created_at: string;
+  started_at: string | null;
+  ended_at: string | null;
+}
+
+export interface DrillAttempt {
+  id: string;
+  drill_id: string;
+  attempt_number: number;
+  transcript: string;
+  duration_seconds: number;
+  overall_score: number | null;
+  sub_scores: Record<string, number>;
+  summary: string | null;
+  strengths: string[] | null;
+  improvements: string[] | null;
+  filler_words: Record<string, number> | null;
+  filler_count: number | null;
+  words_per_minute: number | null;
+  created_at: string;
+}
+
 export interface Profile {
   id: string;
   email: string;
