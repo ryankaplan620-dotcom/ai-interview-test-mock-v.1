@@ -20,11 +20,11 @@ import type {
 } from "./types";
 
 import {
-  PRIYA_BASE_PROMPT,
-  PRIYA_EASY_OVERLAY,
-  PRIYA_HARD_OVERLAY,
-  PRIYA_OPENING,
-} from "./prompts/priya";
+  LUKE_BASE_PROMPT,
+  LUKE_EASY_OVERLAY,
+  LUKE_HARD_OVERLAY,
+  LUKE_OPENING,
+} from "./prompts/luke";
 import {
   MARCUS_BASE_PROMPT,
   MARCUS_EASY_OVERLAY,
@@ -62,18 +62,18 @@ import { PRODUCT_SENSE_BANK } from "./questions/product-sense";
 // --------------------------------------------------------------------------
 
 export const PERSONAS: Record<PersonaId, PersonaConfig> = {
-  priya: {
-    id: "priya",
-    name: "Priya Patel",
-    firstName: "Priya",
+  luke: {
+    id: "luke",
+    name: "Luke Anderson",
+    firstName: "Luke",
     firm: "McKinsey & Company",
     title: "Senior Recruiter",
     tagline: "Consulting behavioral and case screens.",
     supportedInterviewTypes: ["behavioral", "case"],
     defaultDurationMinutes: 30,
     env: {
-      simliAvatarId: "SIMLI_AVATAR_ID_PRIYA",
-      elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_PRIYA",
+      simliAvatarId: "SIMLI_AVATAR_ID_LUKE",
+      elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_LUKE",
     },
     voiceSettings: {
       stability: 0.55,
@@ -81,10 +81,10 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
       style: 0.35,
       speakerBoost: true,
     },
-    basePrompt: PRIYA_BASE_PROMPT,
-    easyModeOverlay: PRIYA_EASY_OVERLAY,
-    hardModeOverlay: PRIYA_HARD_OVERLAY,
-    openingInstruction: PRIYA_OPENING,
+    basePrompt: LUKE_BASE_PROMPT,
+    easyModeOverlay: LUKE_EASY_OVERLAY,
+    hardModeOverlay: LUKE_HARD_OVERLAY,
+    openingInstruction: LUKE_OPENING,
   },
   marcus: {
     id: "marcus",
@@ -204,7 +204,7 @@ export function getQuestionBanksFor(
   }
 
   if (interviewType === "case") {
-    if (personaId === "priya") banks.push(CONSULTING_CASE_BANK);
+    if (personaId === "luke") banks.push(CONSULTING_CASE_BANK);
   }
 
   if (interviewType === "technical") {
@@ -230,7 +230,7 @@ export function getQuestionBanksFor(
   // Superday + hard_mode draw from everything the persona supports
   if (interviewType === "superday" || interviewType === "hard_mode") {
     banks.push(BEHAVIORAL_BANK);
-    if (personaId === "priya") banks.push(CONSULTING_CASE_BANK);
+    if (personaId === "luke") banks.push(CONSULTING_CASE_BANK);
     if (personaId === "marcus") banks.push(BANKING_BANK);
     if (personaId === "sarah") banks.push(TECH_BANK);
     if (personaId === "david") banks.push(PE_FINANCE_BANK);

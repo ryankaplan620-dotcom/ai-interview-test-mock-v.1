@@ -5,7 +5,7 @@ import { ScrollReveal } from "./ScrollReveal";
 
 const exchanges = [
   {
-    speaker: "PRIYA",
+    speaker: "LUKE",
     text: "Walk me through a time you led a team through a difficult change.",
   },
   {
@@ -13,7 +13,7 @@ const exchanges = [
     text: "Last year I was leading a product migration and our main stakeholder wanted to delay by a quarter...",
   },
   {
-    speaker: "PRIYA",
+    speaker: "LUKE",
     text: "What made you push back instead of agreeing to delay?",
   },
   {
@@ -21,7 +21,7 @@ const exchanges = [
     text: "I had data showing our churn was accelerating \u2014 every week of delay cost us roughly 200 users...",
   },
   {
-    speaker: "PRIYA",
+    speaker: "LUKE",
     text: "Strong. What did you learn about stakeholder management from that?",
   },
 ];
@@ -73,7 +73,7 @@ function DemoWindow() {
           <span className="inline-block h-[6px] w-[6px] rounded-full" style={{ background: "#28C840" }} />
         </div>
         <span className="mx-auto font-mono text-[10px] text-text-tertiary">
-          Folio Session &mdash; Priya Patel
+          Folio Session &mdash; Luke Anderson
         </span>
       </div>
 
@@ -92,7 +92,7 @@ function DemoWindow() {
               >
                 <span
                   className={`font-mono text-[9px] tracking-label ${
-                    line.speaker === "PRIYA" ? "text-accent" : "text-text-tertiary"
+                    line.speaker === "LUKE" ? "text-accent" : "text-text-tertiary"
                   }`}
                 >
                   {line.speaker}
@@ -108,10 +108,10 @@ function DemoWindow() {
         {/* Right: avatar */}
         <div className="flex flex-col items-center justify-center bg-ink-deeper py-8 px-8 md:p-8">
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-deep">
-            <span className="font-display text-4xl font-bold text-ink/30">P</span>
+            <span className="font-display text-4xl font-bold text-ink/30">L</span>
           </div>
           <p className="mt-4 font-sans text-base font-semibold text-text-primary">
-            Priya Patel
+            Luke Anderson
           </p>
           <p className="mt-1 font-mono text-[10px] tracking-label text-text-tertiary">
             SENIOR RECRUITER
@@ -141,7 +141,7 @@ function DemoWindow() {
             <div className="absolute inset-0 h-1.5 w-1.5 animate-pulse-ring rounded-full border border-accent" />
           </div>
           <span className="font-mono text-[10px] tracking-label text-text-tertiary">
-            PRIYA IS SPEAKING
+            LUKE IS SPEAKING
           </span>
         </div>
         <span className="font-mono text-[11px] text-text-tertiary">0:32 / 1:30</span>

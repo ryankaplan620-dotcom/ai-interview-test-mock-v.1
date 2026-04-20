@@ -2,10 +2,10 @@ import { ScrollReveal } from "./ScrollReveal";
 
 const personas = [
   {
-    name: "Priya Patel",
+    name: "Luke Anderson",
     role: "SENIOR RECRUITER",
     tone: "Warm. Curious. Tests baseline when you\u2019re comfortable.",
-    image: "/images/priya.jpg",
+    image: "/images/luke.jpg",
   },
   {
     name: "Marcus Chen",

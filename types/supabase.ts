@@ -22,7 +22,7 @@ export type VerificationStatus = "pending" | "verified" | "rejected" | "expired"
 
 export type SessionStatus = "scheduled" | "in_progress" | "completed" | "abandoned" | "failed";
 
-export type PersonaId = "priya" | "marcus" | "sarah" | "david" | "jennifer";
+export type PersonaId = "luke" | "marcus" | "sarah" | "david" | "jennifer";
 
 export type InterviewType =
   | "behavioral"

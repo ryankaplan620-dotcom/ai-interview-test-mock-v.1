@@ -63,7 +63,7 @@ folio-web/
 │       ├── WaitlistForm.tsx      Client-side form with optimistic UI
 │       └── Footer.tsx            Footer with signature line + domain
 ├── public/
-│   ├── images/priya.jpg          Interviewer portrait (Priya Patel)
+│   ├── images/luke.jpg           Interviewer portrait (Luke Anderson)
 │   ├── favicon-*.png             Favicon set (16/32/48)
 │   ├── apple-touch-icon.png      iOS homescreen icon
 │   ├── og-default.png            OpenGraph social share image

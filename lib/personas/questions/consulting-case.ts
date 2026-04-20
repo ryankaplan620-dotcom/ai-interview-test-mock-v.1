@@ -1,9 +1,9 @@
 import type { QuestionBank } from "../types";
 
 /**
- * Consulting case bank — for Priya (McKinsey) and future consulting personas.
+ * Consulting case bank — for Luke (McKinsey) and future consulting personas.
  *
- * Cases are short-form; Priya uses them as the back half of a 30-minute screen.
+ * Cases are short-form; Luke uses them as the back half of a 30-minute screen.
  * Each case includes the setup and key data the interviewer should reveal on demand.
  */
 export const CONSULTING_CASE_BANK: QuestionBank = [

@@ -90,8 +90,8 @@ export interface PersonaConfig {
 
   /** Env var keys for avatar + voice IDs. */
   env: {
-    simliAvatarId: string; // e.g. "SIMLI_AVATAR_ID_PRIYA"
-    elevenLabsVoiceId: string; // e.g. "ELEVENLABS_VOICE_ID_PRIYA"
+    simliAvatarId: string; // e.g. "SIMLI_AVATAR_ID_LUKE"
+    elevenLabsVoiceId: string; // e.g. "ELEVENLABS_VOICE_ID_LUKE"
   };
 
   /** Voice settings tuned per persona — ElevenLabs stability/similarity. */

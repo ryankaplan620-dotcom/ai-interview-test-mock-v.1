@@ -163,7 +163,7 @@ export default async function DashboardPage() {
               INTERVIEWERS
             </span>
             <ul className="mt-3 space-y-2">
-              <PersonaRow name="Priya Patel" role="McKinsey · Consulting" />
+              <PersonaRow name="Luke Anderson" role="McKinsey · Consulting" />
               <PersonaRow name="Marcus Hale" role="Goldman Sachs · Banking" />
               <PersonaRow name="Sarah Chen" role="Meta · Tech" />
               <PersonaRow name="David Reed" role="Bain Capital · Finance" />
@@ -188,7 +188,7 @@ export default async function DashboardPage() {
 
 function personaLabel(p: string): string {
   const map: Record<string, string> = {
-    priya: "Priya Patel",
+    luke: "Luke Anderson",
     marcus: "Marcus Hale",
     sarah: "Sarah Chen",
     david: "David Reed",

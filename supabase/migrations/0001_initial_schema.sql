@@ -57,7 +57,7 @@ create type session_status as enum (
 
 -- Interview personas — the 5 standard recruiters
 create type persona_id as enum (
-  'priya',        -- McKinsey / consulting
+  'luke',         -- McKinsey / consulting
   'marcus',       -- Goldman / banking
   'sarah',        -- Meta / tech
   'david',        -- Bain Capital / finance
