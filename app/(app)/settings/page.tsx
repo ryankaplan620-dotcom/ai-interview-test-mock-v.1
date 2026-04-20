@@ -7,7 +7,8 @@ export default async function SettingsPage() {
   const profile = await getProfile();
   const tier = await getUserTier();
 
-  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.trial;
+  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.cycle;
+  const inTrial = tier?.trial_end && new Date(tier.trial_end).getTime() > Date.now();
 
   return (
     <div className="mx-auto max-w-[840px] px-6 py-12 sm:px-10">
@@ -34,24 +35,32 @@ export default async function SettingsPage() {
           <Row label="Plan" value={tierConfig.name} />
           <Row
             label="Price"
-            value={
-              tier?.effective_tier === "trial"
-                ? "Free trial"
-                : `${formatPrice(tierConfig.monthlyPrice)}/mo`
-            }
+            value={`${formatPrice(tierConfig.price)} / ${tierConfig.cycleLabel.toLowerCase()}`}
           />
-          {tier?.trial_end && tier.effective_tier === "trial" && (
+          {tier && (
+            <Row
+              label="Sessions used"
+              value={`${tier.sessions_used_this_cycle} of ${tier.included_sessions} this cycle`}
+            />
+          )}
+          {tier && tier.overages_used_this_cycle > 0 && (
+            <Row
+              label="Overages purchased"
+              value={`${tier.overages_used_this_cycle} this cycle`}
+            />
+          )}
+          {inTrial && tier?.trial_end && (
             <Row label="Trial ends" value={new Date(tier.trial_end).toLocaleDateString()} />
           )}
-          {tier?.current_period_end && tier.effective_tier !== "trial" && (
+          {tier?.cycle_end && !inTrial && (
             <Row
-              label={tier.cancel_at_period_end ? "Access until" : "Renews"}
-              value={new Date(tier.current_period_end).toLocaleDateString()}
+              label={tier.cancel_at_period_end ? "Access until" : tier.auto_renew ? "Renews" : "Ends"}
+              value={new Date(tier.cycle_end).toLocaleDateString()}
             />
           )}
 
           <div className="mt-5 border-t border-ink-border/40 pt-5">
-            <BillingActions tier={tier?.effective_tier ?? "trial"} />
+            <BillingActions tier={tier?.effective_tier ?? "cycle"} hasSubscription={!!tier} />
           </div>
         </Panel>
 

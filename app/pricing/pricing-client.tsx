@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TIERS, formatPrice, type TierConfig } from "@/lib/tiers";
-import type { SubscriptionTier, BillingCycle } from "@/types/supabase";
+import { TIERS, formatPrice, pricePerSessionAtFullUse, type TierFeatureMatrix } from "@/lib/tiers";
+import type { SubscriptionTier } from "@/types/supabase";
 
 interface PricingClientProps {
   currentTier: SubscriptionTier | null;
@@ -11,32 +11,29 @@ interface PricingClientProps {
   isVerifiedStudent: boolean;
 }
 
-const DISPLAY_ORDER: SubscriptionTier[] = ["student", "general", "pro", "max"];
+const DISPLAY_ORDER: SubscriptionTier[] = ["cycle", "pro", "max"];
 
-const FEATURE_ROWS: { label: string; feature: keyof TierConfig["features"] }[] = [
-  { label: "Unlimited practice sessions", feature: "unlimitedSessions" },
+const FEATURE_ROWS: { label: string; feature: keyof TierFeatureMatrix }[] = [
   { label: "All 5 recruiter personas", feature: "allPersonas" },
+  { label: "Unlimited drill practice", feature: "unlimitedDrills" },
   { label: "Quote-based feedback", feature: "quoteFeedback" },
-  { label: "Firm calibration", feature: "firmCalibration" },
-  { label: "Panel simulation", feature: "panelSimulation" },
-  { label: "End-of-interview Q&A", feature: "endOfInterviewQA" },
-  { label: "Pause coaching", feature: "pauseCoaching" },
-  { label: "Voice acoustic analysis", feature: "voiceAcousticAnalysis" },
+  { label: "Firm-specific calibration", feature: "firmCalibration" },
   { label: "Cross-session memory", feature: "sessionMemory" },
+  { label: "End-of-interview Q&A", feature: "endOfInterviewQA" },
+  { label: "Panel interviews", feature: "panelSimulation" },
   { label: "Superday mode", feature: "superdayMode" },
   { label: "True Hard Mode", feature: "hardMode" },
+  { label: "Priority feedback generation", feature: "priorityFeedback" },
   { label: "Non-verbal feedback", feature: "nonVerbalFeedback" },
   { label: "Question intelligence engine", feature: "questionIntelligenceEngine" },
-  { label: "Interviewer callback", feature: "callback" },
 ];
 
 export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: PricingClientProps) {
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [loadingTier, setLoadingTier] = useState<SubscriptionTier | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  async function handleUpgrade(tier: SubscriptionTier) {
+  async function handlePurchase(tier: SubscriptionTier) {
     setError(null);
 
     if (!isSignedIn) {
@@ -44,7 +41,7 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
       return;
     }
 
-    if (tier === "student" && !isVerifiedStudent) {
+    if (tier === "cycle" && !isVerifiedStudent) {
       router.push("/settings/verify-student");
       return;
     }
@@ -55,7 +52,7 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "subscription", tier, billingCycle }),
+        body: JSON.stringify({ tier }),
       });
 
       const data = await response.json();
@@ -70,46 +67,26 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
 
   return (
     <section className="relative px-6 pb-16 sm:px-10">
-      <div className="mx-auto max-w-[1200px]">
-        {/* Billing cycle toggle */}
-        <div className="mb-10 flex justify-center">
-          <div className="inline-flex rounded-full border border-ink-border bg-ink-surface p-1">
-            <button
-              onClick={() => setBillingCycle("monthly")}
-              className={`rounded-full px-4 py-2 font-sans text-[13px] font-medium transition-colors ${
-                billingCycle === "monthly"
-                  ? "bg-accent text-text-onAccent"
-                  : "text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingCycle("yearly")}
-              className={`rounded-full px-4 py-2 font-sans text-[13px] font-medium transition-colors ${
-                billingCycle === "yearly"
-                  ? "bg-accent text-text-onAccent"
-                  : "text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              Yearly <span className="ml-1 text-[11px] opacity-80">—20%</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Tier cards */}
-        <div className="grid gap-5 lg:grid-cols-4">
+      <div className="mx-auto max-w-[1100px]">
+        <div className="grid gap-6 lg:grid-cols-3">
           {DISPLAY_ORDER.map((tierId) => {
             const tier = TIERS[tierId];
             const isCurrent = currentTier === tierId;
             const isRecommended = tierId === "pro";
-            const price = billingCycle === "monthly" ? tier.monthlyPrice : tier.yearlyMonthlyEquivalent;
-            const totalBilled = billingCycle === "monthly" ? tier.monthlyPrice : tier.yearlyPrice;
+            const perSession = pricePerSessionAtFullUse(tierId);
+            const buttonLabel = getButtonLabel({
+              tierId,
+              isCurrent,
+              isLoading: loadingTier === tierId,
+              isSignedIn,
+              requiresVerification: tier.requiresVerification,
+              isVerifiedStudent,
+            });
 
             return (
               <div
                 key={tierId}
-                className={`relative flex flex-col rounded-2xl border p-6 ${
+                className={`relative flex flex-col rounded-2xl border p-7 ${
                   isRecommended
                     ? "border-accent bg-gradient-to-br from-ink-surface to-ink-raised shadow-accent-glow"
                     : "border-ink-border bg-ink-surface"
@@ -122,37 +99,37 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                 )}
 
                 <div>
-                  <h3 className="font-display text-[20px] font-semibold text-text-primary">
+                  <h3 className="font-display text-[22px] font-semibold text-text-primary">
                     {tier.name}
                   </h3>
-                  <p className="mt-1 font-sans text-[13px] leading-relaxed text-text-secondary">
+                  <p className="mt-2 font-sans text-[13px] leading-relaxed text-text-secondary">
                     {tier.tagline}
                   </p>
                 </div>
 
                 <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-display text-[36px] font-semibold text-text-primary">
-                      {formatPrice(price)}
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-display text-[40px] font-semibold text-text-primary">
+                      {formatPrice(tier.price)}
                     </span>
-                    <span className="font-sans text-[13px] text-text-tertiary">/mo</span>
+                    <span className="font-sans text-[13px] text-text-tertiary">
+                      / {tier.cycleLabel.toLowerCase()}
+                    </span>
                   </div>
-                  {billingCycle === "yearly" && tier.monthlyPrice > 0 && (
-                    <p className="mt-1 font-sans text-[11px] text-text-tertiary">
-                      {formatPrice(totalBilled)} billed yearly
-                    </p>
-                  )}
+                  <p className="mt-2 font-mono text-[11px] tracking-label text-text-tertiary">
+                    AS LOW AS ${perSession.toFixed(2)} / SESSION
+                  </p>
                   {tier.requiresVerification && (
-                    <p className="mt-1 font-mono text-[10px] font-medium tracking-label text-accent">
+                    <p className="mt-2 font-mono text-[10px] font-medium tracking-label text-accent">
                       VERIFIED STUDENTS ONLY
                     </p>
                   )}
                 </div>
 
                 <button
-                  onClick={() => handleUpgrade(tierId)}
+                  onClick={() => handlePurchase(tierId)}
                   disabled={isCurrent || loadingTier === tierId}
-                  className={`mt-6 inline-flex h-10 items-center justify-center rounded-full font-sans text-[13px] font-semibold transition-all ${
+                  className={`mt-6 inline-flex h-11 items-center justify-center rounded-full font-sans text-[13.5px] font-semibold transition-all ${
                     isRecommended
                       ? "bg-cta-gradient text-text-onAccent hover:shadow-accent-glow-lg"
                       : isCurrent
@@ -160,18 +137,24 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                         : "border border-ink-border bg-ink-raised text-text-primary hover:border-accent hover:text-accent"
                   } disabled:cursor-not-allowed disabled:opacity-60`}
                 >
-                  {loadingTier === tierId
-                    ? "Loading..."
-                    : isCurrent
-                      ? "Current plan"
-                      : tier.requiresVerification && !isVerifiedStudent
-                        ? "Verify to continue →"
-                        : isSignedIn
-                          ? "Upgrade →"
-                          : "Start free →"}
+                  {buttonLabel}
                 </button>
 
-                <ul className="mt-8 space-y-3 border-t border-ink-border/40 pt-6">
+                {/* Included sessions block — lead with this, it's the core value */}
+                <div className="mt-6 rounded-xl border border-ink-border/60 bg-ink-raised/40 px-4 py-3">
+                  <p className="font-mono text-[10px] tracking-label text-text-tertiary">INCLUDED</p>
+                  <p className="mt-1 font-display text-[20px] font-semibold text-text-primary">
+                    {tier.includedSessions} full interviews
+                  </p>
+                  <p className="mt-1 font-sans text-[12px] text-text-secondary">
+                    + unlimited drill practice
+                  </p>
+                  <p className="mt-2 font-sans text-[11.5px] leading-relaxed text-text-tertiary">
+                    Need more? ${tier.overagePerSession} per overage session.
+                  </p>
+                </div>
+
+                <ul className="mt-6 space-y-2.5 border-t border-ink-border/40 pt-5">
                   {FEATURE_ROWS.map((row) => {
                     const included = tier.features[row.feature];
                     return (
@@ -208,6 +191,21 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
       </div>
     </section>
   );
+}
+
+function getButtonLabel(args: {
+  tierId: SubscriptionTier;
+  isCurrent: boolean;
+  isLoading: boolean;
+  isSignedIn: boolean;
+  requiresVerification: boolean;
+  isVerifiedStudent: boolean;
+}): string {
+  if (args.isLoading) return "Loading...";
+  if (args.isCurrent) return "Current plan";
+  if (args.requiresVerification && !args.isVerifiedStudent) return "Verify to continue →";
+  if (!args.isSignedIn) return "Start free trial →";
+  return "Start free trial →";
 }
 
 function CheckIcon() {

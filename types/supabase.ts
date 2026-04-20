@@ -6,7 +6,7 @@
  *   npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > types/supabase.ts
  */
 
-export type SubscriptionTier = "trial" | "student" | "general" | "pro" | "max";
+export type SubscriptionTier = "cycle" | "pro" | "max";
 
 export type SubscriptionStatus =
   | "trialing"
@@ -102,6 +102,12 @@ export interface Subscription {
   trial_end: string | null;
   cancel_at_period_end: boolean;
   canceled_at: string | null;
+  // Phase H: cycle pricing fields
+  cycle_start: string | null;
+  cycle_end: string | null;
+  sessions_used_this_cycle: number;
+  overages_used_this_cycle: number;
+  auto_renew: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -145,6 +151,11 @@ export interface Session {
   words_per_minute: number | null;
   eye_contact_pct: number | null;
   filler_words_count: number | null;
+  // Phase G.1: Tavus CVI integration
+  tavus_conversation_id: string | null;
+  tavus_conversation_url: string | null;
+  // Phase H: cycle pricing — true when session is billed as overage
+  is_overage: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -207,6 +218,14 @@ export interface UserTier {
   trial_end: string | null;
   cancel_at_period_end: boolean;
   is_verified_student: boolean;
+  // Cycle pricing fields (migration 0007)
+  cycle_start: string | null;
+  cycle_end: string | null;
+  sessions_used_this_cycle: number;
+  overages_used_this_cycle: number;
+  sessions_remaining_this_cycle: number;
+  included_sessions: number;
+  auto_renew: boolean;
 }
 
 // ==========================================================================

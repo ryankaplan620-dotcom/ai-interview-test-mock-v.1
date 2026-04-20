@@ -27,22 +27,42 @@ const StartSessionInput = z.object({
   targetFirm: z.string().trim().max(120).optional(),
   targetRole: z.string().trim().max(120).optional(),
   isPanel: z.boolean().default(false),
+  /**
+   * User has explicitly agreed to purchase an overage session.
+   * The client sets this after surfacing the overage confirmation UI.
+   */
+  overageAccepted: z.boolean().default(false),
 });
 
 export type StartSessionResult =
   | { ok: true; sessionId: string }
-  | { ok: false; error: string; code: string };
+  | {
+      ok: false;
+      error: string;
+      code: string;
+      /** For session_quota_exceeded: client should show an overage-consent dialog. */
+      overageAvailable?: boolean;
+      /** Price in USD for the overage session. */
+      overagePrice?: number;
+    };
 
 // --------------------------------------------------------------------------
 // Server action
 // --------------------------------------------------------------------------
 
 /**
- * Validate the picker's selection, check tier gates, insert a session row
- * with status='scheduled', and redirect the user to /session/[id].
+ * Validate the picker's selection, check tier gates + cycle quota, insert
+ * a session row with status='scheduled', and redirect the user to /session/[id].
  *
- * Throws via redirect on success. Returns a typed error object on failure
- * so the client can surface it without swallowing the exception.
+ * Two-step overage flow:
+ *   - First call without overageAccepted → returns session_quota_exceeded
+ *     with overageAvailable=true if user has an active cycle. Client shows
+ *     confirmation dialog.
+ *   - Second call with overageAccepted=true → charges the overage via
+ *     /api/stripe/overage-checkout (deferred to client post-confirm), then
+ *     proceeds with session insert and increments overages_used_this_cycle.
+ *
+ * Throws via redirect on success. Returns a typed error object on failure.
  */
 export async function startSession(
   input: z.infer<typeof StartSessionInput>,
@@ -73,28 +93,21 @@ export async function startSession(
     };
   }
 
-  // ---- 4. Tier gates
+  // ---- 4. Load tier + cycle info
   const tier = await getUserTier();
   if (!tier) {
-    return { ok: false, error: "Couldn't load your plan. Refresh and try again.", code: "no_tier" };
-  }
-
-  // Pre-fetch retained session count for the retention gate
-  const supabase = createServerClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count: retainedCount, error: countError } = await (supabase.from("sessions") as any)
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .not("status", "in", "(failed,abandoned)");
-
-  if (countError) {
     return {
       ok: false,
-      error: "Database hiccup. Try that again.",
-      code: "db_error",
+      error: "You don't have an active plan. Choose one to get started.",
+      code: "no_subscription",
     };
   }
 
+  const now = Date.now();
+  const cycleActive =
+    !!tier.cycle_end && new Date(tier.cycle_end).getTime() > now;
+
+  // ---- 5. Gate check (combo, feature gates, session quota)
   const gateResult = checkSessionStart(
     tier.effective_tier,
     {
@@ -104,9 +117,12 @@ export async function startSession(
       targetFirm: req.targetFirm,
       targetRole: req.targetRole,
       isPanel: req.isPanel,
+      overageAccepted: req.overageAccepted,
     },
     {
-      activeSessionCount: retainedCount ?? 0,
+      sessionsUsedThisCycle: tier.sessions_used_this_cycle,
+      overagesUsedThisCycle: tier.overages_used_this_cycle,
+      cycleActive,
       studentVerified: tier.is_verified_student,
     },
   );
@@ -116,10 +132,13 @@ export async function startSession(
       ok: false,
       error: gateResult.message ?? "That session isn't available on your plan.",
       code: gateResult.reason ?? "gated",
+      overageAvailable: gateResult.overageAvailable,
+      overagePrice: gateResult.overagePrice,
     };
   }
 
-  // ---- 5. Insert the session row
+  // ---- 6. Insert the session row
+  const supabase = createServerClient();
   const persona = PERSONAS[req.personaId];
   const durationSeconds = persona.defaultDurationMinutes * 60;
 
@@ -133,11 +152,11 @@ export async function startSession(
     target_role: req.targetRole || null,
     duration_seconds: durationSeconds,
     status: "scheduled" as const,
+    // If the user accepted overage, mark it here so the webhook knows to
+    // charge them. Default false for within-quota sessions.
+    is_overage: req.overageAccepted,
   };
 
-  // Hand-rolled Database types don't flow through .insert() parameter inference.
-  // Same workaround pattern as /dashboard/page.tsx — cast inline. Remove when
-  // types are regenerated via `supabase gen types typescript`.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: inserted, error: insertError } = await (supabase.from("sessions") as any)
     .insert(insertPayload)
@@ -152,7 +171,20 @@ export async function startSession(
     };
   }
 
-  // ---- 6. Redirect into the room
-  // Note: redirect() throws internally; this line does not return normally.
+  // ---- 7. Increment session-usage counter on the subscription row
+  // Within-quota: bump sessions_used_this_cycle
+  // Overage: bump overages_used_this_cycle (overage charge happens separately
+  // via /api/stripe/overage-checkout before redirect, not tracked here)
+  const counterField = req.overageAccepted
+    ? "overages_used_this_cycle"
+    : "sessions_used_this_cycle";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase.rpc as any)("increment_subscription_counter", {
+    p_user_id: user.id,
+    p_field: counterField,
+  }).throwOnError();
+
+  // ---- 8. Redirect into the room
   redirect(`/session/${(inserted as { id: string }).id}`);
 }

@@ -46,7 +46,7 @@ export default async function DashboardPage() {
     overallScore: s.session_feedback?.[0]?.overall_score ?? null,
   }));
 
-  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.trial;
+  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.cycle;
   const firstName = profile?.full_name?.split(" ")[0] ?? "there";
 
   // Average score across completed sessions with feedback
@@ -195,19 +195,41 @@ export default async function DashboardPage() {
               {tierConfig.tagline}
             </p>
 
-            {tier?.effective_tier === "trial" && tier?.trial_end && (
+            {tier?.trial_end && new Date(tier.trial_end).getTime() > Date.now() && (
               <p className="mt-3 rounded-lg border border-accent/20 bg-accent/5 px-3 py-2 font-sans text-[12px] text-accent">
                 Trial ends {new Date(tier.trial_end).toLocaleDateString()}
               </p>
+            )}
+
+            {tier && tier.cycle_end && (
+              <div className="mt-3 space-y-2">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-[10px] tracking-label text-text-tertiary">
+                    SESSIONS LEFT
+                  </span>
+                  <span className="font-display text-[14px] font-semibold tabular-nums text-text-primary">
+                    {tier.sessions_remaining_this_cycle} / {tier.included_sessions}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-[10px] tracking-label text-text-tertiary">
+                    CYCLE ENDS
+                  </span>
+                  <span className="font-sans text-[12px] text-text-secondary">
+                    {new Date(tier.cycle_end).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
             )}
 
             <Link
               href="/pricing"
               className="mt-4 block text-center font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
             >
-              {tier?.effective_tier === "trial" || tier?.effective_tier === "general"
-                ? "Upgrade plan →"
-                : "Manage plan →"}
+              {!tier || tier.effective_tier === "cycle" ? "Upgrade plan →" : "Manage plan →"}
             </Link>
           </div>
 

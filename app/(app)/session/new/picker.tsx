@@ -94,6 +94,7 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
         targetFirm: targetFirm.trim() || undefined,
         targetRole: targetRole.trim() || undefined,
         isPanel,
+        overageAccepted: false,
       });
       if (!result.ok) {
         setError(result.error);

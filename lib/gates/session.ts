@@ -2,10 +2,15 @@
  * Session tier gates.
  *
  * Single source of truth for "can this user start this session?" checks.
- * The orchestrator and the /session/new submission handler both call these.
+ * The orchestrator, `/session/new` submission handler, and Tavus conversation
+ * route all call these.
  *
- * All checks are pure functions over tier + request. No DB access in here —
- * callers pre-fetch anything they need (e.g. active session count) and pass it in.
+ * All checks are pure functions over tier + request + context. No DB access —
+ * callers pre-fetch and pass in.
+ *
+ * Phase H (pricing rework): retention-based quota replaced with cycle session
+ * quota. Users get N full sessions per cycle; once exhausted they either
+ * purchase an overage, wait for cycle renewal, or upgrade.
  */
 
 import type { PersonaId, InterviewType, SubscriptionTier } from "@/types/supabase";
@@ -24,19 +29,26 @@ export interface SessionStartRequest {
   targetFirm?: string;
   targetRole?: string;
   isPanel?: boolean;
+  /** Pre-authorized overage charge — user has agreed to the overage cost. */
+  overageAccepted?: boolean;
 }
 
 export interface SessionStartContext {
-  /** Currently-retained session count for this user (excluding the one they're about to start). */
-  activeSessionCount: number;
-  /** Has the user verified they are a student (if on the Student tier)? */
+  /** Included sessions used so far in the current cycle. */
+  sessionsUsedThisCycle: number;
+  /** Overages already used this cycle (for display + billing context). */
+  overagesUsedThisCycle: number;
+  /** Has the user verified they are a student (if on the Cycle tier)? */
   studentVerified?: boolean;
+  /** Is the user currently within their active cycle? */
+  cycleActive: boolean;
 }
 
 export type SessionGateReason =
   | "invalid_combo"
   | "tier_feature_gated"
-  | "retention_quota_exceeded"
+  | "session_quota_exceeded"
+  | "cycle_inactive"
   | "student_not_verified";
 
 export interface SessionGateResult {
@@ -46,6 +58,10 @@ export interface SessionGateResult {
   message?: string;
   /** If denied by tier, the minimum tier that would allow it. */
   minimumTier?: SubscriptionTier;
+  /** If quota exceeded, whether overage purchase would unlock this session. */
+  overageAvailable?: boolean;
+  /** If overage available, the price in USD. */
+  overagePrice?: number;
 }
 
 // --------------------------------------------------------------------------
@@ -57,7 +73,16 @@ export function checkSessionStart(
   req: SessionStartRequest,
   ctx: SessionStartContext,
 ): SessionGateResult {
-  // 1. Combo validity — persona + type must make sense
+  // 1. Cycle must be active
+  if (!ctx.cycleActive) {
+    return {
+      allowed: false,
+      reason: "cycle_inactive",
+      message: "Your plan has expired. Renew to start a new session.",
+    };
+  }
+
+  // 2. Combo validity — persona + type must make sense
   if (!isValidCombo(req.personaId, req.interviewType)) {
     return {
       allowed: false,
@@ -66,16 +91,16 @@ export function checkSessionStart(
     };
   }
 
-  // 2. Student verification required
-  if (tier === "student" && TIERS.student.requiresVerification && !ctx.studentVerified) {
+  // 3. Student verification required for Cycle tier
+  if (tier === "cycle" && TIERS.cycle.requiresVerification && !ctx.studentVerified) {
     return {
       allowed: false,
       reason: "student_not_verified",
-      message: "Verify your student status to activate the student plan.",
+      message: "Verify your student status to activate your Cycle plan.",
     };
   }
 
-  // 3. Feature gates — mode and special interview types
+  // 4. Feature gates — mode, interview type, panel
   const modeGate = checkModeGate(tier, req);
   if (!modeGate.allowed) return modeGate;
 
@@ -85,12 +110,9 @@ export function checkSessionStart(
   const panelGate = checkPanelGate(tier, req);
   if (!panelGate.allowed) return panelGate;
 
-  const firmCalibrationGate = checkFirmCalibrationGate(tier, req);
-  if (!firmCalibrationGate.allowed) return firmCalibrationGate;
-
-  // 4. Retention quota — can this user keep more sessions?
-  const retentionGate = checkRetentionQuota(tier, ctx);
-  if (!retentionGate.allowed) return retentionGate;
+  // 5. Session quota — user has enough sessions left (or accepted overage)
+  const quotaGate = checkSessionQuota(tier, req, ctx);
+  if (!quotaGate.allowed) return quotaGate;
 
   return { allowed: true };
 }
@@ -100,19 +122,21 @@ export function checkSessionStart(
 // --------------------------------------------------------------------------
 
 function checkModeGate(tier: SubscriptionTier, req: SessionStartRequest): SessionGateResult {
-  // Hard mode is Max-tier only
   if (req.mode === "hard" && !tierHasFeature(tier, "hardMode")) {
     return {
       allowed: false,
       reason: "tier_feature_gated",
-      message: "True Hard Mode is part of the Max plan.",
+      message: "Hard Mode is part of the Max plan.",
       minimumTier: "max",
     };
   }
   return { allowed: true };
 }
 
-function checkInterviewTypeGate(tier: SubscriptionTier, req: SessionStartRequest): SessionGateResult {
+function checkInterviewTypeGate(
+  tier: SubscriptionTier,
+  req: SessionStartRequest,
+): SessionGateResult {
   if (req.interviewType === "superday" && !tierHasFeature(tier, "superdayMode")) {
     return {
       allowed: false,
@@ -137,43 +161,44 @@ function checkPanelGate(tier: SubscriptionTier, req: SessionStartRequest): Sessi
     return {
       allowed: false,
       reason: "tier_feature_gated",
-      message: "Panel interviews are part of the Pro plan.",
-      minimumTier: "pro",
+      message: "Panel interviews are part of the Max plan.",
+      minimumTier: "max",
     };
   }
   return { allowed: true };
 }
 
-function checkFirmCalibrationGate(
+function checkSessionQuota(
   tier: SubscriptionTier,
   req: SessionStartRequest,
+  ctx: SessionStartContext,
 ): SessionGateResult {
-  // targetFirm by itself is fine on any tier — we just don't inject the calibration overlay below Pro.
-  // But if the caller is explicitly requesting calibration as a feature, gate it.
-  // Implementation detail: the orchestrator checks tierHasFeature('firmCalibration') before composing
-  // the calibration overlay. We don't fail the session start over it.
-  void tier;
-  void req;
-  return { allowed: true };
-}
+  const tierConfig = TIERS[tier];
+  const included = tierConfig.includedSessions;
+  const used = ctx.sessionsUsedThisCycle;
 
-function checkRetentionQuota(tier: SubscriptionTier, ctx: SessionStartContext): SessionGateResult {
-  const limit = TIERS[tier].limits.sessionRetentionCount;
-  if (limit === "unlimited") return { allowed: true };
-  if (ctx.activeSessionCount < limit) return { allowed: true };
+  // Within quota — free to start
+  if (used < included) return { allowed: true };
 
+  // Over quota but user accepted overage — allow
+  if (req.overageAccepted) return { allowed: true };
+
+  // Over quota, no overage yet — surface the option
   return {
     allowed: false,
-    reason: "retention_quota_exceeded",
-    message: `You've hit the ${limit}-session retention limit on your plan. Delete older sessions, or upgrade to keep more.`,
+    reason: "session_quota_exceeded",
+    message: `You've used all ${included} sessions in your current cycle. Start an overage session for $${tierConfig.overagePerSession}, or upgrade for more included sessions.`,
+    overageAvailable: true,
+    overagePrice: tierConfig.overagePerSession,
     minimumTier: nextTierAbove(tier),
   };
 }
 
-function nextTierAbove(tier: SubscriptionTier): SubscriptionTier {
-  const order: SubscriptionTier[] = ["trial", "student", "general", "pro", "max"];
+function nextTierAbove(tier: SubscriptionTier): SubscriptionTier | undefined {
+  const order: SubscriptionTier[] = ["cycle", "pro", "max"];
   const idx = order.indexOf(tier);
-  return order[Math.min(idx + 1, order.length - 1)];
+  if (idx === -1 || idx === order.length - 1) return undefined;
+  return order[idx + 1];
 }
 
 // --------------------------------------------------------------------------
@@ -187,18 +212,18 @@ export interface RuntimeFeatureFlags {
   nonVerbalFeedback: boolean;
   voiceAcousticAnalysis: boolean;
   panelSimulation: boolean;
+  priorityFeedback: boolean;
 }
 
-/**
- * Resolve the runtime feature flags the orchestrator should honour for this tier.
- */
 export function resolveRuntimeFeatures(tier: SubscriptionTier): RuntimeFeatureFlags {
   return {
     firmCalibration: tierHasFeature(tier, "firmCalibration"),
     sessionMemory: tierHasFeature(tier, "sessionMemory"),
     questionIntelligenceEngine: tierHasFeature(tier, "questionIntelligenceEngine"),
     nonVerbalFeedback: tierHasFeature(tier, "nonVerbalFeedback"),
-    voiceAcousticAnalysis: tierHasFeature(tier, "voiceAcousticAnalysis"),
+    // Voice acoustic analysis isn't in the new feature matrix — removed this phase
+    voiceAcousticAnalysis: false,
     panelSimulation: tierHasFeature(tier, "panelSimulation"),
+    priorityFeedback: tierHasFeature(tier, "priorityFeedback"),
   };
 }

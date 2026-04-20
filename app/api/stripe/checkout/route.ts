@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/server";
-import { createSubscriptionCheckout, createCoachReviewCheckout } from "@/lib/stripe/checkout";
+import { createSubscriptionCheckout } from "@/lib/stripe/checkout";
 
-const SubscriptionBody = z.object({
-  type: z.literal("subscription"),
-  tier: z.enum(["student", "general", "pro", "max"]),
-  billingCycle: z.enum(["monthly", "yearly"]),
+const CheckoutBody = z.object({
+  tier: z.enum(["cycle", "pro", "max"]),
 });
-
-const CoachReviewBody = z.object({
-  type: z.literal("coach_review"),
-  sessionId: z.string().uuid().optional(),
-});
-
-const CheckoutBody = z.discriminatedUnion("type", [SubscriptionBody, CoachReviewBody]);
 
 export async function POST(request: Request) {
   try {
@@ -30,22 +21,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "User email missing" }, { status: 400 });
     }
 
-    let result: { url: string };
-
-    if (parsed.data.type === "subscription") {
-      result = await createSubscriptionCheckout({
-        userId: user.id,
-        email: user.email,
-        tier: parsed.data.tier,
-        billingCycle: parsed.data.billingCycle,
-      });
-    } else {
-      result = await createCoachReviewCheckout({
-        userId: user.id,
-        email: user.email,
-        sessionId: parsed.data.sessionId,
-      });
-    }
+    const result = await createSubscriptionCheckout({
+      userId: user.id,
+      email: user.email,
+      tier: parsed.data.tier,
+    });
 
     return NextResponse.json(result);
   } catch (err) {

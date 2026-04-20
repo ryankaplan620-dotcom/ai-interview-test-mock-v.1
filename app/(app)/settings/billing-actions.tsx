@@ -4,7 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import type { SubscriptionTier } from "@/types/supabase";
 
-export function BillingActions({ tier }: { tier: SubscriptionTier }) {
+export function BillingActions({
+  tier,
+  hasSubscription,
+}: {
+  tier: SubscriptionTier;
+  hasSubscription: boolean;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,19 +28,22 @@ export function BillingActions({ tier }: { tier: SubscriptionTier }) {
     }
   }
 
-  if (tier === "trial") {
+  // No active subscription — offer a purchase
+  if (!hasSubscription) {
     return (
       <div>
         <Link
           href="/pricing"
           className="inline-flex h-10 items-center rounded-full bg-cta-gradient px-5 font-sans text-[13px] font-semibold text-text-onAccent transition-all hover:shadow-accent-glow-lg"
         >
-          Upgrade your plan →
+          Choose a plan →
         </Link>
       </div>
     );
   }
 
+  // Active subscription — portal + change plan
+  void tier;
   return (
     <div className="flex flex-wrap gap-3">
       <button

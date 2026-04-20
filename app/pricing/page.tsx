@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { FolioMark } from "@/components/FolioMark";
-import { TIERS, formatPrice, annualSavingsPercent } from "@/lib/tiers";
 import { PricingClient } from "./pricing-client";
 import { getUser, getUserTier } from "@/lib/auth/server";
 
 export const metadata = {
   title: "Pricing",
-  description: "Folio pricing — Student $5.99, General $9.99, Pro $19.99, Max $30.",
+  description:
+    "Folio pricing — Cycle $49 (90 days, students), Pro $149 (full year), Max $249 (full year with panels and superday).",
 };
 
 export default async function PricingPage() {
@@ -54,16 +54,16 @@ export default async function PricingPage() {
         <div className="mx-auto max-w-[840px] text-center">
           <span className="font-mono text-[11px] font-medium tracking-label text-accent">PRICING</span>
           <h1 className="mt-6 font-display text-[44px] font-semibold leading-[1.1] tracking-display text-text-primary sm:text-[56px]">
-            Four tiers.
+            Built for the cycle.
             <br />
-            <em className="font-serif font-normal italic text-accent">One product.</em>
+            <em className="font-serif font-normal italic text-accent">Not the month.</em>
           </h1>
-          <p className="mx-auto mt-6 max-w-[560px] font-sans text-[17px] leading-relaxed text-text-secondary">
-            Practice as much as you want, on every tier. Upgrade for firm calibration, panel simulation, and the
-            harder modes that prepare you for the interviews that actually matter.
+          <p className="mx-auto mt-6 max-w-[580px] font-sans text-[17px] leading-relaxed text-text-secondary">
+            Recruiting happens in quarters, not billing cycles. Pay once for a full prep season with a
+            generous session allowance, unlimited drill practice, and every persona from day one.
           </p>
           <p className="mt-4 font-sans text-[14px] text-text-tertiary">
-            15-day free trial on every paid tier. No credit card required.
+            15-day free trial on your first purchase. Cancel anytime before renewal.
           </p>
         </div>
       </section>
@@ -75,27 +75,21 @@ export default async function PricingPage() {
         isVerifiedStudent={isVerifiedStudent}
       />
 
-      {/* Coach review add-on */}
+      {/* Overage explainer */}
       <section className="relative px-6 pb-20 sm:px-10">
         <div className="mx-auto max-w-[840px]">
           <div className="rounded-2xl border border-ink-border bg-ink-surface p-8 sm:p-10">
-            <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <span className="font-mono text-[10px] font-medium tracking-label text-accent">
-                  ADD-ON · $49 ONE-TIME
-                </span>
-                <h3 className="mt-2 font-display text-[22px] font-semibold text-text-primary">
-                  Human coach review
-                </h3>
-                <p className="mt-2 max-w-md font-sans text-[14px] leading-relaxed text-text-secondary">
-                  Send any completed session to a human coach. Get a detailed written review back within 48 hours.
-                  Available to users on any tier, no subscription required.
-                </p>
-              </div>
-              <div className="shrink-0">
-                <span className="font-display text-[36px] font-semibold text-text-primary">$49</span>
-              </div>
-            </div>
+            <span className="font-mono text-[10px] font-medium tracking-label text-accent">
+              WHEN YOU NEED MORE
+            </span>
+            <h3 className="mt-2 font-display text-[22px] font-semibold text-text-primary">
+              Overage sessions
+            </h3>
+            <p className="mt-2 max-w-2xl font-sans text-[14px] leading-relaxed text-text-secondary">
+              Hit your included-session limit before your cycle ends? Pay per session to keep going:
+              $8 each on Cycle and Pro, $6 each on Max. No forced upgrade, no subscription surprises.
+              You decide when to push on with another interview.
+            </p>
           </div>
         </div>
       </section>
@@ -108,24 +102,28 @@ export default async function PricingPage() {
           </h2>
           <div className="mt-12 space-y-8">
             <Faq
+              q="Why cycles instead of monthly billing?"
+              a="Recruiting prep is seasonal. Most students work hard in late summer through fall for full-time offers, then again in spring for internships. A monthly subscription means you either pay through dead months or churn and re-subscribe — both feel bad. Cycles match real usage."
+            />
+            <Faq
               q="What's included in the 15-day trial?"
-              a="Full General-tier access. Unlimited practice sessions with all five recruiter personas, quote-based feedback, session recording. No credit card required to start."
+              a="Full access to whatever tier you picked, for 15 days, no charge. If you don't cancel before day 15, the card on file is charged and your cycle starts. You can cancel in one click from Settings."
             />
             <Faq
-              q="How does the Student tier work?"
-              a="Verify your student status through SheerID or sign up with a .edu email, and you get the same features as General at half the price. Verification renews annually."
+              q="How do I verify as a student?"
+              a="Through SheerID during checkout. Takes about a minute for most schools. The Cycle tier is priced at near-cost — SheerID protects it from being used by non-students, which keeps it sustainable."
             />
             <Faq
-              q="Can I switch tiers?"
-              a="Yes. Upgrade or downgrade any time from your account settings. Upgrades prorate immediately; downgrades take effect at the end of your current billing period."
+              q="What happens when my cycle ends?"
+              a="By default, your plan auto-renews and your session counter resets. You get a reminder email 10 days out. If you'd rather not renew, toggle auto-renew off in Settings — you keep full access until the cycle actually ends."
             />
             <Faq
-              q="What's True Hard Mode?"
-              a="The Max-tier simulation of real elite-firm adversarial behavior — long silences, interruptions, distorted repeats. It's what actual Goldman and McKinsey finals do. A user who survives it in Folio is prepared for the real one."
+              q="What's the difference between Pro and Max?"
+              a="Max adds panel interviews (two or three interviewers at once), superday mode (a simulated full superday running multiple formats in sequence), true hard mode (the adversarial finals-round experience), and priority feedback (your feedback generates faster after each session)."
             />
             <Faq
-              q="How do I cancel?"
-              a="One click in your account settings, and you can keep using Folio through the end of your billing period. Annual plans are prorated on refund."
+              q="What if I need more than 8 or 24 sessions?"
+              a="Pay $8 per extra session ($6 on Max). No upgrade prompt, no upsell pressure — we designed the included counts to cover a normal recruiting cycle with room to spare, and the overage option is there for the rare week when you have five interviews back-to-back."
             />
           </div>
         </div>
@@ -150,8 +148,3 @@ function Faq({ q, a }: { q: string; a: string }) {
     </div>
   );
 }
-
-// Note: annualSavingsPercent is imported for use in the client component
-void annualSavingsPercent;
-void formatPrice;
-void TIERS;

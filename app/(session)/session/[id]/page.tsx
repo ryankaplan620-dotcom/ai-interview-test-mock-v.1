@@ -71,7 +71,7 @@ export default async function SessionPage({ params }: PageProps) {
 
   // ---- 6. Fallback: legacy Simli/ElevenLabs/Deepgram pipeline from Phases C.1–C.3
   const tier = await getUserTier();
-  const runtime = resolveRuntimeFeatures(tier?.effective_tier ?? "trial");
+  const runtime = resolveRuntimeFeatures(tier?.effective_tier ?? "cycle");
   const pipelineCapabilities = {
     deepgram: !shouldMock("deepgram"),
     elevenlabs: !shouldMock("elevenlabs"),

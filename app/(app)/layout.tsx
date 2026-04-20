@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const profile = await getProfile();
   const tier = await getUserTier();
 
-  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.trial;
+  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.cycle;
 
   return (
     <main className="relative flex min-h-screen flex-col bg-ink">
