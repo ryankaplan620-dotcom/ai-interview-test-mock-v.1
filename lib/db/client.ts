@@ -3,17 +3,9 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@/types/supabase";
 
-/**
- * Supabase client for use in Client Components.
- * Reads auth state from cookies, maintains session across tabs.
- */
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://qgygwvpruscjuxfhfefd.supabase.co";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFneWd3dnBydXNjanV4ZmhmZWZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzU3NTIsImV4cCI6MjA5MTcxMTc1Mn0.Male9fY7ZJptkcH0VAzq_k_wUbLod2Kd-VNK8KIdPoA";
+
 export function createClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase environment variables are not set.");
-  }
-
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 }

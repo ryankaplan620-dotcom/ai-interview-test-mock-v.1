@@ -3,26 +3,13 @@ import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 
-/**
- * Supabase server client for use in Server Components and Route Handlers.
- *
- * This client reads auth state from cookies and can write to cookies
- * for session refresh. Use this in any server-side context where you
- * need to identify the user.
- */
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://qgygwvpruscjuxfhfefd.supabase.co";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFneWd3dnBydXNjanV4ZmhmZWZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzU3NTIsImV4cCI6MjA5MTcxMTc1Mn0.Male9fY7ZJptkcH0VAzq_k_wUbLod2Kd-VNK8KIdPoA";
+
 export function createServerClient() {
   const cookieStore = cookies();
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Supabase environment variables are not set. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.",
-    );
-  }
-
-  return createServerClientSSR<Database>(supabaseUrl, supabaseAnonKey, {
+  return createServerClientSSR<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       get(name: string) {
         return cookieStore.get(name)?.value;
@@ -30,45 +17,25 @@ export function createServerClient() {
       set(name: string, value: string, options: CookieOptions) {
         try {
           cookieStore.set({ name, value, ...options });
-        } catch {
-          // Called from a Server Component; set is a no-op there.
-          // Middleware handles session refresh.
-        }
+        } catch {}
       },
       remove(name: string, options: CookieOptions) {
         try {
           cookieStore.set({ name, value: "", ...options });
-        } catch {
-          // Ignore in Server Components.
-        }
+        } catch {}
       },
     },
   }) as unknown as SupabaseClient<Database>;
 }
 
-/**
- * Supabase admin client using the service role key.
- * Bypasses RLS. ONLY use in server-side code where you know it's safe.
- * Never expose service role key to client.
- *
- * Returns an any-typed client to work around @supabase/ssr's strict generics
- * on inserts/upserts with hand-rolled Database types. In production, replace
- * the hand-rolled types in types/supabase.ts with generated types via:
- *   npx supabase gen types typescript --project-id <id> > types/supabase.ts
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createServiceRoleClient(): SupabaseClient<any, "public", any> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error(
-      "Service role environment variables missing. Add SUPABASE_SERVICE_ROLE_KEY to .env.local.",
-    );
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set.");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return createServerClientSSR<any>(supabaseUrl, serviceRoleKey, {
+  return createServerClientSSR<any>(SUPABASE_URL, serviceRoleKey, {
     cookies: {
       get: () => undefined,
       set: () => {},
