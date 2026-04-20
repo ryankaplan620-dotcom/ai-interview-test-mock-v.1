@@ -64,7 +64,7 @@ export default async function SessionPage({ params }: PageProps) {
   const pipelineCapabilities = {
     deepgram: !shouldMock("deepgram"),
     elevenlabs: !shouldMock("elevenlabs"),
-    simli: !shouldMock("simli"),
+    tavus: !shouldMock("tavus"),
   };
 
   return (

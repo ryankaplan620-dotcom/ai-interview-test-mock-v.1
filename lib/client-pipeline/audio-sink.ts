@@ -1,10 +1,10 @@
 /**
  * Shared audio sink.
  *
- * In Option B (audio routed only through Simli's WebRTC track), there is a
+ * In Option B (audio routed only through Tavus's WebRTC track), there is a
  * single audio source — an AudioContext-owned MediaStreamDestination that the
- * TTS client writes PCM into and the Simli avatar publishes outbound over
- * WebRTC. The user hears audio via the remote track Simli returns, not via
+ * TTS client writes PCM into and the Tavus avatar publishes outbound over
+ * WebRTC. The user hears audio via the remote track Tavus returns, not via
  * local speakers.
  *
  * This module owns the AudioContext lifetime and the scheduling cursor so

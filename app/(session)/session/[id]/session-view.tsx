@@ -12,7 +12,7 @@ import { MockTTSClient } from "@/lib/client-pipeline/mock-tts";
 import { MockAvatarClient } from "@/lib/client-pipeline/mock-avatar";
 import { DeepgramSTTClient } from "@/lib/client-pipeline/deepgram-stt";
 import { ElevenLabsTTSClient } from "@/lib/client-pipeline/elevenlabs-tts";
-import { SimliAvatarClient } from "@/lib/client-pipeline/simli-avatar";
+import { TavusAvatarClient } from "@/lib/client-pipeline/tavus-avatar";
 import { createAudioSink, type AudioSink } from "@/lib/client-pipeline/audio-sink";
 import type { STTClient, TTSClient, AvatarClient } from "@/lib/client-pipeline/types";
 
@@ -52,7 +52,7 @@ export interface RuntimeFeatureFlagsClient {
 export interface PipelineCapabilities {
   deepgram: boolean;
   elevenlabs: boolean;
-  simli: boolean;
+  tavus: boolean;
 }
 
 export interface SessionViewProps {
@@ -225,15 +225,15 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
 
     // Build the pipeline. Real services used when the server advertises capability
     // (key present); otherwise mock. TTS + avatar share an AudioSink in real mode —
-    // ElevenLabs writes PCM into it, Simli sends that stream's audio track upstream
-    // over WebRTC. The user hears Simli's returned (lip-synced) audio, not local playback.
+    // ElevenLabs writes PCM into it, Tavus sends that stream's audio track upstream
+    // over WebRTC. The user hears Tavus's returned (lip-synced) audio, not local playback.
 
     const useRealTts = pipelineCapabilities.elevenlabs;
-    const useRealAvatar = pipelineCapabilities.simli;
+    const useRealAvatar = pipelineCapabilities.tavus;
 
     // Audio sink only needed if *either* real TTS or real avatar is active — both
     // share it in full-real mode; a real-TTS-only mode would play through it locally
-    // but we don't support that (Option B — audio only via Simli).
+    // but we don't support that (Option B — audio only via Tavus).
     let audioSink: AudioSink | null = null;
     if (useRealTts && useRealAvatar) {
       audioSink = await createAudioSink({ sampleRate: 22050 });
@@ -251,14 +251,14 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
 
     const avatar: AvatarClient =
       useRealAvatar && audioSink
-        ? new SimliAvatarClient({
+        ? new TavusAvatarClient({
             sessionId: session.id,
             audioSink,
             onRemoteStream: (stream) => {
               setRemoteAvatarStream(stream);
             },
             onError: (err) => {
-              console.error("[simli]", err);
+              console.error("[tavus]", err);
             },
           })
         : new MockAvatarClient();
@@ -268,7 +268,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
 
     if (mockAvatarRef.current) {
       mockAvatarRef.current.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
-    } else if (avatar instanceof SimliAvatarClient) {
+    } else if (avatar instanceof TavusAvatarClient) {
       avatar.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
     }
 
@@ -786,7 +786,7 @@ function PersonaFrame({
         )}
 
         {remoteStream ? (
-          // Real avatar — Simli's returned video + audio (audio plays through this element)
+          // Real avatar — Tavus's returned video + audio (audio plays through this element)
           <>
             <video
               ref={attachVideo}
@@ -804,7 +804,7 @@ function PersonaFrame({
             </div>
           </>
         ) : (
-          // Placeholder — used in mock avatar mode, or while Simli is still connecting
+          // Placeholder — used in mock avatar mode, or while Tavus is still connecting
           <div className="flex flex-col items-center">
             <div
               className={[

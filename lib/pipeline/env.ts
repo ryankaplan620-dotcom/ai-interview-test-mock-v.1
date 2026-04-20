@@ -1,7 +1,7 @@
 /**
  * Environment detection for the voice pipeline.
  *
- * Each external service (Claude, Deepgram, ElevenLabs, Simli) falls back to
+ * Each external service (Claude, Deepgram, ElevenLabs, Tavus) falls back to
  * mock mode if its API key is missing — so local dev works without keys and
  * individual services can be brought online one at a time.
  *
@@ -9,7 +9,7 @@
  * testing UX behaviour even when all keys are set).
  */
 
-type ServiceKey = "claude" | "deepgram" | "elevenlabs" | "simli";
+type ServiceKey = "claude" | "deepgram" | "elevenlabs" | "tavus";
 
 function forceMockAll(): boolean {
   return process.env.FOLIO_FORCE_MOCK_PIPELINE === "true";
@@ -24,8 +24,8 @@ export function shouldMock(service: ServiceKey): boolean {
       return !process.env.DEEPGRAM_API_KEY;
     case "elevenlabs":
       return !process.env.ELEVENLABS_API_KEY;
-    case "simli":
-      return !process.env.SIMLI_API_KEY;
+    case "tavus":
+      return !process.env.TAVUS_API_KEY;
   }
 }
 

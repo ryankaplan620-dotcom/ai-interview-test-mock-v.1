@@ -2,7 +2,7 @@
  * Persona type definitions.
  *
  * A "persona" is one of Folio's five interviewers. Each has:
- *  - A Simli avatar (rendered video)
+ *  - A Tavus avatar (rendered video)
  *  - An ElevenLabs voice (synthesised audio)
  *  - A Claude system prompt (intelligence and personality)
  *  - Firm/role tagging for routing
@@ -90,7 +90,7 @@ export interface PersonaConfig {
 
   /** Env var keys for avatar + voice IDs. */
   env: {
-    simliAvatarId: string; // e.g. "SIMLI_AVATAR_ID_PRIYA"
+    tavusReplicaId: string; // e.g. "TAVUS_REPLICA_ID_PRIYA"
     elevenLabsVoiceId: string; // e.g. "ELEVENLABS_VOICE_ID_PRIYA"
   };
 

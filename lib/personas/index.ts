@@ -72,7 +72,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     supportedInterviewTypes: ["behavioral", "case"],
     defaultDurationMinutes: 30,
     env: {
-      simliAvatarId: "SIMLI_AVATAR_ID_PRIYA",
+      tavusReplicaId: "TAVUS_REPLICA_ID_PRIYA",
       elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_PRIYA",
     },
     voiceSettings: {
@@ -96,7 +96,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     supportedInterviewTypes: ["behavioral", "technical"],
     defaultDurationMinutes: 30,
     env: {
-      simliAvatarId: "SIMLI_AVATAR_ID_MARCUS",
+      tavusReplicaId: "TAVUS_REPLICA_ID_MARCUS",
       elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_MARCUS",
     },
     voiceSettings: {
@@ -120,7 +120,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     supportedInterviewTypes: ["behavioral", "technical"],
     defaultDurationMinutes: 45,
     env: {
-      simliAvatarId: "SIMLI_AVATAR_ID_SARAH",
+      tavusReplicaId: "TAVUS_REPLICA_ID_SARAH",
       elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_SARAH",
     },
     voiceSettings: {
@@ -144,7 +144,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     supportedInterviewTypes: ["behavioral", "technical"],
     defaultDurationMinutes: 30,
     env: {
-      simliAvatarId: "SIMLI_AVATAR_ID_DAVID",
+      tavusReplicaId: "TAVUS_REPLICA_ID_DAVID",
       elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_DAVID",
     },
     voiceSettings: {
@@ -168,7 +168,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     supportedInterviewTypes: ["behavioral", "product_sense"],
     defaultDurationMinutes: 45,
     env: {
-      simliAvatarId: "SIMLI_AVATAR_ID_JENNIFER",
+      tavusReplicaId: "TAVUS_REPLICA_ID_JENNIFER",
       elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_JENNIFER",
     },
     voiceSettings: {
@@ -421,7 +421,7 @@ export function isValidCombo(personaId: PersonaId, interviewType: InterviewType)
 
 export function getPersonaAvatarId(personaId: PersonaId): string | null {
   const config = PERSONAS[personaId];
-  return process.env[config.env.simliAvatarId] ?? null;
+  return process.env[config.env.tavusReplicaId] ?? null;
 }
 
 export function getPersonaVoiceId(personaId: PersonaId): string | null {

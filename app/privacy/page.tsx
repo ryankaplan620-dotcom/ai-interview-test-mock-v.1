@@ -31,7 +31,7 @@ export default function PrivacyPage() {
       <ul>
         <li>Anthropic, for Claude persona intelligence.</li>
         <li>ElevenLabs, for voice synthesis.</li>
-        <li>Simli, for avatar rendering.</li>
+        <li>Tavus, for avatar rendering.</li>
         <li>Deepgram, for speech-to-text transcription.</li>
         <li>Stripe, for payment processing.</li>
         <li>Resend, for transactional email.</li>

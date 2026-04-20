@@ -16,11 +16,11 @@ interface ElevenLabsTTSClientOptions {
  *   - Accumulates odd-length residual bytes across chunks (each PCM sample is
  *     2 bytes; chunks may split samples)
  *   - Pushes Int16Array chunks to the shared audio sink, which queues them
- *     for WebRTC upstream to Simli
+ *     for WebRTC upstream to Tavus
  *   - Resolves speak() when the sink's queue drains
  *
- * The sink is the bridge to Simli — TTS never plays through speakers locally.
- * The user hears audio on the remote Simli track returned over the peer
+ * The sink is the bridge to Tavus — TTS never plays through speakers locally.
+ * The user hears audio on the remote Tavus track returned over the peer
  * connection, synchronized with the lip-synced video.
  */
 export class ElevenLabsTTSClient implements TTSClient {
