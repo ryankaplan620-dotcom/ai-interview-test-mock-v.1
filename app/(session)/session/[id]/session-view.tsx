@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { FolioMark } from "@/components/FolioMark";
 import { endSession, markSessionStarted } from "./actions";
 import type { PersonaId, InterviewType, SessionStatus, SessionMode } from "@/types/supabase";
+import type { ConversationTurn, OrchestratorState, OrchestratorHandle } from "@/lib/pipeline/types";
+import { createOrchestrator } from "@/lib/client-pipeline/orchestrator";
+import { MockSTTClient } from "@/lib/client-pipeline/mock-stt";
+import { MockTTSClient } from "@/lib/client-pipeline/mock-tts";
+import { MockAvatarClient } from "@/lib/client-pipeline/mock-avatar";
 
 // --------------------------------------------------------------------------
 // Prop types (all client-safe — no prompts, no env IDs)
@@ -48,14 +53,6 @@ export interface SessionViewProps {
 type Phase = "permissions" | "pre-call" | "live" | "ending";
 type MediaState = "idle" | "requesting" | "granted" | "denied" | "error";
 
-interface TranscriptLine {
-  id: string;
-  speaker: "user" | "interviewer";
-  text: string;
-  startedAtMs: number; // ms since call start
-  interim?: boolean;
-}
-
 // --------------------------------------------------------------------------
 // Component
 // --------------------------------------------------------------------------
@@ -78,12 +75,20 @@ export function SessionView({ session, persona, runtimeFeatures }: SessionViewPr
   );
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  // Transcript (Phase C populates this via the orchestrator)
-  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
-  const [currentInterviewerLine, setCurrentInterviewerLine] = useState<string | null>(null);
+  // Transcript + interviewer line are driven by the orchestrator once the call is live.
+  const [orchestratorState, setOrchestratorState] = useState<OrchestratorState | null>(null);
+  const [avatarSpeaking, setAvatarSpeaking] = useState(false);
+
+  // Derived: what the UI actually shows
+  const transcript = orchestratorState?.transcript ?? [];
+  const currentInterviewerLine = orchestratorState?.currentInterviewerLine ?? null;
+  const currentUserInterim = orchestratorState?.currentUserInterim ?? null;
 
   // Refs
   const streamRef = useRef<MediaStream | null>(null);
+  const orchestratorRef = useRef<OrchestratorHandle | null>(null);
+  const mockSttRef = useRef<MockSTTClient | null>(null);
+  const mockAvatarRef = useRef<MockAvatarClient | null>(null);
 
   // Callback ref: re-binds srcObject every time a <video> element mounts.
   // Needed because pre-call and live render different <video> nodes, and a plain
@@ -193,6 +198,9 @@ export function SessionView({ session, persona, runtimeFeatures }: SessionViewPr
 
   const startCall = useCallback(async () => {
     if (mediaState !== "granted") return;
+    if (!streamRef.current) return;
+    if (orchestratorRef.current) return; // already running
+
     const result = await markSessionStarted(session.id);
     if (!result.ok) {
       setMediaError("Couldn't start the session. Try again.");
@@ -200,10 +208,40 @@ export function SessionView({ session, persona, runtimeFeatures }: SessionViewPr
     }
     setCallStartedAtMs(Date.now());
     setPhase("live");
-    // Phase C hook: orchestrator.start({ session, persona, streamRef.current }) goes here.
-    // For Phase B we seed a placeholder interviewer line so the transcript panel isn't empty.
-    setCurrentInterviewerLine("Connecting...");
-  }, [mediaState, session.id]);
+
+    // Build the orchestrator. Phase C.1 uses mock clients everywhere except Claude,
+    // which is real when ANTHROPIC_API_KEY is set (the route falls back to mock itself).
+    const stt = new MockSTTClient();
+    const tts = new MockTTSClient();
+    const avatar = new MockAvatarClient();
+    mockSttRef.current = stt;
+    mockAvatarRef.current = avatar;
+
+    // Drive the pulse on the persona frame from the mock avatar's speaking state
+    avatar.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
+
+    const orchestrator = createOrchestrator({
+      ctx: {
+        sessionId: session.id,
+        personaId: session.persona,
+        interviewType: session.interview_type,
+        mode: session.mode,
+        targetFirm: session.target_firm,
+        targetRole: session.target_role,
+        candidateFirstName: null,
+        targetDurationMinutes: Math.round(session.duration_seconds / 60),
+      },
+      micStream: streamRef.current,
+      clients: { stt, tts, avatar },
+    });
+    orchestratorRef.current = orchestrator;
+
+    const unsub = orchestrator.subscribe((s) => setOrchestratorState(s));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (orchestratorRef as any).unsub = unsub;
+
+    void orchestrator.start();
+  }, [mediaState, session]);
 
   // ---- End call ---------------------------------------------------------
 
@@ -211,6 +249,18 @@ export function SessionView({ session, persona, runtimeFeatures }: SessionViewPr
     async (finalStatus: "completed" | "abandoned" = "completed") => {
       setPhase("ending");
       const duration = callStartedAtMs ? Math.floor((Date.now() - callStartedAtMs) / 1000) : 0;
+
+      // Tear down orchestrator first so it stops any in-flight streams
+      try {
+        await orchestratorRef.current?.end(finalStatus === "completed" ? "completed" : "abandoned");
+      } catch {
+        /* noop */
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const unsub = (orchestratorRef as any).unsub as (() => void) | undefined;
+      unsub?.();
+      orchestratorRef.current = null;
+
       startEndTransition(async () => {
         await endSession({ sessionId: session.id, finalStatus, actualDurationSeconds: duration });
         streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -219,6 +269,13 @@ export function SessionView({ session, persona, runtimeFeatures }: SessionViewPr
     },
     [callStartedAtMs, session.id, router],
   );
+
+  // Clean up orchestrator on unmount (if user navigates away without clicking End)
+  useEffect(() => {
+    return () => {
+      void orchestratorRef.current?.end("abandoned");
+    };
+  }, []);
 
   // ---- Derived ----------------------------------------------------------
 
@@ -260,6 +317,11 @@ export function SessionView({ session, persona, runtimeFeatures }: SessionViewPr
       attachSelfVideo={attachSelfVideo}
       transcript={transcript}
       currentInterviewerLine={currentInterviewerLine}
+      currentUserInterim={currentUserInterim}
+      avatarSpeaking={avatarSpeaking}
+      orchestratorPhase={orchestratorState?.phase ?? "idle"}
+      onMockSubmit={(text) => orchestratorRef.current?.mockSubmitUserTurn(text)}
+      isMockMode={mockSttRef.current?.isMock ?? true}
     />
   );
 }
@@ -405,6 +467,11 @@ function LiveCallScreen({
   attachSelfVideo,
   transcript,
   currentInterviewerLine,
+  currentUserInterim,
+  avatarSpeaking,
+  orchestratorPhase,
+  onMockSubmit,
+  isMockMode,
 }: {
   persona: SessionViewPersona;
   session: SessionViewSession;
@@ -416,8 +483,13 @@ function LiveCallScreen({
   onToggleCamera: () => void;
   onEnd: () => void;
   attachSelfVideo: (el: HTMLVideoElement | null) => void;
-  transcript: TranscriptLine[];
+  transcript: ConversationTurn[];
   currentInterviewerLine: string | null;
+  currentUserInterim: string | null;
+  avatarSpeaking: boolean;
+  orchestratorPhase: string;
+  onMockSubmit: (text: string) => void;
+  isMockMode: boolean;
 }) {
   const elapsedLabel = formatElapsed(elapsedSeconds);
   const overBudget = elapsedSeconds > targetMinutes * 60;
@@ -450,8 +522,17 @@ function LiveCallScreen({
 
       {/* Stage */}
       <div className="relative flex-1 overflow-hidden">
-        {/* Persona frame — Phase C replaces this with the Simli <video> */}
-        <PersonaFrame persona={persona} />
+        <PersonaFrame persona={persona} speaking={avatarSpeaking} />
+
+        {/* Listening-phase indicator */}
+        {orchestratorPhase === "listening" && !currentInterviewerLine && (
+          <div className="pointer-events-none absolute top-6 left-1/2 -translate-x-1/2">
+            <span className="flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-[10px] tracking-label text-accent">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+              {persona.firstName.toUpperCase()} IS LISTENING
+            </span>
+          </div>
+        )}
 
         {/* Self-view PiP */}
         <div className="absolute bottom-28 right-6 w-[200px] overflow-hidden rounded-xl border border-ink-border bg-ink-raised shadow-lg sm:w-[240px]">
@@ -474,11 +555,21 @@ function LiveCallScreen({
           </div>
         </div>
 
-        {/* Interviewer line (current spoken / being spoken — seeded placeholder until Phase C) */}
+        {/* Interviewer line (streaming Claude text; cleared on commit) */}
         {currentInterviewerLine && (
           <div className="pointer-events-none absolute bottom-28 left-0 right-[260px] flex justify-center px-6">
             <p className="max-w-[720px] rounded-xl bg-ink/80 px-5 py-3 text-center font-sans text-[15px] leading-relaxed text-text-primary backdrop-blur-md">
               {currentInterviewerLine}
+              {orchestratorPhase === "thinking" && <span className="ml-1 animate-pulse">...</span>}
+            </p>
+          </div>
+        )}
+
+        {/* User interim transcription (shown while listening) */}
+        {currentUserInterim && orchestratorPhase === "listening" && (
+          <div className="pointer-events-none absolute bottom-28 left-6 w-[260px]">
+            <p className="rounded-xl bg-ink/60 px-4 py-2 font-sans text-[12px] italic leading-relaxed text-text-tertiary backdrop-blur-md">
+              {currentUserInterim}
             </p>
           </div>
         )}
@@ -510,8 +601,63 @@ function LiveCallScreen({
         </button>
       </footer>
 
-      {/* Transcript strip — collapsed by default for Phase B (Phase C can make this toggleable) */}
+      {/* Mock-mode dev panel — lets you drive a session without real STT.
+          Only rendered when the STT client is the mock implementation. */}
+      {isMockMode && orchestratorPhase === "listening" && (
+        <MockInputPanel onSubmit={onMockSubmit} persona={persona} />
+      )}
+
       <TranscriptStrip transcript={transcript} persona={persona} />
+    </div>
+  );
+}
+
+// --------------------------------------------------------------------------
+// Mock input panel — only shown in dev / mock mode
+// --------------------------------------------------------------------------
+
+function MockInputPanel({
+  onSubmit,
+  persona,
+}: {
+  onSubmit: (text: string) => void;
+  persona: SessionViewPersona;
+}) {
+  const [value, setValue] = useState("");
+
+  const submit = () => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    onSubmit(trimmed);
+    setValue("");
+  };
+
+  return (
+    <div className="border-t border-accent/20 bg-accent/5 px-6 py-3">
+      <div className="mx-auto flex max-w-[720px] items-center gap-3">
+        <span className="shrink-0 font-mono text-[10px] tracking-label text-accent">
+          MOCK · REPLY TO {persona.firstName.toUpperCase()}
+        </span>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") submit();
+          }}
+          placeholder="Type what you'd say, press Enter..."
+          className="flex-1 rounded-lg border border-ink-border bg-ink px-3 py-2 font-sans text-[13px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
+          autoFocus
+        />
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!value.trim()}
+          className="rounded-lg bg-accent px-3 py-2 font-sans text-[12px] font-semibold text-ink disabled:opacity-50"
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 }
@@ -536,21 +682,35 @@ function EndingScreen() {
 // SUB-COMPONENTS
 // ==========================================================================
 
-function PersonaFrame({ persona }: { persona: SessionViewPersona }) {
-  // Phase B placeholder. Phase C replaces the inner block with <video ref={simliVideoRef}>.
+function PersonaFrame({ persona, speaking = false }: { persona: SessionViewPersona; speaking?: boolean }) {
+  // Phase C.1 placeholder. Phase C.5 replaces the inner block with <video ref={simliVideoRef}>.
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div
-        className="relative flex h-[420px] w-[560px] items-center justify-center rounded-3xl border border-ink-border"
+        className={[
+          "relative flex h-[420px] w-[560px] items-center justify-center rounded-3xl border transition-colors",
+          speaking ? "border-accent/60" : "border-ink-border",
+        ].join(" ")}
         style={{
           background:
             "radial-gradient(ellipse at top, rgba(0,245,144,0.12), transparent 60%), radial-gradient(ellipse at bottom right, rgba(0,212,120,0.08), transparent 55%), #161B22",
         }}
         aria-label={`${persona.name} frame`}
       >
+        {/* Speaking pulse ring */}
+        {speaking && (
+          <div className="pointer-events-none absolute inset-0 rounded-3xl">
+            <div className="absolute inset-0 animate-pulse rounded-3xl ring-2 ring-accent/30" />
+          </div>
+        )}
         <div className="flex flex-col items-center">
           <div
-            className="flex h-44 w-44 items-center justify-center rounded-full border border-accent/30"
+            className={[
+              "flex h-44 w-44 items-center justify-center rounded-full border transition-all duration-500",
+              speaking
+                ? "scale-105 border-accent/60 shadow-[0_0_60px_rgba(0,245,144,0.25)]"
+                : "scale-100 border-accent/30",
+            ].join(" ")}
             style={{
               background: "radial-gradient(circle at 30% 30%, rgba(0,245,144,0.25), rgba(13,17,23,0.9) 70%)",
             }}
@@ -563,6 +723,9 @@ function PersonaFrame({ persona }: { persona: SessionViewPersona }) {
           <p className="mt-0.5 font-sans text-[12px] text-text-secondary">
             {persona.title} · {persona.firm}
           </p>
+          {speaking && (
+            <p className="mt-3 font-mono text-[10px] tracking-label text-accent/80">SPEAKING</p>
+          )}
         </div>
       </div>
     </div>
@@ -709,7 +872,7 @@ function TranscriptStrip({
   transcript,
   persona,
 }: {
-  transcript: TranscriptLine[];
+  transcript: ConversationTurn[];
   persona: SessionViewPersona;
 }) {
   if (transcript.length === 0) {
@@ -725,18 +888,18 @@ function TranscriptStrip({
   return (
     <div className="absolute bottom-20 left-0 right-0 flex justify-center px-6">
       <div className="flex max-w-[720px] flex-col gap-1.5">
-        {lastTwo.map((line) => (
+        {lastTwo.map((line, i) => (
           <p
-            key={line.id}
+            key={`${line.startedAtMs}-${i}`}
             className={[
               "font-sans text-[13px] leading-relaxed",
-              line.speaker === "user" ? "text-text-secondary" : "text-text-primary",
+              line.role === "user" ? "text-text-secondary" : "text-text-primary",
             ].join(" ")}
           >
             <span className="font-mono text-[10px] tracking-label text-text-tertiary">
-              {line.speaker === "user" ? "YOU" : persona.firstName.toUpperCase()}
+              {line.role === "user" ? "YOU" : persona.firstName.toUpperCase()}
             </span>{" "}
-            {line.text}
+            {line.content}
           </p>
         ))}
       </div>
