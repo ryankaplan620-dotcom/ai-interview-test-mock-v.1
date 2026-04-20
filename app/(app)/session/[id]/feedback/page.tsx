@@ -50,9 +50,19 @@ export default async function FeedbackPage({ params }: PageProps) {
   if (session.status === "in_progress" || session.status === "scheduled") {
     redirect(`/session/${session.id}`);
   }
+
+  const persona = PERSONAS[session.persona];
+
   // Abandoned or failed sessions have no feedback
   if (session.status !== "completed") {
-    return <NoFeedbackState status={session.status} sessionId={session.id} />;
+    return (
+      <NoFeedbackState
+        status={session.status}
+        sessionId={session.id}
+        personaFirstName={persona.firstName}
+        personaFirm={persona.firm}
+      />
+    );
   }
 
   // Check for existing feedback
@@ -62,7 +72,6 @@ export default async function FeedbackPage({ params }: PageProps) {
     .eq("session_id", session.id)
     .maybeSingle();
 
-  const persona = PERSONAS[session.persona];
   const sessionMeta = {
     id: session.id,
     personaName: persona.name,
@@ -96,29 +105,86 @@ export default async function FeedbackPage({ params }: PageProps) {
   return <FeedbackView feedback={feedback} sessionMeta={sessionMeta} />;
 }
 
-function NoFeedbackState({ status, sessionId }: { status: string; sessionId: string }) {
-  const label =
+function NoFeedbackState({
+  status,
+  sessionId,
+  personaFirstName,
+  personaFirm,
+}: {
+  status: string;
+  sessionId: string;
+  personaFirstName: string;
+  personaFirm: string;
+}) {
+  const config =
     status === "abandoned"
-      ? "This session ended early, so there's no feedback to generate."
+      ? {
+          chipLabel: "ABANDONED",
+          chipClass: "text-amber-300/90 border-amber-300/30 bg-amber-300/5",
+          headline: "This one didn't finish.",
+          body: `You ended the session with ${personaFirstName} early, so there's no full transcript to analyze. No shame in it — sometimes you know you're not ready and it's better to restart fresh.`,
+          primaryCta: "Run it back",
+        }
       : status === "failed"
-        ? "This session had a technical issue and couldn't be completed."
-        : "This session isn't eligible for feedback yet.";
+        ? {
+            chipLabel: "FAILED",
+            chipClass: "text-rose-300/90 border-rose-300/30 bg-rose-300/5",
+            headline: "Something went wrong.",
+            body: `We hit a technical issue during your session with ${personaFirstName} and couldn't complete it. Not on you — try starting a fresh one.`,
+            primaryCta: "Start a new session",
+          }
+        : {
+            chipLabel: status.toUpperCase(),
+            chipClass: "text-text-tertiary border-ink-border bg-ink-surface",
+            headline: "No feedback available.",
+            body: `This session isn't eligible for feedback.`,
+            primaryCta: "Start a new session",
+          };
 
   return (
-    <div className="mx-auto max-w-[720px] px-6 py-16 sm:px-10">
-      <p className="font-mono text-[11px] tracking-label text-text-tertiary">
-        SESSION · {sessionId.slice(0, 8).toUpperCase()}
-      </p>
-      <h1 className="mt-3 font-display text-[28px] font-semibold text-text-primary">
-        No feedback available.
+    <div className="mx-auto max-w-[640px] px-6 py-16 sm:px-10">
+      {/* Breadcrumb */}
+      <div className="mb-8">
+        <Link
+          href="/dashboard"
+          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary"
+        >
+          ← Dashboard
+        </Link>
+      </div>
+
+      {/* Status chip */}
+      <span
+        className={[
+          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium tracking-label",
+          config.chipClass,
+        ].join(" ")}
+      >
+        {config.chipLabel}
+      </span>
+
+      {/* Headline */}
+      <h1 className="mt-4 font-display text-[32px] font-semibold text-text-primary">
+        {config.headline}
       </h1>
-      <p className="mt-3 font-sans text-[15px] leading-relaxed text-text-secondary">{label}</p>
-      <div className="mt-8 flex gap-3">
+
+      {/* Session context */}
+      <p className="mt-2 font-sans text-[13px] text-text-tertiary">
+        {personaFirstName} at {personaFirm} · {sessionId.slice(0, 8).toUpperCase()}
+      </p>
+
+      {/* Body */}
+      <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-text-secondary">
+        {config.body}
+      </p>
+
+      {/* CTAs */}
+      <div className="mt-10 flex flex-wrap gap-3">
         <Link
           href="/session/new"
           className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-ink transition-all hover:bg-accent-light"
         >
-          Start a new session →
+          {config.primaryCta} →
         </Link>
         <Link
           href="/dashboard"

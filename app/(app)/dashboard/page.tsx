@@ -3,12 +3,21 @@ import { createServerClient } from "@/lib/db/server";
 import { requireUser, getUserTier, getProfile } from "@/lib/auth/server";
 import { TIERS } from "@/lib/tiers";
 import { LinkButton } from "@/components/Button";
-import type { Session } from "@/types/supabase";
+import { SessionRow, type SessionRowData } from "@/components/SessionRow";
+import type { SessionStatus, PersonaId, InterviewType } from "@/types/supabase";
 
-type SessionPreview = Pick<
-  Session,
-  "id" | "persona" | "interview_type" | "target_firm" | "status" | "started_at" | "actual_duration_seconds"
->;
+// Supabase nested selects return joined rows as an array regardless of cardinality.
+// session_feedback has unique(session_id) from migration 0004, so the array is always 0 or 1.
+interface SessionWithFeedbackRaw {
+  id: string;
+  persona: PersonaId;
+  interview_type: InterviewType;
+  target_firm: string | null;
+  status: SessionStatus;
+  started_at: string | null;
+  actual_duration_seconds: number | null;
+  session_feedback: Array<{ overall_score: number | null }> | null;
+}
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -16,17 +25,38 @@ export default async function DashboardPage() {
   const tier = await getUserTier();
   const supabase = createServerClient();
 
-  const { data: sessionsRaw } = await supabase
-    .from("sessions")
-    .select("id, persona, interview_type, target_firm, status, started_at, actual_duration_seconds")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: sessionsRaw } = await (supabase.from("sessions") as any)
+    .select(
+      `id, persona, interview_type, target_firm, status, started_at, actual_duration_seconds,
+       session_feedback ( overall_score )`,
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(10);
 
-  const sessions = (sessionsRaw ?? []) as unknown as SessionPreview[];
+  const sessions: SessionRowData[] = ((sessionsRaw ?? []) as SessionWithFeedbackRaw[]).map((s) => ({
+    id: s.id,
+    persona: s.persona,
+    interview_type: s.interview_type,
+    target_firm: s.target_firm,
+    status: s.status,
+    started_at: s.started_at,
+    actual_duration_seconds: s.actual_duration_seconds,
+    overallScore: s.session_feedback?.[0]?.overall_score ?? null,
+  }));
 
   const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.trial;
   const firstName = profile?.full_name?.split(" ")[0] ?? "there";
+
+  // Average score across completed sessions with feedback
+  const scoredSessions = sessions.filter((s) => s.overallScore !== null);
+  const averageScore =
+    scoredSessions.length > 0
+      ? Math.round(
+          scoredSessions.reduce((sum, s) => sum + (s.overallScore ?? 0), 0) / scoredSessions.length,
+        )
+      : null;
 
   return (
     <div className="mx-auto max-w-[1440px] px-6 py-12 sm:px-10">
@@ -37,7 +67,9 @@ export default async function DashboardPage() {
           Hello, {firstName}.
         </h1>
         <p className="mt-2 font-serif text-[18px] italic text-text-secondary">
-          Your next interview is already on the calendar.
+          {scoredSessions.length > 0
+            ? `You've completed ${scoredSessions.length} session${scoredSessions.length === 1 ? "" : "s"}.`
+            : "Your next interview is already on the calendar."}
         </p>
       </div>
 
@@ -75,42 +107,21 @@ export default async function DashboardPage() {
           <div>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-display text-[20px] font-semibold text-text-primary">Recent sessions</h3>
-              <Link
-                href="/sessions"
-                className="font-sans text-[13px] font-medium text-text-secondary transition-colors hover:text-accent"
-              >
-                View all →
-              </Link>
+              {sessions.length >= 10 && (
+                <Link
+                  href="/sessions"
+                  className="font-sans text-[13px] font-medium text-text-secondary transition-colors hover:text-accent"
+                >
+                  View all →
+                </Link>
+              )}
             </div>
 
             {sessions.length > 0 ? (
               <ul className="divide-y divide-ink-border/40 overflow-hidden rounded-xl border border-ink-border">
                 {sessions.map((session) => (
                   <li key={session.id}>
-                    <Link
-                      href={`/sessions/${session.id}`}
-                      className="flex items-center justify-between bg-ink-surface px-5 py-4 transition-colors hover:bg-ink-raised"
-                    >
-                      <div>
-                        <p className="font-sans text-[14px] font-medium text-text-primary">
-                          {personaLabel(session.persona)}
-                          {session.target_firm ? ` · ${session.target_firm}` : ""}
-                        </p>
-                        <p className="mt-0.5 font-sans text-[12px] text-text-tertiary">
-                          {session.interview_type.replace("_", " ")} ·{" "}
-                          {session.actual_duration_seconds
-                            ? `${Math.round(session.actual_duration_seconds / 60)} min`
-                            : "In progress"}
-                        </p>
-                      </div>
-                      <span
-                        className={`font-mono text-[10px] font-medium tracking-label ${
-                          session.status === "completed" ? "text-accent" : "text-text-tertiary"
-                        }`}
-                      >
-                        {session.status.toUpperCase()}
-                      </span>
-                    </Link>
+                    <SessionRow session={session} />
                   </li>
                 ))}
               </ul>
@@ -129,6 +140,29 @@ export default async function DashboardPage() {
 
         {/* Sidebar */}
         <aside className="space-y-6">
+          {/* Average score (only shown after first scored session) */}
+          {averageScore !== null && (
+            <div className="rounded-xl border border-ink-border bg-ink-surface p-5">
+              <span className="font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+                YOUR AVERAGE
+              </span>
+              <div className="mt-2 flex items-baseline gap-2">
+                <p
+                  className={[
+                    "font-display text-[40px] font-semibold leading-none tabular-nums",
+                    averageScoreColor(averageScore),
+                  ].join(" ")}
+                >
+                  {averageScore}
+                </p>
+                <p className="font-mono text-[11px] tracking-label text-text-tertiary">/100</p>
+              </div>
+              <p className="mt-1 font-sans text-[12px] text-text-tertiary">
+                Across {scoredSessions.length} session{scoredSessions.length === 1 ? "" : "s"}
+              </p>
+            </div>
+          )}
+
           {/* Tier card */}
           <div className="rounded-xl border border-ink-border bg-ink-surface p-5">
             <span className="font-mono text-[10px] font-medium tracking-label text-text-tertiary">
@@ -186,15 +220,11 @@ export default async function DashboardPage() {
   );
 }
 
-function personaLabel(p: string): string {
-  const map: Record<string, string> = {
-    priya: "Priya Patel",
-    marcus: "Marcus Hale",
-    sarah: "Sarah Chen",
-    david: "David Reed",
-    jennifer: "Jennifer Ortiz",
-  };
-  return map[p] ?? p;
+function averageScoreColor(v: number): string {
+  if (v >= 85) return "text-accent";
+  if (v >= 70) return "text-text-primary";
+  if (v >= 55) return "text-amber-300/90";
+  return "text-rose-300/90";
 }
 
 function PersonaRow({ name, role }: { name: string; role: string }) {
