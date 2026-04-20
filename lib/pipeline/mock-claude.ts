@@ -22,8 +22,8 @@ interface MockResponseInput {
 }
 
 const OPENINGS: Record<PersonaId, (firstName: string) => string> = {
-  luke: (n) =>
-    `Hi${n ? `, ${n}` : ""}. I'm Luke. Thanks for making time. Before we get started, walk me through your resume in about two minutes.`,
+  priya: (n) =>
+    `Hi${n ? `, ${n}` : ""}. I'm Priya. Thanks for making time. Before we get started, walk me through your resume in about two minutes.`,
   marcus: () =>
     `Hi, I'm Marcus. Walk me through your story. Ninety seconds.`,
   sarah: (n) =>
@@ -36,7 +36,7 @@ const OPENINGS: Record<PersonaId, (firstName: string) => string> = {
 
 // Per-persona, per-turn response bank. Mocks rotate through these after the opening.
 const FOLLOWUPS: Record<PersonaId, string[]> = {
-  luke: [
+  priya: [
     "Got it. You mentioned that project — why that one, and not something else?",
     "Can you give me a specific example of that?",
     "How did you measure whether it worked?",
@@ -84,7 +84,7 @@ const FOLLOWUPS: Record<PersonaId, string[]> = {
 };
 
 const WRAPUP: Record<PersonaId, string> = {
-  luke: "Thanks for taking the time. You'll hear from recruiting in the next few days.",
+  priya: "Thanks for taking the time. You'll hear from recruiting in the next few days.",
   marcus: "Alright. That's our time. Thanks.",
   sarah: "Thanks so much for chatting today. The team will be in touch.",
   david: "Good. We're done. Thanks.",

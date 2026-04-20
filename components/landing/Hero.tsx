@@ -95,7 +95,7 @@ export function Hero() {
 
 /**
  * Live interview simulation preview.
- * Renders the Zoom-style video frame with real Luke portrait.
+ * Renders the Zoom-style video frame with real Priya portrait.
  */
 function DemoCard() {
   return (
@@ -110,8 +110,8 @@ function DemoCard() {
         {/* Video frame */}
         <div className="relative aspect-[508/280] w-full overflow-hidden">
           <img
-            src="/images/luke.jpg"
-            alt="Luke Anderson, Senior Recruiter"
+            src="/images/priya.jpg"
+            alt="Priya Patel, Senior Recruiter"
             className="absolute inset-0 h-full w-full object-cover"
             loading="eager"
           />
@@ -165,7 +165,7 @@ function DemoCard() {
           <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between px-6 py-4">
             <div>
               <div className="font-sans text-[15px] font-semibold tracking-[-0.015em] text-text-primary">
-                Luke Anderson
+                Priya Patel
               </div>
               <div className="font-sans text-[11px] tracking-body text-text-secondary">
                 Senior Recruiter · McKinsey &amp; Company
@@ -180,7 +180,7 @@ function DemoCard() {
         {/* Transcript strip */}
         <div className="bg-ink-raised px-6 py-4">
           <div className="font-mono text-[9px] font-medium tracking-label text-text-tertiary">
-            LUKE · 0:42
+            PRIYA · 0:42
           </div>
           <p className="mt-1 font-serif text-[14px] italic tracking-body text-text-primary">
             &ldquo;Tell me about a time you led through pressure.&rdquo;
