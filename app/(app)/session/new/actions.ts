@@ -95,7 +95,8 @@ export async function startSession(
 
   // ---- 4. Load tier + cycle info
   const tier = await getUserTier();
-  if (!tier) {
+  const isDev = process.env.NEXT_PUBLIC_APP_ENV === "development" || process.env.FOLIO_DEV_BYPASS_GATES === "true";
+  if (!tier && !isDev) {
     return {
       ok: false,
       error: "You don't have an active plan. Choose one to get started.",
@@ -104,12 +105,14 @@ export async function startSession(
   }
 
   const now = Date.now();
-  const cycleActive =
-    !!tier.cycle_end && new Date(tier.cycle_end).getTime() > now;
+  const cycleActive = tier
+    ? !!tier.cycle_end && new Date(tier.cycle_end).getTime() > now
+    : isDev;
 
   // ---- 5. Gate check (combo, feature gates, session quota)
+  const effectiveTier = tier?.effective_tier ?? "max";
   const gateResult = checkSessionStart(
-    tier.effective_tier,
+    effectiveTier,
     {
       personaId: req.personaId,
       interviewType: req.interviewType,
@@ -120,10 +123,10 @@ export async function startSession(
       overageAccepted: req.overageAccepted,
     },
     {
-      sessionsUsedThisCycle: tier.sessions_used_this_cycle,
-      overagesUsedThisCycle: tier.overages_used_this_cycle,
+      sessionsUsedThisCycle: tier?.sessions_used_this_cycle ?? 0,
+      overagesUsedThisCycle: tier?.overages_used_this_cycle ?? 0,
       cycleActive,
-      studentVerified: tier.is_verified_student,
+      studentVerified: tier?.is_verified_student ?? true,
     },
   );
 

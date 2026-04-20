@@ -115,13 +115,13 @@ export async function sendWelcomeEmail({ to }: { to: string }) {
     headingItalic: "Folio.",
     body: `
       <p>Your 15-day free trial is live.</p>
-      <p>You have full access to every General-tier feature. Unlimited practice interviews, all five recruiter personas, and feedback on every session.</p>
+      <p>You have full access to your plan's features. Practice interviews with all five recruiter personas, drills, and feedback on every session.</p>
       <p>Start practicing anytime. The interview before the interview is already here.</p>
     `,
     ctaText: "Start your first session →",
     ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/dashboard`,
   });
-  const text = `Welcome to Folio.\n\nYour 15-day free trial is live. Full access to every General-tier feature — unlimited practice interviews, all five recruiter personas, feedback on every session.\n\nStart here: ${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/dashboard\n\n— Built to get you hired.\nfolio.io`;
+  const text = `Welcome to Folio.\n\nYour 15-day free trial is live. Full access to your plan's features — practice interviews with all five recruiter personas, drills, and feedback on every session.\n\nStart here: ${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/dashboard\n\n— Built to get you hired.\nfolio.io`;
   return sendEmail({ to, subject: "Your Folio trial is live.", html, text });
 }
 
@@ -130,8 +130,7 @@ export async function sendTrialEndingEmail({ to, daysLeft }: { to: string; daysL
     heading: `Your trial ends in ${daysLeft} days.`,
     body: `
       <p>Pick a plan and keep practicing.</p>
-      <p>General is $9.99/mo. Pro adds firm calibration and panels at $19.99. Max adds Superday, Hard Mode, and the question intelligence engine at $30.</p>
-      <p>Students verify with .edu or SheerID for $5.99.</p>
+      <p>Cycle is $49 for 90 days (students only). Pro is $149 for a full year with firm calibration. Max is $249 for panels, superdays, hard mode, and priority feedback.</p>
     `,
     ctaText: "Pick a plan →",
     ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing`,
@@ -157,12 +156,12 @@ export async function sendStudentVerifiedEmail({ to }: { to: string }) {
   const html = brandFrame({
     heading: "You're verified.",
     body: `
-      <p>Your student status is confirmed. The Student tier at $5.99/mo is available when you upgrade.</p>
+      <p>Your student status is confirmed. The Cycle tier at $49 for 90 days is now available when you upgrade.</p>
       <p>Verification stays active for one year, then automatically re-verifies.</p>
     `,
     ctaText: "Pick your plan →",
     ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing`,
   });
-  const text = `You're verified as a student. The Student tier at $5.99/mo is now available.\n\n${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing`;
+  const text = `You're verified as a student. The Cycle tier at $49 for 90 days is now available.\n\n${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing`;
   return sendEmail({ to, subject: "Student status confirmed.", html, text });
 }

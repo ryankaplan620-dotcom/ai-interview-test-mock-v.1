@@ -13,15 +13,16 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://qgygwvpruscjuxfhfefd.supabase.co";
+
 export function createServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!url || !key) {
+  if (!key) {
     throw new Error("supabase_service_role_not_configured");
   }
 
-  return createClient(url, key, {
+  return createClient(SUPABASE_URL, key, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

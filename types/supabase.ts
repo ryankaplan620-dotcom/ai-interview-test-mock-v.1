@@ -72,7 +72,10 @@ export interface DrillAttempt {
   created_at: string;
 }
 
-export interface Profile {
+/** @deprecated Use UserProfile instead */
+export type Profile = UserProfile;
+
+export interface UserProfile {
   id: string;
   email: string;
   full_name: string | null;
@@ -209,6 +212,110 @@ export interface CoachReview {
   updated_at: string;
 }
 
+export interface OveragePurchase {
+  id: string;
+  user_id: string;
+  session_id: string | null;
+  stripe_payment_intent_id: string;
+  stripe_charge_id: string | null;
+  amount: number;
+  status: "pending" | "succeeded" | "failed" | "refunded";
+  succeeded_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SessionMessage {
+  id: string;
+  session_id: string;
+  speaker: "user" | "interviewer" | "system";
+  content: string;
+  timestamp_seconds: number | null;
+  created_at: string;
+}
+
+export interface SessionScorecard {
+  id: string;
+  session_id: string;
+  dimension: string;
+  score: number | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface SkillHistory {
+  id: string;
+  user_id: string;
+  skill: string;
+  score: number | null;
+  session_id: string | null;
+  recorded_at: string;
+  created_at: string;
+}
+
+export interface CompanyQuestion {
+  id: string;
+  company_slug: string;
+  question_text: string;
+  interview_type: InterviewType | null;
+  role_level: string | null;
+  source: string | null;
+  verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OutreachContact {
+  id: string;
+  user_id: string;
+  name: string;
+  email: string | null;
+  company: string | null;
+  role: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OutreachDraft {
+  id: string;
+  user_id: string;
+  contact_id: string | null;
+  subject: string | null;
+  body: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OutreachSequence {
+  id: string;
+  user_id: string;
+  name: string;
+  steps: Record<string, unknown>[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserStreak {
+  id: string;
+  user_id: string;
+  current_streak: number;
+  longest_streak: number;
+  last_active_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DailyActivity {
+  id: string;
+  user_id: string;
+  activity_date: string;
+  sessions_completed: number;
+  drills_completed: number;
+  created_at: string;
+}
+
 export interface UserTier {
   user_id: string;
   email: string;
@@ -235,10 +342,10 @@ export interface UserTier {
 export type Database = {
   public: {
     Tables: {
-      profiles: {
-        Row: Profile;
-        Insert: Partial<Profile> & { id: string; email: string };
-        Update: Partial<Profile>;
+      user_profiles: {
+        Row: UserProfile;
+        Insert: Partial<UserProfile> & { id: string; email: string };
+        Update: Partial<UserProfile>;
         Relationships: [];
       };
       subscriptions: {
@@ -315,6 +422,78 @@ export type Database = {
           invited_at: string | null;
           converted_user_id: string | null;
         }>;
+        Relationships: [];
+      };
+      overage_purchases: {
+        Row: OveragePurchase;
+        Insert: Partial<OveragePurchase> & { user_id: string; stripe_payment_intent_id: string; amount: number };
+        Update: Partial<OveragePurchase>;
+        Relationships: [];
+      };
+      drills: {
+        Row: Drill;
+        Insert: Partial<Drill> & { user_id: string; drill_type: DrillType; prompt_id: string; prompt_text: string };
+        Update: Partial<Drill>;
+        Relationships: [];
+      };
+      drill_attempts: {
+        Row: DrillAttempt;
+        Insert: Partial<DrillAttempt> & { drill_id: string; attempt_number: number; transcript: string; duration_seconds: number };
+        Update: Partial<DrillAttempt>;
+        Relationships: [];
+      };
+      session_messages: {
+        Row: SessionMessage;
+        Insert: Partial<SessionMessage> & { session_id: string; speaker: "user" | "interviewer" | "system"; content: string };
+        Update: Partial<SessionMessage>;
+        Relationships: [];
+      };
+      session_scorecards: {
+        Row: SessionScorecard;
+        Insert: Partial<SessionScorecard> & { session_id: string; dimension: string };
+        Update: Partial<SessionScorecard>;
+        Relationships: [];
+      };
+      skill_history: {
+        Row: SkillHistory;
+        Insert: Partial<SkillHistory> & { user_id: string; skill: string };
+        Update: Partial<SkillHistory>;
+        Relationships: [];
+      };
+      company_questions: {
+        Row: CompanyQuestion;
+        Insert: Partial<CompanyQuestion> & { company_slug: string; question_text: string };
+        Update: Partial<CompanyQuestion>;
+        Relationships: [];
+      };
+      outreach_contacts: {
+        Row: OutreachContact;
+        Insert: Partial<OutreachContact> & { user_id: string; name: string };
+        Update: Partial<OutreachContact>;
+        Relationships: [];
+      };
+      outreach_drafts: {
+        Row: OutreachDraft;
+        Insert: Partial<OutreachDraft> & { user_id: string };
+        Update: Partial<OutreachDraft>;
+        Relationships: [];
+      };
+      outreach_sequences: {
+        Row: OutreachSequence;
+        Insert: Partial<OutreachSequence> & { user_id: string; name: string };
+        Update: Partial<OutreachSequence>;
+        Relationships: [];
+      };
+      user_streaks: {
+        Row: UserStreak;
+        Insert: Partial<UserStreak> & { user_id: string };
+        Update: Partial<UserStreak>;
+        Relationships: [];
+      };
+      daily_activity: {
+        Row: DailyActivity;
+        Insert: Partial<DailyActivity> & { user_id: string; activity_date: string };
+        Update: Partial<DailyActivity>;
         Relationships: [];
       };
     };

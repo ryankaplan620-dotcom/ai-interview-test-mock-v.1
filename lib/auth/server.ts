@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createServerClient } from "@/lib/db/server";
-import type { Profile, UserTier } from "@/types/supabase";
+import type { UserProfile, UserTier } from "@/types/supabase";
 
 /**
  * Returns the authenticated user or null.
@@ -31,12 +31,12 @@ export async function requireUser() {
  * Returns the user's profile row, or null if not signed in.
  * Cached per-request.
  */
-export const getProfile = cache(async (): Promise<Profile | null> => {
+export const getProfile = cache(async (): Promise<UserProfile | null> => {
   const user = await getUser();
   if (!user) return null;
 
   const supabase = createServerClient();
-  const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).single();
 
   return data;
 });

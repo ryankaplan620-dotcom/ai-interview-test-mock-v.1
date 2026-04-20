@@ -73,6 +73,11 @@ export function checkSessionStart(
   req: SessionStartRequest,
   ctx: SessionStartContext,
 ): SessionGateResult {
+  // DEV BYPASS: skip all gates when FOLIO_DEV_BYPASS_GATES is set
+  if (process.env.FOLIO_DEV_BYPASS_GATES === "true" || process.env.NEXT_PUBLIC_APP_ENV === "development") {
+    return { allowed: true };
+  }
+
   // 1. Cycle must be active
   if (!ctx.cycleActive) {
     return {

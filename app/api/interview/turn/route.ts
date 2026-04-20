@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
   // Fetch profile for candidate first name
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase.from("profiles") as any)
+  const { data: profile } = await (supabase.from("user_profiles") as any)
     .select("full_name")
     .eq("id", user.id)
     .single();
