@@ -11,9 +11,9 @@ const nextConfig = {
         source: "/(.*)",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(self), microphone=(self)" },
+          { key: "Permissions-Policy", value: "camera=(self https://*.tavus.io https://*.daily.co), microphone=(self https://*.tavus.io https://*.daily.co)" },
         ],
       },
     ];
