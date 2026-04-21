@@ -1,7 +1,7 @@
 import { ScrollReveal } from "./ScrollReveal";
 
 const stats = [
-  { value: "50+", label: "Target firms" },
+  { value: "200+", label: "Companies" },
   { value: "5", label: "Interviewer personas" },
   { value: "6", label: "Score dimensions" },
   { value: "90s", label: "To your first Folio Score" },

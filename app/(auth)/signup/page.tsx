@@ -88,18 +88,24 @@ export default function SignupPage() {
         </p>
 
         <form onSubmit={handleSignup} className="mt-8 space-y-4">
-          <input
-            type="text"
-            required
-            autoComplete="name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Full name"
-            className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
-          />
+          <div>
+            <label htmlFor="signup-name" className="sr-only">Full name</label>
+            <input
+              id="signup-name"
+              type="text"
+              required
+              autoComplete="name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Full name"
+              className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
+            />
+          </div>
 
           <div>
+            <label htmlFor="signup-email" className="sr-only">Email address</label>
             <input
+              id="signup-email"
               type="email"
               required
               autoComplete="email"
@@ -113,16 +119,20 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <input
-            type="password"
-            required
-            autoComplete="new-password"
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password (8+ characters)"
-            className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
-          />
+          <div>
+            <label htmlFor="signup-password" className="sr-only">Password</label>
+            <input
+              id="signup-password"
+              type="password"
+              required
+              autoComplete="new-password"
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password (8+ characters)"
+              className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
+            />
+          </div>
 
           {error && (
             <p className="font-sans text-[13px] text-rose-400" role="alert">

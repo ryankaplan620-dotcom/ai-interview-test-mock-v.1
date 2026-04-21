@@ -4,34 +4,34 @@ const personas = [
   {
     name: "Priya Patel",
     role: "SENIOR RECRUITER",
-    tone: "Warm. Curious. Tests baseline when you\u2019re comfortable.",
+    tone: "Warm. Curious. Puts you at ease, then tests whether your answers hold up.",
     image: "/images/priya.jpg",
   },
   {
-    name: "Marcus Chen",
-    role: "MANAGING DIRECTOR",
-    tone: "Neutral. Evidence-first. Silence is a test.",
+    name: "Marcus Hale",
+    role: "HIRING MANAGER",
+    tone: "Direct. Evidence-first. If you can\u2019t back it up, he\u2019ll know.",
     gradient: "linear-gradient(135deg, #2A3139, #0D1117)",
     initial: "M",
   },
   {
-    name: "Sarah Williams",
+    name: "Sarah Chen",
     role: "ENGINEERING MANAGER",
-    tone: "Clear. Conversational. Probes your technical depth.",
+    tone: "Technical but human. Probes your depth without making you feel tested.",
     gradient: "linear-gradient(135deg, #1a2942, #0D1117)",
     initial: "S",
   },
   {
-    name: "David Torres",
-    role: "PARTNER",
-    tone: "Adversarial. Calibrated. Final-round pressure.",
+    name: "David Reed",
+    role: "VP, OPERATIONS",
+    tone: "Experienced. Calm. Asks the question behind the question.",
     gradient: "linear-gradient(135deg, #2a1f1f, #0D1117)",
     initial: "D",
   },
   {
     name: "Jennifer Park",
-    role: "PRODUCT LEAD",
-    tone: "Brisk. Efficient. Conciseness is the message.",
+    role: "DIRECTOR, TALENT",
+    tone: "Fast-paced. Efficient. Values clarity over complexity.",
     gradient: "linear-gradient(135deg, #1f2a24, #0D1117)",
     initial: "J",
   },
@@ -68,7 +68,7 @@ export function Interviewers() {
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible scrollbar-hide">
             {personas.map((persona, i) => (
               <ScrollReveal key={persona.name} delay={i * 100}>
-                <div className="min-w-[220px] snap-start rounded-2xl border border-ink-border bg-ink-surface overflow-hidden transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-accent/30 hover:shadow-accent-glow">
+                <div className={`min-w-[220px] snap-start rounded-2xl border border-ink-border bg-ink-surface overflow-hidden transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-accent/30 hover:shadow-accent-glow ${i === 0 ? "ml-6 md:ml-0" : ""}`}>
                   {/* Portrait area */}
                   <div className="relative aspect-[3/4] overflow-hidden">
                     {persona.image ? (

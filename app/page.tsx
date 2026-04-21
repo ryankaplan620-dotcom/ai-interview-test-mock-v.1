@@ -32,7 +32,7 @@ function SectionDots() {
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen bg-ink text-text-primary">
+    <main id="main-content" className="relative min-h-screen bg-ink text-text-primary">
       {/* Subtle ambient glow — no grid */}
       <div className="pointer-events-none fixed inset-0 bg-depth-glow opacity-50" aria-hidden />
 

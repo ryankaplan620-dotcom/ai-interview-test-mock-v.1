@@ -106,7 +106,7 @@ function AnimatedCounter() {
   return (
     <ScrollReveal>
       <div ref={ref} className="max-w-[1120px]">
-        <p className="font-display text-[80px] font-bold tracking-tight text-text-primary sm:text-[96px]">
+        <p className="font-display text-[60px] font-bold tracking-tight text-text-primary sm:text-[80px] md:text-[96px]">
           {count}
         </p>
         <p className="font-sans text-sm text-text-tertiary">out of 100</p>
@@ -116,7 +116,7 @@ function AnimatedCounter() {
             done ? "opacity-100" : "opacity-0"
           }`}
         >
-          Competitive for Round 1 at most consulting firms.
+          Competitive for first-round interviews across industries.
         </p>
 
         <span
@@ -177,7 +177,7 @@ function RadarChart() {
   return (
     <ScrollReveal>
       <div className="flex justify-center">
-        <svg ref={ref} viewBox="0 0 300 300" className="w-full max-w-[300px]" aria-label="Radar chart showing six score dimensions">
+        <svg ref={ref} viewBox="0 0 300 300" className="w-full max-w-[240px] sm:max-w-[300px]" aria-label="Radar chart showing six score dimensions">
           {/* Reference hexagons */}
           {[0.4, 0.7, 1.0].map((frac) => (
             <polygon

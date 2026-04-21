@@ -78,6 +78,29 @@ html {
   animation: tagline-pulse 4s ease-in-out infinite;
 }
 
+/* Skip to content — a11y */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-to-content:focus {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: auto;
+  height: auto;
+  padding: 12px 24px;
+  background: #00F590;
+  color: #0D1117;
+  font-weight: 600;
+  border-radius: 8px;
+  z-index: 9999;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

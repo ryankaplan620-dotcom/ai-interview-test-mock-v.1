@@ -27,7 +27,7 @@ const faqs = [
   {
     question: "What firms does Folio cover?",
     answer:
-      "Over 50 target firms across consulting, investment banking, technology, private equity, and law. Each firm has its own question bank, evaluation criteria, and calibrated difficulty. New firms are added weekly.",
+      "Folio covers all types of interviews \u2014 from Fortune 500 companies to startups, government agencies to healthcare systems. Our question banks span behavioral, technical, case, product, and general professional interviews. Whether you\u2019re interviewing at Google or your local hospital, Folio adapts.",
   },
   {
     question: "Is my data private?",

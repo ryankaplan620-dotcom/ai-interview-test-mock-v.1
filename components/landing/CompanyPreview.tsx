@@ -1,15 +1,15 @@
 import { ScrollReveal } from "./ScrollReveal";
 
 const companies = [
-  { name: "McKinsey", count: 62 },
-  { name: "BCG", count: 55 },
-  { name: "Bain", count: 48 },
-  { name: "Goldman Sachs", count: 71 },
-  { name: "JP Morgan", count: 58 },
-  { name: "Stripe", count: 42 },
   { name: "Google", count: 67 },
   { name: "Amazon", count: 73 },
-  { name: "Meta", count: 51 },
+  { name: "Microsoft", count: 58 },
+  { name: "Stripe", count: 42 },
+  { name: "Deloitte", count: 44 },
+  { name: "Salesforce", count: 38 },
+  { name: "HCA Healthcare", count: 25 },
+  { name: "Target", count: 31 },
+  { name: "US Government", count: 29 },
 ];
 
 export function CompanyPreview() {
@@ -28,11 +28,11 @@ export function CompanyPreview() {
           </div>
 
           <h2 className="mt-6 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[44px]">
-            We&apos;ve done your homework.
+            Prepared for any room.
           </h2>
 
           <p className="mt-4 max-w-[600px] font-sans text-[16px] text-text-secondary">
-            50+ target firms. 500+ verified questions. Calibrated to how they actually interview.
+            200+ companies across every industry. Behavioral, technical, case, and general interviews — calibrated to how each organization actually hires.
           </p>
         </ScrollReveal>
 

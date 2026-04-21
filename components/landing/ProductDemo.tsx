@@ -72,7 +72,7 @@ function DemoWindow() {
           <span className="inline-block h-[6px] w-[6px] rounded-full" style={{ background: "#FEBC2E" }} />
           <span className="inline-block h-[6px] w-[6px] rounded-full" style={{ background: "#28C840" }} />
         </div>
-        <span className="mx-auto font-mono text-[10px] text-text-tertiary">
+        <span className="mx-auto font-mono text-[9px] text-text-tertiary sm:text-[10px]">
           Folio Session &mdash; Priya Patel
         </span>
       </div>
@@ -106,7 +106,7 @@ function DemoWindow() {
         </div>
 
         {/* Right: avatar */}
-        <div className="flex flex-col items-center justify-center bg-ink-deeper py-8 px-8 md:p-8">
+        <div className="flex flex-col items-center justify-center bg-ink-deeper py-6 px-8 md:py-8 md:px-8">
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-deep">
             <span className="font-display text-4xl font-bold text-ink/30">P</span>
           </div>
@@ -134,17 +134,17 @@ function DemoWindow() {
       </div>
 
       {/* Bottom bar */}
-      <div className="flex h-12 items-center justify-between border-t border-ink-border bg-ink-deeper px-6">
+      <div className="flex h-12 items-center justify-between border-t border-ink-border bg-ink-deeper px-4 sm:px-6">
         <div className="flex items-center gap-2">
           <div className="relative">
             <div className="h-1.5 w-1.5 rounded-full bg-accent" />
             <div className="absolute inset-0 h-1.5 w-1.5 animate-pulse-ring rounded-full border border-accent" />
           </div>
-          <span className="font-mono text-[10px] tracking-label text-text-tertiary">
+          <span className="font-mono text-[9px] tracking-label text-text-tertiary sm:text-[10px]">
             PRIYA IS SPEAKING
           </span>
         </div>
-        <span className="font-mono text-[11px] text-text-tertiary">0:32 / 1:30</span>
+        <span className="font-mono text-[10px] text-text-tertiary sm:text-[11px]">0:32 / 1:30</span>
       </div>
     </div>
   );

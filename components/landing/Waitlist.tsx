@@ -19,7 +19,7 @@ export function Waitlist() {
         </h2>
 
         <p className="mx-auto mt-6 max-w-[520px] font-sans text-[16px] leading-relaxed text-text-secondary">
-          Join the waitlist. We&apos;ll email you the day your target firm&apos;s interview bank goes live — and your
+          Join the waitlist. We&apos;ll email you the moment Folio is ready — and your
           first practice session is on us.
         </p>
 

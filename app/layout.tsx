@@ -73,10 +73,13 @@ export const metadata: Metadata = {
   keywords: [
     "interview practice",
     "mock interview",
-    "consulting interview prep",
-    "banking interview prep",
-    "tech interview prep",
+    "job interview prep",
+    "behavioral interview",
+    "technical interview",
     "career preparation",
+    "interview prep",
+    "tech interview prep",
+    "consulting interview prep",
     "Folio",
   ],
   authors: [{ name: "Folio" }],
@@ -150,7 +153,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" className={fontVariables}>
-      <body>{children}</body>
+      <body>
+        <a href="#main-content" className="skip-to-content">Skip to content</a>
+        {children}
+      </body>
     </html>
   );
 }

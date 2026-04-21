@@ -21,7 +21,7 @@ export function Hero() {
                 className="pointer-events-none absolute left-1/2 top-1/2 -z-0 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 bg-accent/5 blur-3xl"
                 aria-hidden
               />
-              <h1 className="relative z-10 mt-16 font-display text-[40px] font-semibold leading-[1.02] tracking-display text-text-primary sm:text-[56px] lg:text-[64px]">
+              <h1 className="relative z-10 mt-16 font-display text-[32px] font-semibold leading-[1.02] tracking-display text-text-primary sm:text-[56px] lg:text-[64px]">
                 The interview{" "}
                 <span className="block">
                   <em className="font-serif font-normal not-italic italic tracking-heading text-accent">
@@ -53,32 +53,15 @@ export function Hero() {
               </Link>
             </div>
 
-            {/* Proof row — typographic wordmarks */}
+            {/* Proof row — industry categories */}
             <div className="mt-24">
               <span className="font-mono text-[10px] font-medium uppercase tracking-[0.28em] text-text-tertiary">
-                Join students from
+                Trusted across industries
               </span>
               <div className="mt-2 h-px w-full max-w-[720px] bg-ink-border/50" />
 
-              {/* Wordmark row — each school in distinct typeface */}
-              <div className="mt-8 flex flex-wrap items-baseline gap-x-10 gap-y-6 text-text-secondary">
-                <span className="font-[var(--font-cinzel)] text-[22px] font-bold tracking-[0.08em]">
-                  HARVARD
-                </span>
-                <span className="font-[var(--font-playfair)] text-[26px] font-semibold tracking-[-0.01em]">
-                  Stanford
-                </span>
-                <span className="font-[var(--font-spectral)] text-[24px] font-medium tracking-[0.01em]">
-                  Wharton
-                </span>
-                <span className="font-display text-[25px] font-bold tracking-[-0.03em]">MIT</span>
-                <span className="font-[var(--font-crimson)] text-[25px] italic tracking-[-0.005em]">
-                  Booth
-                </span>
-                <span className="font-[var(--font-playfair)] text-[26px] font-medium tracking-[-0.005em]">
-                  Yale
-                </span>
-                <span className="font-sans text-[13px] font-medium text-text-tertiary">+47 more</span>
+              <div className="mt-8 font-sans text-[14px] font-medium tracking-wide text-text-secondary sm:text-[16px]">
+                Tech{" "}<span className="text-text-tertiary">&middot;</span>{" "}Finance{" "}<span className="text-text-tertiary">&middot;</span>{" "}Consulting{" "}<span className="text-text-tertiary">&middot;</span>{" "}Healthcare{" "}<span className="text-text-tertiary">&middot;</span>{" "}Startups{" "}<span className="text-text-tertiary">&middot;</span>{" "}Government{" "}<span className="text-text-tertiary">&middot;</span>{" "}<span className="text-accent">+50 more</span>
               </div>
             </div>
           </div>
@@ -99,7 +82,7 @@ export function Hero() {
  */
 function DemoCard() {
   return (
-    <div className="relative w-full max-w-[508px] overflow-hidden">
+    <div className="relative w-full max-w-[508px] overflow-hidden mx-auto">
       {/* Ambient halo behind card */}
       <div
         className="absolute -inset-3 rounded-3xl bg-accent/10 blur-2xl"
@@ -156,7 +139,7 @@ function DemoCard() {
                 SESSION · 0:47 / 60
               </div>
               <div className="font-mono text-[9px] tracking-[0.12em] text-text-secondary">
-                MCKINSEY · BEHAVIORAL
+                BEHAVIORAL · STANDARD
               </div>
             </div>
           </div>
@@ -168,7 +151,7 @@ function DemoCard() {
                 Priya Patel
               </div>
               <div className="font-sans text-[11px] tracking-body text-text-secondary">
-                Senior Recruiter · McKinsey &amp; Company
+                Senior Recruiter
               </div>
             </div>
 
