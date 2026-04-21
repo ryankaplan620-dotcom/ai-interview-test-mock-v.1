@@ -52,7 +52,30 @@ export const getUserTier = cache(async (): Promise<UserTier | null> => {
   const supabase = createServerClient();
   const { data } = await supabase.from("user_tiers").select("*").eq("user_id", user.id).single();
 
-  return data;
+  if (data) return data;
+
+  // Dev fallback: no subscription row → simulate Max tier
+  if (process.env.NODE_ENV === "development") {
+    return {
+      user_id: user.id,
+      email: user.email ?? "",
+      effective_tier: "max",
+      status: "active",
+      current_period_end: null,
+      trial_end: null,
+      cancel_at_period_end: false,
+      is_verified_student: false,
+      cycle_start: new Date().toISOString(),
+      cycle_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      sessions_used_this_cycle: 0,
+      overages_used_this_cycle: 0,
+      included_sessions: 40,
+      sessions_remaining_this_cycle: 40,
+      auto_renew: true,
+    } satisfies UserTier;
+  }
+
+  return null;
 });
 
 /**
