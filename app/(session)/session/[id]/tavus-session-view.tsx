@@ -275,7 +275,7 @@ function LiveScreen({
       {/* Tavus iframe */}
       <iframe
         src={conversationUrl}
-        allow="camera; microphone; autoplay; encrypted-media; fullscreen; display-capture"
+        allow="camera *; microphone *; autoplay *; encrypted-media *; fullscreen *; display-capture *"
         className="flex-1 w-full border-0"
         title={`Interview with ${persona.name}`}
       />
