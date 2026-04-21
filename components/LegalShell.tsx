@@ -18,7 +18,7 @@ export function LegalShell({
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 sm:px-10">
           <Link href="/" className="inline-flex items-center gap-2.5">
             <FolioMark className="h-6 w-6" color="#00F590" />
-            <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">folio</span>
+            <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">Folio</span>
           </Link>
         </div>
       </nav>

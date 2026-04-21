@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/dashboard" className="inline-flex items-center gap-2.5">
               <FolioMark className="h-6 w-6" color="#00F590" />
               <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">
-                folio
+                Folio
               </span>
             </Link>
 

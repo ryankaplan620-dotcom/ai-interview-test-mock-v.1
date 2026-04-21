@@ -95,7 +95,7 @@ export async function startSession(
 
   // ---- 4. Load tier + cycle info
   const tier = await getUserTier();
-  const isDev = process.env.NEXT_PUBLIC_APP_ENV === "development" || process.env.FOLIO_DEV_BYPASS_GATES === "true";
+  const isDev = process.env.NEXT_PUBLIC_APP_ENV === "development" || process.env.FOLIO_DEV_BYPASS_GATES === "true" || process.env.NODE_ENV === "development";
   if (!tier && !isDev) {
     return {
       ok: false,
