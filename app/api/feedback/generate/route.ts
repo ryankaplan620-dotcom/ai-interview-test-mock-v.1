@@ -3,13 +3,14 @@ import { z } from "zod";
 import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { generateFeedback } from "@/lib/pipeline/feedback";
+import { extractAndPersistMemories } from "@/lib/pipeline/memory";
 import type { FeedbackPayload } from "@/lib/pipeline/feedback-types";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// Claude analysis typically lands in 15-30 seconds. Next.js default (10s for
-// Vercel hobby, 60s for Pro) may cut us off — bump explicitly.
+// Claude analysis typically lands in 15-30 seconds. Memory extraction adds
+// ~5-10 seconds on top — still well inside our 60s budget.
 export const maxDuration = 60;
 
 const Input = z.object({
@@ -27,6 +28,13 @@ const Input = z.object({
  * Unique constraint on session_feedback.session_id protects against races
  * between concurrent requests — the second one fails its insert and falls
  * back to reading the winner's row.
+ *
+ * Upgrade 07 (Phase I.1): After feedback is persisted for the first time,
+ * fire a side-effect that extracts 0-3 memory notes from the transcript
+ * and writes them to user_session_memory for future sessions with the same
+ * persona. Memory extraction runs AFTER the response is returned is tempting
+ * but would lose the Claude context on Vercel's stateless invocation — so we
+ * run it inline. Errors are swallowed so memory issues never block feedback.
  */
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -75,7 +83,8 @@ export async function POST(req: NextRequest) {
   }
 
   // --------------------------------------------------------------------
-  // 2. If feedback already exists, return it
+  // 2. If feedback already exists, return it (no memory re-extraction —
+  //    memories are a side-effect of FIRST feedback generation only).
   // --------------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existingRaw } = await (supabase.from("session_feedback") as any)
@@ -114,6 +123,13 @@ export async function POST(req: NextRequest) {
   // --------------------------------------------------------------------
   // 4. Generate feedback via Claude (or mock)
   // --------------------------------------------------------------------
+  const mappedTurns = turns.map((t) => ({
+    role: (t.speaker === "interviewer" ? "assistant" : "user") as "user" | "assistant",
+    content: t.text,
+    startedAtMs: Math.round(t.started_at_seconds * 1000),
+    endedAtMs: t.ended_at_seconds !== null ? Math.round(t.ended_at_seconds * 1000) : null,
+  }));
+
   let payload: FeedbackPayload;
   try {
     payload = await generateFeedback({
@@ -125,12 +141,7 @@ export async function POST(req: NextRequest) {
       targetRole: session.target_role,
       durationSeconds: session.duration_seconds,
       actualDurationSeconds: session.actual_duration_seconds,
-      turns: turns.map((t) => ({
-        role: t.speaker === "interviewer" ? "assistant" : "user",
-        content: t.text,
-        startedAtMs: Math.round(t.started_at_seconds * 1000),
-        endedAtMs: t.ended_at_seconds !== null ? Math.round(t.ended_at_seconds * 1000) : null,
-      })),
+      turns: mappedTurns,
     });
   } catch (err) {
     console.error("[feedback.generate] claude error:", err);
@@ -163,9 +174,12 @@ export async function POST(req: NextRequest) {
     .select("*")
     .single();
 
+  let winningFeedback: typeof inserted | null = inserted;
+
   if (insertErr) {
     // Most likely: unique constraint violation — another concurrent request
-    // beat us. Read that row and return it.
+    // beat us. Read that row and return it. We do NOT run memory extraction
+    // in this branch — only the winner extracts, to avoid duplicate notes.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: winner } = await (supabase.from("session_feedback") as any)
       .select("*")
@@ -181,5 +195,38 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ feedback: inserted, cached: false });
+  // --------------------------------------------------------------------
+  // 6. Upgrade 07 — extract memories (non-blocking semantics, but inline
+  //    because Vercel kills stateless invocations after response).
+  //    Any failure here is logged-and-swallowed; feedback is already saved.
+  // --------------------------------------------------------------------
+  try {
+    const memResult = await extractAndPersistMemories({
+      sessionId: session.id,
+      userId: session.user_id,
+      personaId: session.persona,
+      interviewType: session.interview_type,
+      mode: session.mode,
+      targetFirm: session.target_firm,
+      targetRole: session.target_role,
+      transcript: mappedTurns.map((t) => ({ role: t.role, content: t.content })),
+      feedbackSummary: payload.summary,
+      feedbackImprovements: payload.improvements,
+    });
+    if (memResult.extracted > 0) {
+      console.log(
+        `[feedback.generate] extracted ${memResult.extracted} memory notes for session ${session.id}`,
+      );
+    } else if (memResult.skipped) {
+      console.log(
+        `[feedback.generate] memory extraction skipped (${memResult.skipped}) for session ${session.id}`,
+      );
+    }
+  } catch (err) {
+    // Defensive — extractAndPersistMemories already swallows its own errors,
+    // but belt + braces.
+    console.error("[feedback.generate] memory extraction threw:", err);
+  }
+
+  return NextResponse.json({ feedback: winningFeedback, cached: false });
 }

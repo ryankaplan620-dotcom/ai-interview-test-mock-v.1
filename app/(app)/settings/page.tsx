@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getProfile, getUserTier, requireUser } from "@/lib/auth/server";
 import { TIERS, formatPrice } from "@/lib/tiers";
 import { BillingActions } from "./billing-actions";
@@ -61,6 +62,23 @@ export default async function SettingsPage() {
 
           <div className="mt-5 border-t border-ink-border/40 pt-5">
             <BillingActions tier={tier?.effective_tier ?? "cycle"} hasSubscription={!!tier} />
+          </div>
+        </Panel>
+
+        {/* Memory — Phase I.1 */}
+        <Panel title="Memory">
+          <p className="font-sans text-[14px] leading-relaxed text-text-secondary">
+            After each session, each interviewer takes a few private notes about your performance.
+            Those notes are referenced the next time you practice with them, so sessions build on
+            each other instead of starting from zero.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/settings/memory"
+              className="inline-flex h-9 items-center rounded-full border border-ink-border bg-ink-raised px-4 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+            >
+              View what interviewers remember →
+            </Link>
           </div>
         </Panel>
 

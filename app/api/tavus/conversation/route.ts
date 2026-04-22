@@ -5,6 +5,12 @@ import { createServerClient } from "@/lib/db/server";
 import { PERSONAS } from "@/lib/personas";
 import { getTavusPersonaId, getTavusReplicaId, tavusConfigured } from "@/lib/pipeline/tavus-registry";
 import { createTavusConversation } from "@/lib/pipeline/tavus-client";
+import {
+  formatMemoriesForContext,
+  loadMemoriesForSession,
+  markMemoriesSurfaced,
+  type MemoryNote,
+} from "@/lib/pipeline/memory";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -21,6 +27,14 @@ const Input = z.object({
  * Idempotent: if the session already has a tavus_conversation_url, return it.
  * Otherwise create a new Tavus conversation and persist the URL + conversation_id
  * on the session row.
+ *
+ * Upgrade 07 (Phase I.1): before creating the conversation, pull up to
+ * MEMORY_CONTEXT_MAX memory notes for (user, persona) and weave them into
+ * the conversational_context so the interviewer can reference them naturally.
+ * After the Tavus create succeeds, bump the surfaced_count on those memories.
+ * Idempotency note: if this route is retried and the session already has a
+ * conversation, we do NOT re-pull or re-bump memories — the first call owns
+ * that state.
  */
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -65,7 +79,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "session_ended" }, { status: 409 });
   }
 
-  // Already have a Tavus conversation for this session — return it
+  // Already have a Tavus conversation for this session — return it.
+  // Don't re-surface memories: the original create already did that.
   if (session.tavus_conversation_url && session.tavus_conversation_id) {
     return NextResponse.json({
       conversationUrl: session.tavus_conversation_url,
@@ -87,17 +102,30 @@ export async function POST(req: NextRequest) {
   }
   const replicaId = getTavusReplicaId(session.persona);
 
+  // --------------------------------------------------------------------
+  // Upgrade 07: pull memories for this (user, persona) before building
+  // the session context. Missing / empty result → context simply has no
+  // memory block, which is the correct behavior for first sessions.
+  // --------------------------------------------------------------------
+  const memories: MemoryNote[] = await loadMemoriesForSession({
+    userId: session.user_id,
+    personaId: session.persona,
+  });
+
   // Build per-session conversational context. Persona's system_prompt is
   // already set at persona-creation time (standard mode). Here we layer on
-  // the specific firm/role/mode overlay for this individual session.
+  // the specific firm/role/mode overlay for this individual session PLUS
+  // any recalled memories.
   const persona = PERSONAS[session.persona];
   const conversationalContext = buildSessionContext({
     personaName: persona.name,
+    personaFirstName: persona.firstName,
     personaFirm: persona.firm,
     mode: session.mode,
     interviewType: session.interview_type,
     targetFirm: session.target_firm,
     targetRole: session.target_role,
+    memories,
   });
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -132,6 +160,12 @@ export async function POST(req: NextRequest) {
     })
     .eq("id", session.id);
 
+  // Bump surfaced_count on the memories we used. Non-fatal on failure —
+  // worst case the same note gets pulled again next session.
+  if (memories.length > 0) {
+    await markMemoriesSurfaced(memories.map((m) => m.id));
+  }
+
   return NextResponse.json({
     conversationUrl: tavusRes.conversation_url,
     conversationId: tavusRes.conversation_id,
@@ -139,13 +173,19 @@ export async function POST(req: NextRequest) {
   });
 }
 
+// --------------------------------------------------------------------------
+// Context builder — now memory-aware.
+// --------------------------------------------------------------------------
+
 function buildSessionContext(args: {
   personaName: string;
+  personaFirstName: string;
   personaFirm: string;
   mode: SessionMode;
   interviewType: InterviewType;
   targetFirm: string | null;
   targetRole: string | null;
+  memories: MemoryNote[];
 }): string {
   const lines: string[] = [];
 
@@ -161,7 +201,8 @@ function buildSessionContext(args: {
 
   const modeDescriptions: Record<SessionMode, string> = {
     easy: "Run the interview at an encouraging pace. Give the candidate space to recover if they stumble. This is a confidence-building session.",
-    standard: "Run the interview as you normally would — realistic, fair, with appropriate follow-ups and challenge.",
+    standard:
+      "Run the interview as you normally would — realistic, fair, with appropriate follow-ups and challenge.",
     hard: "Run the interview at top-tier difficulty. Pause after weak answers. Push back when claims are generic. Interrupt if they're rambling. This is real finals-round intensity.",
   };
   lines.push(modeDescriptions[args.mode]);
@@ -175,6 +216,18 @@ function buildSessionContext(args: {
     hard_mode: "This is the hardest difficulty tier. Top-firm finals-round intensity.",
   };
   lines.push(typeDescriptions[args.interviewType]);
+
+  // --------------------------------------------------------------------
+  // Memory block — only appended when there are memories to surface.
+  // Placed BEFORE the greeting instruction so the persona knows about the
+  // prior context before deciding how to open.
+  // --------------------------------------------------------------------
+  const memoryBlock = formatMemoriesForContext(args.memories, args.personaFirstName);
+  if (memoryBlock) {
+    lines.push("");
+    lines.push(memoryBlock);
+    lines.push("");
+  }
 
   lines.push(
     "Begin by greeting the candidate briefly and asking them to walk you through their resume. Stay in character throughout. Do not break the interview frame, do not mention that you are an AI.",
