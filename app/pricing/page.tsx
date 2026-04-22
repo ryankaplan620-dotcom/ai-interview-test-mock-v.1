@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { FolioMark } from "@/components/FolioMark";
 import { PricingClient } from "./pricing-client";

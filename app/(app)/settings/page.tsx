@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getProfile, getUserTier, requireUser } from "@/lib/auth/server";
 import { TIERS, formatPrice } from "@/lib/tiers";

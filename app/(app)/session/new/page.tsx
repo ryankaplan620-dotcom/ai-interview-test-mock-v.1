@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { requireUser, getUserTier } from "@/lib/auth/server";
 import { PERSONAS } from "@/lib/personas";
 import { resolveRuntimeFeatures } from "@/lib/gates/session";

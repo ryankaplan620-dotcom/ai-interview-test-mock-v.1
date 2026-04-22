@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { createServerClient } from "@/lib/db/server";
 import { requireUser, getUserTier, getProfile } from "@/lib/auth/server";
