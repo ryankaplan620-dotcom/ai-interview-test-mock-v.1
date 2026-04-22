@@ -1,6 +1,6 @@
 /**
  * Folio database types.
- * Generated to match supabase/migrations/0001_initial_schema.sql through 0008.
+ * Generated to match supabase/migrations/0001_initial_schema.sql through 0009.
  *
  * In production, regenerate with:
  *   npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > types/supabase.ts
@@ -104,7 +104,6 @@ export interface Subscription {
   trial_end: string | null;
   cancel_at_period_end: boolean;
   canceled_at: string | null;
-  // Phase H: cycle pricing fields
   cycle_start: string | null;
   cycle_end: string | null;
   sessions_used_this_cycle: number;
@@ -150,14 +149,11 @@ export interface Session {
   recording_size_bytes: number | null;
   transcript_url: string | null;
   pause_avg_seconds: number | null;
-  pause_avg_seconds_unused?: never;
   words_per_minute: number | null;
   eye_contact_pct: number | null;
   filler_words_count: number | null;
-  // Phase G.1: Tavus CVI integration
   tavus_conversation_id: string | null;
   tavus_conversation_url: string | null;
-  // Phase H: cycle pricing — true when session is billed as overage
   is_overage: boolean;
   created_at: string;
   updated_at: string;
@@ -221,7 +217,6 @@ export interface UserTier {
   trial_end: string | null;
   cancel_at_period_end: boolean;
   is_verified_student: boolean;
-  // Cycle pricing fields (migration 0007)
   cycle_start: string | null;
   cycle_end: string | null;
   sessions_used_this_cycle: number;
@@ -246,6 +241,43 @@ export interface UserSessionMemory {
   surfaced_count: number;
   dismissed: boolean;
   dismissed_at: string | null;
+  created_at: string;
+}
+
+// ==========================================================================
+// Phase I.2 — Q&A feedback (migration 0009)
+// ==========================================================================
+
+export type QaBoundaryMethod = "transition_detected" | "fallback_timestamp" | "absent";
+
+export interface SessionQaBoundary {
+  session_id: string;
+  start_turn_index: number | null;
+  start_seconds: number | null;
+  method: QaBoundaryMethod;
+  candidate_questions_count: number;
+  created_at: string;
+}
+
+export interface QaQuestionBreakdown {
+  question: string;
+  signal: string;
+  stronger_version: string;
+  reasoning: string;
+}
+
+export interface SessionQaFeedback {
+  id: string;
+  session_id: string;
+  overall_score: number;
+  preparation_score: number;
+  specificity_score: number;
+  engagement_score: number;
+  composure_score: number;
+  summary: string;
+  question_breakdown: QaQuestionBreakdown[];
+  improvements: string[];
+  questions_asked_count: number;
   created_at: string;
 }
 
@@ -308,7 +340,6 @@ export type Database = {
         Update: Partial<CoachReview>;
         Relationships: [];
       };
-      // Phase I.1 — session memory
       user_session_memory: {
         Row: UserSessionMemory;
         Insert: Partial<UserSessionMemory> & {
@@ -318,6 +349,29 @@ export type Database = {
           category: string;
         };
         Update: Partial<UserSessionMemory>;
+        Relationships: [];
+      };
+      session_qa_boundary: {
+        Row: SessionQaBoundary;
+        Insert: Partial<SessionQaBoundary> & {
+          session_id: string;
+          method: QaBoundaryMethod;
+        };
+        Update: Partial<SessionQaBoundary>;
+        Relationships: [];
+      };
+      session_qa_feedback: {
+        Row: SessionQaFeedback;
+        Insert: Partial<SessionQaFeedback> & {
+          session_id: string;
+          overall_score: number;
+          preparation_score: number;
+          specificity_score: number;
+          engagement_score: number;
+          composure_score: number;
+          summary: string;
+        };
+        Update: Partial<SessionQaFeedback>;
         Relationships: [];
       };
       waitlist: {
@@ -358,12 +412,10 @@ export type Database = {
       };
     };
     Functions: {
-      // Phase H
       increment_subscription_counter: {
         Args: { p_user_id: string; p_field: string };
         Returns: void;
       };
-      // Phase I.1 — bulk bump on the memories a new session just surfaced
       bump_memory_surfaced_count: {
         Args: { p_memory_ids: string[] };
         Returns: void;
@@ -376,6 +428,7 @@ export type Database = {
       session_status: SessionStatus;
       persona_id: PersonaId;
       interview_type: InterviewType;
+      qa_boundary_method: QaBoundaryMethod;
     };
     CompositeTypes: Record<string, never>;
   };

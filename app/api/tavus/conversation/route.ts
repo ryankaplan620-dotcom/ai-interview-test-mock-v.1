@@ -11,6 +11,7 @@ import {
   markMemoriesSurfaced,
   type MemoryNote,
 } from "@/lib/pipeline/memory";
+import { renderQaOverlay } from "@/lib/personas/qa-overlay";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -24,17 +25,16 @@ const Input = z.object({
 /**
  * Create (or fetch) a Tavus conversation for this Folio session.
  *
- * Idempotent: if the session already has a tavus_conversation_url, return it.
- * Otherwise create a new Tavus conversation and persist the URL + conversation_id
- * on the session row.
+ * Context composition (in order):
+ *   1. Persona base: "You are <name>..." + mode + interview-type
+ *   2. Memory block (Phase I.1 / Upgrade 07) — prior-session notes for
+ *      this (user, persona) pair, if any
+ *   3. Q&A overlay (Phase I.2 / Upgrade 08) — universal end-of-interview
+ *      Q&A period instructions
+ *   4. Opening instruction — greeting + resume walk
  *
- * Upgrade 07 (Phase I.1): before creating the conversation, pull up to
- * MEMORY_CONTEXT_MAX memory notes for (user, persona) and weave them into
- * the conversational_context so the interviewer can reference them naturally.
- * After the Tavus create succeeds, bump the surfaced_count on those memories.
- * Idempotency note: if this route is retried and the session already has a
- * conversation, we do NOT re-pull or re-bump memories — the first call owns
- * that state.
+ * Idempotent re-entry (session already has a tavus_conversation_url) skips
+ * memory surfacing entirely — the first call owns that state.
  */
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -79,8 +79,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "session_ended" }, { status: 409 });
   }
 
-  // Already have a Tavus conversation for this session — return it.
-  // Don't re-surface memories: the original create already did that.
+  // Already have a Tavus conversation for this session — return it, skip memory
   if (session.tavus_conversation_url && session.tavus_conversation_id) {
     return NextResponse.json({
       conversationUrl: session.tavus_conversation_url,
@@ -89,7 +88,6 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Look up persona ID — fail loud if not registered
   const tavusPersonaId = getTavusPersonaId(session.persona);
   if (!tavusPersonaId) {
     return NextResponse.json(
@@ -101,22 +99,15 @@ export async function POST(req: NextRequest) {
     );
   }
   const replicaId = getTavusReplicaId(session.persona);
+  const persona = PERSONAS[session.persona];
 
-  // --------------------------------------------------------------------
-  // Upgrade 07: pull memories for this (user, persona) before building
-  // the session context. Missing / empty result → context simply has no
-  // memory block, which is the correct behavior for first sessions.
-  // --------------------------------------------------------------------
+  // Phase I.1: pull memories
   const memories: MemoryNote[] = await loadMemoriesForSession({
     userId: session.user_id,
     personaId: session.persona,
   });
 
-  // Build per-session conversational context. Persona's system_prompt is
-  // already set at persona-creation time (standard mode). Here we layer on
-  // the specific firm/role/mode overlay for this individual session PLUS
-  // any recalled memories.
-  const persona = PERSONAS[session.persona];
+  // Build context
   const conversationalContext = buildSessionContext({
     personaName: persona.name,
     personaFirstName: persona.firstName,
@@ -125,6 +116,7 @@ export async function POST(req: NextRequest) {
     interviewType: session.interview_type,
     targetFirm: session.target_firm,
     targetRole: session.target_role,
+    durationSeconds: session.duration_seconds,
     memories,
   });
 
@@ -149,7 +141,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Persist back to the session row (also stamps started_at if not set)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase.from("sessions") as any)
     .update({
@@ -160,8 +151,7 @@ export async function POST(req: NextRequest) {
     })
     .eq("id", session.id);
 
-  // Bump surfaced_count on the memories we used. Non-fatal on failure —
-  // worst case the same note gets pulled again next session.
+  // Phase I.1: bump surfaced_count
   if (memories.length > 0) {
     await markMemoriesSurfaced(memories.map((m) => m.id));
   }
@@ -174,7 +164,7 @@ export async function POST(req: NextRequest) {
 }
 
 // --------------------------------------------------------------------------
-// Context builder — now memory-aware.
+// Context builder — memory-aware (I.1) and Q&A-aware (I.2)
 // --------------------------------------------------------------------------
 
 function buildSessionContext(args: {
@@ -185,16 +175,19 @@ function buildSessionContext(args: {
   interviewType: InterviewType;
   targetFirm: string | null;
   targetRole: string | null;
+  durationSeconds: number;
   memories: MemoryNote[];
 }): string {
-  const lines: string[] = [];
+  const sections: string[] = [];
 
-  lines.push(
+  // --- 1. Base framing ---
+  const basePieces: string[] = [];
+  basePieces.push(
     `You are ${args.personaName}. This is a practice interview with a candidate preparing for real interviews.`,
   );
 
   if (args.targetFirm) {
-    lines.push(
+    basePieces.push(
       `The candidate is targeting ${args.targetFirm}${args.targetRole ? ` for a ${args.targetRole} role` : ""}. You are at ${args.personaFirm}, but for this session, interview them as if you were at ${args.targetFirm}.`,
     );
   }
@@ -205,7 +198,7 @@ function buildSessionContext(args: {
       "Run the interview as you normally would — realistic, fair, with appropriate follow-ups and challenge.",
     hard: "Run the interview at top-tier difficulty. Pause after weak answers. Push back when claims are generic. Interrupt if they're rambling. This is real finals-round intensity.",
   };
-  lines.push(modeDescriptions[args.mode]);
+  basePieces.push(modeDescriptions[args.mode]);
 
   const typeDescriptions: Record<InterviewType, string> = {
     behavioral: "Focus on behavioral questions: leadership, conflict, failure, achievement.",
@@ -215,23 +208,27 @@ function buildSessionContext(args: {
     superday: "This is a superday-style session — move through multiple question types.",
     hard_mode: "This is the hardest difficulty tier. Top-firm finals-round intensity.",
   };
-  lines.push(typeDescriptions[args.interviewType]);
+  basePieces.push(typeDescriptions[args.interviewType]);
 
-  // --------------------------------------------------------------------
-  // Memory block — only appended when there are memories to surface.
-  // Placed BEFORE the greeting instruction so the persona knows about the
-  // prior context before deciding how to open.
-  // --------------------------------------------------------------------
+  // Session-length hint so persona knows how to pace
+  const minutes = Math.round(args.durationSeconds / 60);
+  basePieces.push(`The session is scheduled for approximately ${minutes} minutes.`);
+
+  sections.push(basePieces.join(" "));
+
+  // --- 2. Memory block (Phase I.1) ---
   const memoryBlock = formatMemoriesForContext(args.memories, args.personaFirstName);
   if (memoryBlock) {
-    lines.push("");
-    lines.push(memoryBlock);
-    lines.push("");
+    sections.push(memoryBlock);
   }
 
-  lines.push(
+  // --- 3. Q&A overlay (Phase I.2) ---
+  sections.push(renderQaOverlay(args.personaName));
+
+  // --- 4. Opening instruction ---
+  sections.push(
     "Begin by greeting the candidate briefly and asking them to walk you through their resume. Stay in character throughout. Do not break the interview frame, do not mention that you are an AI.",
   );
 
-  return lines.join(" ");
+  return sections.join("\n\n");
 }

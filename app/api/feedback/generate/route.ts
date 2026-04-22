@@ -4,13 +4,15 @@ import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { generateFeedback } from "@/lib/pipeline/feedback";
 import { extractAndPersistMemories } from "@/lib/pipeline/memory";
+import { generateAndPersistQaFeedback } from "@/lib/pipeline/qa-feedback";
 import type { FeedbackPayload } from "@/lib/pipeline/feedback-types";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// Claude analysis typically lands in 15-30 seconds. Memory extraction adds
-// ~5-10 seconds on top — still well inside our 60s budget.
+// Main feedback: 15-30s. Memory extraction: 5-10s. Q&A boundary + feedback: 10-20s.
+// All three run sequentially after the main feedback persists. Worst case ~60s,
+// which matches the Next route budget.
 export const maxDuration = 60;
 
 const Input = z.object({
@@ -20,21 +22,16 @@ const Input = z.object({
 /**
  * Generate (or fetch) feedback for a completed session.
  *
- * Idempotent:
- *   - If feedback already exists for the session, return it (no regen).
- *   - If not, read the transcript from transcript_turns, call Claude,
- *     write the result to session_feedback, return it.
+ * Phases running here:
+ *   1. Main feedback pass (Phase D) — rubric scoring, quotes, strengths, improvements.
+ *   2. Memory extraction (Phase I.1 / Upgrade 07) — per-persona first-person notes
+ *      for future sessions. Non-fatal on error.
+ *   3. Q&A feedback (Phase I.2 / Upgrade 08) — boundary detection + separate rubric
+ *      for the end-of-interview questions period. Non-fatal on error.
  *
- * Unique constraint on session_feedback.session_id protects against races
- * between concurrent requests — the second one fails its insert and falls
- * back to reading the winner's row.
- *
- * Upgrade 07 (Phase I.1): After feedback is persisted for the first time,
- * fire a side-effect that extracts 0-3 memory notes from the transcript
- * and writes them to user_session_memory for future sessions with the same
- * persona. Memory extraction runs AFTER the response is returned is tempting
- * but would lose the Claude context on Vercel's stateless invocation — so we
- * run it inline. Errors are swallowed so memory issues never block feedback.
+ * Memory + Q&A only run on the FIRST successful feedback persistence (the winner
+ * of the unique-constraint race). Re-requests with existing feedback return
+ * cached without re-extracting.
  */
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -46,9 +43,7 @@ export async function POST(req: NextRequest) {
   const { sessionId } = parsed.data;
   const supabase = createServerClient();
 
-  // --------------------------------------------------------------------
-  // 1. Verify session exists, is owned, and is completed
-  // --------------------------------------------------------------------
+  // 1. Verify session exists, is owned, is completed
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sessionRaw } = await (supabase.from("sessions") as any)
     .select(
@@ -82,10 +77,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // --------------------------------------------------------------------
-  // 2. If feedback already exists, return it (no memory re-extraction —
-  //    memories are a side-effect of FIRST feedback generation only).
-  // --------------------------------------------------------------------
+  // 2. Return cached if already present — no re-extraction of memory/Q&A
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existingRaw } = await (supabase.from("session_feedback") as any)
     .select("*")
@@ -96,9 +88,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ feedback: existingRaw, cached: true });
   }
 
-  // --------------------------------------------------------------------
-  // 3. Load transcript from transcript_turns
-  // --------------------------------------------------------------------
+  // 3. Load transcript
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: turnsRaw, error: turnsErr } = await (supabase.from("transcript_turns") as any)
     .select("speaker, text, started_at_seconds, ended_at_seconds")
@@ -120,9 +110,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "empty_transcript" }, { status: 400 });
   }
 
-  // --------------------------------------------------------------------
-  // 4. Generate feedback via Claude (or mock)
-  // --------------------------------------------------------------------
   const mappedTurns = turns.map((t) => ({
     role: (t.speaker === "interviewer" ? "assistant" : "user") as "user" | "assistant",
     content: t.text,
@@ -130,6 +117,7 @@ export async function POST(req: NextRequest) {
     endedAtMs: t.ended_at_seconds !== null ? Math.round(t.ended_at_seconds * 1000) : null,
   }));
 
+  // 4. Main feedback pass
   let payload: FeedbackPayload;
   try {
     payload = await generateFeedback({
@@ -151,11 +139,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // --------------------------------------------------------------------
-  // 5. Persist to session_feedback
-  //    Unique constraint on session_id handles race: if someone else wrote
-  //    first, our insert fails and we read theirs.
-  // --------------------------------------------------------------------
+  // 5. Persist — unique constraint handles races
   const insertPayload = {
     session_id: session.id,
     overall_score: payload.overall_score,
@@ -174,18 +158,14 @@ export async function POST(req: NextRequest) {
     .select("*")
     .single();
 
-  let winningFeedback: typeof inserted | null = inserted;
-
   if (insertErr) {
-    // Most likely: unique constraint violation — another concurrent request
-    // beat us. Read that row and return it. We do NOT run memory extraction
-    // in this branch — only the winner extracts, to avoid duplicate notes.
+    // Race — read the winner's row. No side-effects here, only the winner
+    // runs memory + Q&A extraction.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: winner } = await (supabase.from("session_feedback") as any)
       .select("*")
       .eq("session_id", sessionId)
       .maybeSingle();
-
     if (winner) {
       return NextResponse.json({ feedback: winner, cached: true });
     }
@@ -195,11 +175,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // --------------------------------------------------------------------
-  // 6. Upgrade 07 — extract memories (non-blocking semantics, but inline
-  //    because Vercel kills stateless invocations after response).
-  //    Any failure here is logged-and-swallowed; feedback is already saved.
-  // --------------------------------------------------------------------
+  // 6. Side-effects. Both are non-fatal: we've already persisted the main
+  //    feedback, and we'd rather return it and log any extraction failures
+  //    than fail the whole request.
+
+  // 6a. Memory extraction (Phase I.1)
   try {
     const memResult = await extractAndPersistMemories({
       sessionId: session.id,
@@ -223,10 +203,25 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (err) {
-    // Defensive — extractAndPersistMemories already swallows its own errors,
-    // but belt + braces.
     console.error("[feedback.generate] memory extraction threw:", err);
   }
 
-  return NextResponse.json({ feedback: winningFeedback, cached: false });
+  // 6b. Q&A feedback (Phase I.2)
+  try {
+    const qaResult = await generateAndPersistQaFeedback({
+      sessionId: session.id,
+      personaId: session.persona,
+      targetFirm: session.target_firm,
+      targetRole: session.target_role,
+      durationSeconds: session.actual_duration_seconds ?? session.duration_seconds,
+      turns: mappedTurns,
+    });
+    console.log(
+      `[feedback.generate] qa feedback: ${qaResult.status}${qaResult.reason ? ` (${qaResult.reason})` : ""} for session ${session.id}`,
+    );
+  } catch (err) {
+    console.error("[feedback.generate] qa feedback threw:", err);
+  }
+
+  return NextResponse.json({ feedback: inserted, cached: false });
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { FeedbackPayload, FeedbackQuote } from "@/lib/pipeline/feedback-types";
 import type { InterviewType, SessionMode } from "@/types/supabase";
+import { QaFeedbackPanel } from "./qa-panel";
 
 export interface SessionMeta {
   id: string;
@@ -120,6 +121,12 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
           </div>
         </section>
       )}
+
+      {/* Q&A section — Phase I.2 / Upgrade 08 */}
+      {/* Panel self-renders based on its internal polling state. Returns null
+          for sessions with no Q&A section (too short or no transition detected),
+          so we don't need a conditional wrapper here. */}
+      <QaFeedbackPanel sessionId={sessionMeta.id} />
 
       {/* CTA */}
       <section className="mt-14 flex flex-col items-start gap-3 border-t border-ink-border pt-10 sm:flex-row sm:items-center sm:justify-between">
