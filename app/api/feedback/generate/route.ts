@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { generateFeedback } from "@/lib/pipeline/feedback";
 import { extractAndPersistMemories } from "@/lib/pipeline/memory";
 import { generateAndPersistQaFeedback } from "@/lib/pipeline/qa-feedback";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 import type { FeedbackPayload } from "@/lib/pipeline/feedback-types";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// Main feedback: 15-30s. Memory extraction: 5-10s. Q&A boundary + feedback: 10-20s.
-// All three run sequentially after the main feedback persists. Worst case ~60s,
-// which matches the Next route budget.
 export const maxDuration = 60;
 
 const Input = z.object({
@@ -22,28 +20,26 @@ const Input = z.object({
 /**
  * Generate (or fetch) feedback for a completed session.
  *
- * Phases running here:
- *   1. Main feedback pass (Phase D) — rubric scoring, quotes, strengths, improvements.
- *   2. Memory extraction (Phase I.1 / Upgrade 07) — per-persona first-person notes
- *      for future sessions. Non-fatal on error.
- *   3. Q&A feedback (Phase I.2 / Upgrade 08) — boundary detection + separate rubric
- *      for the end-of-interview questions period. Non-fatal on error.
+ * Rate limited per-user: 20 per 10 minutes, 100 per 24 hours. Looser than
+ * tavus/conversation because this endpoint is re-polled by the UI while
+ * Q&A analysis is running, and existing-feedback reads short-circuit
+ * without hitting Claude. In practice the rate limit never trips for a
+ * legitimate user; it exists to catch buggy polling loops or scripted abuse.
  *
- * Memory + Q&A only run on the FIRST successful feedback persistence (the winner
- * of the unique-constraint race). Re-requests with existing feedback return
- * cached without re-extracting.
+ * Side-effects that run after the FIRST successful feedback persist:
+ *   - Memory extraction (Phase I.1) — per-persona first-person notes
+ *   - Q&A feedback (Phase I.2) — boundary detection + Q&A rubric scoring
+ *
+ * Both are non-fatal: any failure is logged, feedback response still returns.
  */
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   const { sessionId } = parsed.data;
   const supabase = createServerClient();
 
-  // 1. Verify session exists, is owned, is completed
+  // 1. Verify ownership
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sessionRaw } = await (supabase.from("sessions") as any)
     .select(
@@ -77,7 +73,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 2. Return cached if already present — no re-extraction of memory/Q&A
+  // 2. Return cached if present
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existingRaw } = await (supabase.from("session_feedback") as any)
     .select("*")
@@ -139,7 +135,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 5. Persist — unique constraint handles races
+  // 5. Persist
   const insertPayload = {
     session_id: session.id,
     overall_score: payload.overall_score,
@@ -159,8 +155,6 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (insertErr) {
-    // Race — read the winner's row. No side-effects here, only the winner
-    // runs memory + Q&A extraction.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: winner } = await (supabase.from("session_feedback") as any)
       .select("*")
@@ -175,9 +169,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 6. Side-effects. Both are non-fatal: we've already persisted the main
-  //    feedback, and we'd rather return it and log any extraction failures
-  //    than fail the whole request.
+  // 6. Side-effects (non-fatal)
 
   // 6a. Memory extraction (Phase I.1)
   try {
@@ -225,3 +217,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ feedback: inserted, cached: false });
 }
+
+export const POST = withRateLimit(RATE_LIMITS.feedback_generate, handler);

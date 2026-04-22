@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { PERSONAS } from "@/lib/personas";
 import { getTavusPersonaId, getTavusReplicaId, tavusConfigured } from "@/lib/pipeline/tavus-registry";
@@ -12,6 +11,8 @@ import {
   type MemoryNote,
 } from "@/lib/pipeline/memory";
 import { renderQaOverlay } from "@/lib/personas/qa-overlay";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -25,21 +26,21 @@ const Input = z.object({
 /**
  * Create (or fetch) a Tavus conversation for this Folio session.
  *
- * Context composition (in order):
- *   1. Persona base: "You are <name>..." + mode + interview-type
- *   2. Memory block (Phase I.1 / Upgrade 07) — prior-session notes for
- *      this (user, persona) pair, if any
- *   3. Q&A overlay (Phase I.2 / Upgrade 08) — universal end-of-interview
- *      Q&A period instructions
- *   4. Opening instruction — greeting + resume walk
+ * Rate limited per-user: 3 per 10 minutes, 20 per 24 hours. The idempotent
+ * re-entry path (session already has tavus_conversation_url) is NOT
+ * rate-limited — we return cached before the check... well, actually, we
+ * can't. The rate-limit wrapper runs before the handler. That's intentional:
+ * even cached fetches should be bounded, or a client-side retry loop could
+ * hammer the endpoint at >100 QPS. Legitimate cache-hit flows use at most
+ * 1-2 calls per session, so the 3/10min limit is comfortably safe.
  *
- * Idempotent re-entry (session already has a tavus_conversation_url) skips
- * memory surfacing entirely — the first call owns that state.
+ * Context composition:
+ *   1. Persona base (mode, interview type, length hint)
+ *   2. Memory block (Phase I.1) — prior-session notes for (user, persona) pair
+ *   3. Q&A overlay (Phase I.2) — universal end-of-interview Q&A instructions
+ *   4. Opening instruction — greeting + resume walk
  */
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   if (!tavusConfigured()) {
     return NextResponse.json({ error: "tavus_not_configured" }, { status: 503 });
   }
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "session_ended" }, { status: 409 });
   }
 
-  // Already have a Tavus conversation for this session — return it, skip memory
+  // Idempotent re-entry — return cached, skip memory surfacing
   if (session.tavus_conversation_url && session.tavus_conversation_id) {
     return NextResponse.json({
       conversationUrl: session.tavus_conversation_url,
@@ -101,13 +102,12 @@ export async function POST(req: NextRequest) {
   const replicaId = getTavusReplicaId(session.persona);
   const persona = PERSONAS[session.persona];
 
-  // Phase I.1: pull memories
+  // Phase I.1: memory pull
   const memories: MemoryNote[] = await loadMemoriesForSession({
     userId: session.user_id,
     personaId: session.persona,
   });
 
-  // Build context
   const conversationalContext = buildSessionContext({
     personaName: persona.name,
     personaFirstName: persona.firstName,
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
       sessionId: session.id,
       conversationalContext,
       callbackUrl,
-      maxDurationSeconds: session.duration_seconds + 300, // +5 min grace
+      maxDurationSeconds: session.duration_seconds + 300,
     });
   } catch (err) {
     console.error("[tavus.conversation] create failed:", err);
@@ -151,7 +151,6 @@ export async function POST(req: NextRequest) {
     })
     .eq("id", session.id);
 
-  // Phase I.1: bump surfaced_count
   if (memories.length > 0) {
     await markMemoriesSurfaced(memories.map((m) => m.id));
   }
@@ -163,8 +162,10 @@ export async function POST(req: NextRequest) {
   });
 }
 
+export const POST = withRateLimit(RATE_LIMITS.tavus_conversation, handler);
+
 // --------------------------------------------------------------------------
-// Context builder — memory-aware (I.1) and Q&A-aware (I.2)
+// Context builder (unchanged from Phase I.2)
 // --------------------------------------------------------------------------
 
 function buildSessionContext(args: {
@@ -180,7 +181,6 @@ function buildSessionContext(args: {
 }): string {
   const sections: string[] = [];
 
-  // --- 1. Base framing ---
   const basePieces: string[] = [];
   basePieces.push(
     `You are ${args.personaName}. This is a practice interview with a candidate preparing for real interviews.`,
@@ -210,22 +210,18 @@ function buildSessionContext(args: {
   };
   basePieces.push(typeDescriptions[args.interviewType]);
 
-  // Session-length hint so persona knows how to pace
   const minutes = Math.round(args.durationSeconds / 60);
   basePieces.push(`The session is scheduled for approximately ${minutes} minutes.`);
 
   sections.push(basePieces.join(" "));
 
-  // --- 2. Memory block (Phase I.1) ---
   const memoryBlock = formatMemoriesForContext(args.memories, args.personaFirstName);
   if (memoryBlock) {
     sections.push(memoryBlock);
   }
 
-  // --- 3. Q&A overlay (Phase I.2) ---
   sections.push(renderQaOverlay(args.personaName));
 
-  // --- 4. Opening instruction ---
   sections.push(
     "Begin by greeting the candidate briefly and asking them to walk you through their resume. Stay in character throughout. Do not break the interview frame, do not mention that you are an AI.",
   );
