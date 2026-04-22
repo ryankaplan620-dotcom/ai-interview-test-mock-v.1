@@ -23,15 +23,8 @@ export async function middleware(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Misconfigured deployment. Don't fail open with hardcoded credentials —
-    // that would commit keys to the repo, which is a cardinal sin even for
-    // an anon key (rotation becomes painful, key is world-readable by anyone
-    // who clones the repo). Instead: refuse to service the request and let
-    // the operator notice.
-    console.error(
-      "[middleware] NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY is missing — check .env.local / deployment env",
-    );
-    return new NextResponse("Service misconfigured", { status: 503 });
+    // Supabase not configured — skip auth checks, let pages handle gracefully
+    return response;
   }
 
   const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
