@@ -2,27 +2,31 @@ import { ScrollReveal } from "./ScrollReveal";
 
 const tiers = [
   {
-    name: "STUDENT",
-    price: "$5.99",
-    features: "3 sessions/week, 1 persona, Basic score",
+    name: "FREE",
+    price: "$0",
+    period: "",
+    features: "1 interview (10 min), Folio Score, basic feedback",
     highlighted: false,
   },
   {
-    name: "GENERAL",
-    price: "$9.99",
-    features: "5 sessions/week, All personas, Full score",
+    name: "BASIC",
+    price: "$49",
+    period: "/90 days",
+    features: "3 interviews, 4 comms sessions, 5 outreach sends",
     highlighted: false,
   },
   {
     name: "PRO",
-    price: "$19.99",
-    features: "Unlimited sessions, Outreach, All drills",
+    price: "$149",
+    period: "/year",
+    features: "8 interviews, unlimited comms, 20 outreach, firm calibration",
     highlighted: true,
   },
   {
     name: "MAX",
-    price: "$30",
-    features: "Everything + Priority, Custom calibration",
+    price: "$249",
+    period: "/year",
+    features: "16 interviews, unlimited comms, 50 outreach, superday + hard mode",
     highlighted: false,
   },
 ];
@@ -43,7 +47,7 @@ export function PricingPreview() {
               Start free. Scale when it&apos;s real.
             </h2>
             <p className="mt-4 font-sans text-text-secondary">
-              15-day free trial. No credit card.
+              Try your first interview free. No credit card required.
             </p>
           </div>
         </ScrollReveal>
@@ -74,7 +78,9 @@ export function PricingPreview() {
                 </span>
                 <p className="mt-3 font-display text-[36px] font-bold text-text-primary">
                   {tier.price}
-                  <span className="font-sans text-[14px] font-normal text-text-tertiary">/mo</span>
+                  {tier.period && (
+                    <span className="font-sans text-[14px] font-normal text-text-tertiary">{tier.period}</span>
+                  )}
                 </p>
                 <p className="mt-4 font-sans text-[13px] leading-relaxed text-text-secondary">
                   {tier.features}
@@ -86,7 +92,7 @@ export function PricingPreview() {
 
         <ScrollReveal>
           <p className="mt-12 text-center font-sans text-sm text-text-tertiary">
-            All plans include a 15-day free trial
+            First interview is free. Paid plans include a 15-day trial.
           </p>
         </ScrollReveal>
       </div>

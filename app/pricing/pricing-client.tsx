@@ -11,7 +11,7 @@ interface PricingClientProps {
   isVerifiedStudent: boolean;
 }
 
-const DISPLAY_ORDER: SubscriptionTier[] = ["basic", "pro", "max"];
+const DISPLAY_ORDER: SubscriptionTier[] = ["free", "basic", "pro", "max"];
 
 const FEATURE_ROWS: { label: string; feature: LegacyFeatureKey }[] = [
   { label: "All 5 recruiter personas", feature: "allPersonas" },
