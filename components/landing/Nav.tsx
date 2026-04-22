@@ -9,7 +9,7 @@ const navLinks = [
   { label: "Product", href: "#product" },
   { label: "Interviewers", href: "#interviewers" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Journal", href: "#journal" },
+  { label: "Download", href: "/download" },
 ];
 
 export function Nav() {
