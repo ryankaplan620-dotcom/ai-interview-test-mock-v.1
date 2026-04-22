@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Playfair_Display, Spectral, Crimson_Text, Cinzel } from "next/font/google";
+import { CookieBanner } from "@/components/legal/cookie-banner";
 import "./globals.css";
 
 // ==========================================
@@ -156,6 +157,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <a href="#main-content" className="skip-to-content">Skip to content</a>
         {children}
+        <CookieBanner />
       </body>
     </html>
   );

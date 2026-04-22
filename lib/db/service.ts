@@ -13,11 +13,14 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://qgygwvpruscjuxfhfefd.supabase.co";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 export function createServiceClient() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+  if (!SUPABASE_URL) {
+    throw new Error("supabase_url_not_configured");
+  }
   if (!key) {
     throw new Error("supabase_service_role_not_configured");
   }

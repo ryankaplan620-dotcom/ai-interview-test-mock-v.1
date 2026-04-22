@@ -40,3 +40,10 @@ next-env.d.ts
 .idea/
 .vscode/
 *.swp
+
+# Supabase CLI artifacts (contain project-ref metadata; regenerated on `supabase link`)
+/supabase/.temp/
+/supabase/.branches/
+
+# macOS file-system metadata
+._*
