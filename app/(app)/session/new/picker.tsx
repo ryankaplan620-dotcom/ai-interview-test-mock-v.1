@@ -315,7 +315,7 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
           {pending ? "Starting..." : "Start the call →"}
         </button>
         <p className="font-mono text-[11px] tracking-label text-text-tertiary">
-          TIER · {TIERS[tier].name.toUpperCase()}
+          TIER · {TIERS[tier].label.toUpperCase()}
         </p>
       </div>
     </div>

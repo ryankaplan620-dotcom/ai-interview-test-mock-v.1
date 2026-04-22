@@ -140,7 +140,7 @@ export async function syncSubscription(
     return;
   }
 
-  const tier = (subscription.metadata.tier ?? "cycle") as SubscriptionTier;
+  const tier = (subscription.metadata.tier ?? "basic") as SubscriptionTier;
   void TIERS[tier]; // validate tier exists in our catalog
   const status = subscription.status as SubscriptionStatus;
   const priceId = subscription.items.data[0]?.price.id ?? null;

@@ -47,7 +47,7 @@ export default async function DashboardPage() {
     overallScore: s.session_feedback?.[0]?.overall_score ?? null,
   }));
 
-  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.cycle;
+  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.free;
   const firstName = profile?.full_name?.split(" ")[0] ?? "there";
 
   // Average score across completed sessions with feedback
@@ -190,10 +190,10 @@ export default async function DashboardPage() {
               YOUR PLAN
             </span>
             <p className="mt-2 font-display text-[20px] font-semibold text-text-primary">
-              {tierConfig.name}
+              {tierConfig.label}
             </p>
             <p className="mt-1 font-sans text-[13px] leading-relaxed text-text-secondary">
-              {tierConfig.tagline}
+              {tierConfig.billing.label}
             </p>
 
             {tier?.trial_end && new Date(tier.trial_end).getTime() > Date.now() && (
@@ -230,7 +230,7 @@ export default async function DashboardPage() {
               href="/pricing"
               className="mt-4 block text-center font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
             >
-              {!tier || tier.effective_tier === "cycle" ? "Upgrade plan →" : "Manage plan →"}
+              {!tier || tier.effective_tier === "basic" ? "Upgrade plan →" : "Manage plan →"}
             </Link>
           </div>
 

@@ -31,7 +31,7 @@ export interface SubscriptionFixtureOpts {
   subId?: string;
   customerId?: string;
   userId: string;
-  tier: "cycle" | "pro" | "max";
+  tier: "basic" | "pro" | "max";
   status: Stripe.Subscription.Status;
   priceId?: string;
   currentPeriodStart: Date;

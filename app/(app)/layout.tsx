@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const profile = await getProfile();
   const tier = await getUserTier();
 
-  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.cycle;
+  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.free;
 
   return (
     <main className="relative flex min-h-screen flex-col bg-ink">
@@ -57,7 +57,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               <span className="font-mono text-[10px] font-medium tracking-label text-accent">
-                {tierConfig.name.toUpperCase()}
+                {tierConfig.label.toUpperCase()}
               </span>
             </Link>
             <span className="hidden font-sans text-[13.5px] text-text-secondary md:inline">

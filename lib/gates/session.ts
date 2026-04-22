@@ -97,7 +97,7 @@ export function checkSessionStart(
   }
 
   // 3. Student verification required for Cycle tier
-  if (tier === "cycle" && TIERS.cycle.requiresVerification && !ctx.studentVerified) {
+  if (tier === "basic" && TIERS.basic.requiresStudentVerification && !ctx.studentVerified) {
     return {
       allowed: false,
       reason: "student_not_verified",
@@ -179,7 +179,7 @@ function checkSessionQuota(
   ctx: SessionStartContext,
 ): SessionGateResult {
   const tierConfig = TIERS[tier];
-  const included = tierConfig.includedSessions;
+  const included = tierConfig.allotments.interviewSessions;
   const used = ctx.sessionsUsedThisCycle;
 
   // Within quota — free to start
@@ -192,15 +192,15 @@ function checkSessionQuota(
   return {
     allowed: false,
     reason: "session_quota_exceeded",
-    message: `You've used all ${included} sessions in your current cycle. Start an overage session for $${tierConfig.overagePerSession}, or upgrade for more included sessions.`,
+    message: `You've used all ${included} sessions in your current cycle. Start an overage session for $${tierConfig.overage.sessionPriceUsd}, or upgrade for more included sessions.`,
     overageAvailable: true,
-    overagePrice: tierConfig.overagePerSession,
+    overagePrice: tierConfig.overage.sessionPriceUsd,
     minimumTier: nextTierAbove(tier),
   };
 }
 
 function nextTierAbove(tier: SubscriptionTier): SubscriptionTier | undefined {
-  const order: SubscriptionTier[] = ["cycle", "pro", "max"];
+  const order: SubscriptionTier[] = ["basic", "pro", "max"];
   const idx = order.indexOf(tier);
   if (idx === -1 || idx === order.length - 1) return undefined;
   return order[idx + 1];

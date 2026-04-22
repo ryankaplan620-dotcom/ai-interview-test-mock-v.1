@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth/server";
 import { createSubscriptionCheckout } from "@/lib/stripe/checkout";
 
 const CheckoutBody = z.object({
-  tier: z.enum(["cycle", "pro", "max"]),
+  tier: z.enum(["basic", "pro", "max"]),
 });
 
 export async function POST(request: Request) {

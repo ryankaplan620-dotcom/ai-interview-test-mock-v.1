@@ -30,7 +30,7 @@ export async function createSubscriptionCheckout({
   const tierConfig = TIERS[tier];
 
   // Cycle tier requires verified-student status
-  if (tierConfig.requiresVerification) {
+  if (tierConfig.requiresStudentVerification) {
     const supabase = createServiceRoleClient();
     const { data: tierView } = await supabase
       .from("user_tiers")
@@ -40,7 +40,7 @@ export async function createSubscriptionCheckout({
 
     if (!tierView?.is_verified_student) {
       throw new Error(
-        `${tierConfig.name} plan requires verified enrollment. Complete student verification first.`,
+        `${tierConfig.label} plan requires verified enrollment. Complete student verification first.`,
       );
     }
   }
@@ -202,7 +202,7 @@ async function getOrCreateStripeCustomer({
     {
       user_id: userId,
       stripe_customer_id: customer.id,
-      tier: "cycle",
+      tier: "basic",
       status: "incomplete",
     },
     { onConflict: "user_id" },

@@ -1,222 +1,296 @@
 /**
- * Folio tier configuration — cycle-based pricing.
+ * Folio tier configuration.
  *
- * Folio is not a monthly-subscription product. It's a seasonal prep product
- * that users return to around recruiting cycles. Tiers are:
+ * Defines subscription tiers, included allotments, and Stripe price references.
+ * Stripe price IDs are loaded from env vars at runtime so the same code runs
+ * across staging and production.
  *
- *   - Cycle: 90-day student pass, SheerID-gated
- *   - Pro:   365-day access, non-student default
- *   - Max:   365-day access with panel/superday/hard-mode and priority feedback
- *
- * Each tier has:
- *   - A price (charged once per cycle, auto-renewing by default)
- *   - Included session count (full Tavus-backed interviews)
- *   - Unlimited drills (cheap, retention-anchoring)
- *   - Overage rate for sessions beyond quota
- *
- * Unit economics (at Tavus CVI $0.37/min, ~$11.50 per 30-min session):
- *   Cycle $49 / 8 sessions  → ~$92 cost at full use, priced as acquisition product
- *   Pro   $149 / 24 sessions → breakeven at 13 sessions, ~40% margin at median usage
- *   Max   $249 / 40 sessions → breakeven at 22 sessions, ~30% margin at median usage
- *
- * The `trial` and `general` tiers from prior versions are removed. Trial is now
- * a 15-day window on any paid plan, handled in Stripe checkout config, not as
- * a separate tier. General is collapsed into Pro.
+ * Tier keys are persisted in the DB (subscription.tier column) and used as
+ * metadata on Stripe subscriptions. Renaming a tier key requires coordinated
+ * migration. Current structure is pre-launch locked in April 2026.
  */
 
-import type { SubscriptionTier } from "@/types/supabase";
+export type TierKey = 'free' | 'basic' | 'pro' | 'max';
 
-export interface TierConfig {
-  id: SubscriptionTier;
-  name: string;
-  tagline: string;
+export type BillingPeriod = {
+  days: number;
+  label: string;
+};
 
-  /** Price in USD charged per cycle. */
-  price: number;
-  /** Cycle length. */
-  cycleDays: number;
-  /** Human-readable cycle label for pricing UI. */
-  cycleLabel: string;
+export type TierAllotments = {
+  interviewSessions: number;
+  interviewSessionMaxMinutes: number;
+  commsSessions: number | 'locked';
+  commsSessionMaxMinutes: number;
+  outreachSendsPerMonth: number | 'locked';
+};
 
-  /** Stripe price ID env var key. */
-  stripeEnvKey: string;
+export type TierOverage = {
+  sessionPriceUsd: number;
+  stripeEnvKey: string | null;
+};
 
-  /** Included full sessions per cycle. */
-  includedSessions: number;
-  /** Charge per overage session in USD. */
-  overagePerSession: number;
-  /** Stripe price ID env var key for the overage purchase (one-off). */
-  overageStripeEnvKey: string;
+export type Tier = {
+  key: TierKey;
+  label: string;
+  priceUsd: number;
+  billing: BillingPeriod;
+  requiresStudentVerification: boolean;
+  stripeEnvKey: string | null;
+  allotments: TierAllotments;
+  overage: TierOverage;
+  features: string[];
+};
 
-  features: TierFeatureMatrix;
-  requiresVerification: boolean;
-}
-
-export interface TierFeatureMatrix {
-  unlimitedDrills: boolean;
-  allPersonas: boolean;
-  quoteFeedback: boolean;
-
-  // Pro+
-  firmCalibration: boolean;
-  sessionMemory: boolean;
-  endOfInterviewQA: boolean;
-
-  // Max-only
-  panelSimulation: boolean;
-  superdayMode: boolean;
-  hardMode: boolean;
-  priorityFeedback: boolean;
-  nonVerbalFeedback: boolean;
-  questionIntelligenceEngine: boolean;
-  callback: boolean;
-}
-
-// ==========================================================================
-// THE TIERS
-// ==========================================================================
-
-export const TIERS: Record<SubscriptionTier, TierConfig> = {
-  /**
-   * Cycle — SheerID-gated student tier.
-   * 90 days, $49, 8 sessions. Near-breakeven by design; acquisition-priced.
-   */
-  cycle: {
-    id: "cycle",
-    name: "Cycle",
-    tagline: "One recruiting cycle. The real thing, at student pricing.",
-    price: 49,
-    cycleDays: 90,
-    cycleLabel: "90 days",
-    stripeEnvKey: "STRIPE_PRICE_CYCLE",
-    includedSessions: 8,
-    overagePerSession: 8,
-    overageStripeEnvKey: "STRIPE_PRICE_OVERAGE_STANDARD",
-    features: {
-      unlimitedDrills: true,
-      allPersonas: true,
-      quoteFeedback: true,
-      firmCalibration: false,
-      sessionMemory: false,
-      endOfInterviewQA: false,
-      panelSimulation: false,
-      superdayMode: false,
-      hardMode: false,
-      priorityFeedback: false,
-      nonVerbalFeedback: false,
-      questionIntelligenceEngine: false,
-      callback: false,
+export const TIERS: Record<TierKey, Tier> = {
+  free: {
+    key: 'free',
+    label: 'Free',
+    priceUsd: 0,
+    billing: { days: 0, label: 'Free forever' },
+    requiresStudentVerification: false,
+    stripeEnvKey: null,
+    allotments: {
+      interviewSessions: 1,
+      interviewSessionMaxMinutes: 10,
+      commsSessions: 'locked',
+      commsSessionMaxMinutes: 0,
+      outreachSendsPerMonth: 'locked',
     },
-    requiresVerification: true,
+    overage: {
+      sessionPriceUsd: 0,
+      stripeEnvKey: null,
+    },
+    features: [
+      'One interview session, 10 minute cap',
+      'Full access to interviewer personas',
+      'AI feedback after your session',
+      'Communication training locked',
+      'Outreach locked',
+    ],
   },
 
-  /**
-   * Pro — the default paid tier.
-   * 365 days, $149, 24 sessions. Covers two recruiting cycles.
-   */
+  basic: {
+    key: 'basic',
+    label: 'Basic',
+    priceUsd: 49,
+    billing: { days: 90, label: '90 days' },
+    requiresStudentVerification: true,
+    stripeEnvKey: 'STRIPE_PRICE_BASIC',
+    allotments: {
+      interviewSessions: 3,
+      interviewSessionMaxMinutes: 30,
+      commsSessions: 4,
+      commsSessionMaxMinutes: 10,
+      outreachSendsPerMonth: 10,
+    },
+    overage: {
+      sessionPriceUsd: 20,
+      stripeEnvKey: 'STRIPE_PRICE_OVERAGE_STANDARD',
+    },
+    features: [
+      '3 interview sessions, 30 minutes each',
+      '4 communication training sessions',
+      '10 outreach sends per month',
+      'Student pricing via SheerID',
+      'Basic personas and modes',
+    ],
+  },
+
   pro: {
-    id: "pro",
-    name: "Pro",
-    tagline: "A full year of prep. Two recruiting cycles, all the drills you want.",
-    price: 149,
-    cycleDays: 365,
-    cycleLabel: "Full year",
-    stripeEnvKey: "STRIPE_PRICE_PRO",
-    includedSessions: 24,
-    overagePerSession: 8,
-    overageStripeEnvKey: "STRIPE_PRICE_OVERAGE_STANDARD",
-    features: {
-      unlimitedDrills: true,
-      allPersonas: true,
-      quoteFeedback: true,
-      firmCalibration: true,
-      sessionMemory: true,
-      endOfInterviewQA: true,
-      panelSimulation: false,
-      superdayMode: false,
-      hardMode: false,
-      priorityFeedback: false,
-      nonVerbalFeedback: false,
-      questionIntelligenceEngine: false,
-      callback: false,
+    key: 'pro',
+    label: 'Pro',
+    priceUsd: 149,
+    billing: { days: 365, label: '1 year' },
+    requiresStudentVerification: false,
+    stripeEnvKey: 'STRIPE_PRICE_PRO',
+    allotments: {
+      interviewSessions: 8,
+      interviewSessionMaxMinutes: 30,
+      commsSessions: 10,
+      commsSessionMaxMinutes: 10,
+      outreachSendsPerMonth: 30,
     },
-    requiresVerification: false,
+    overage: {
+      sessionPriceUsd: 20,
+      stripeEnvKey: 'STRIPE_PRICE_OVERAGE_STANDARD',
+    },
+    features: [
+      '8 interview sessions, 30 minutes each',
+      '10 communication training sessions',
+      '30 outreach sends per month',
+      'Full persona set',
+      'All interview modes',
+      'Firm calibration',
+    ],
   },
 
-  /**
-   * Max — full-surface tier.
-   * 365 days, $249, 40 sessions + panel/superday/hard-mode/priority-feedback.
-   */
   max: {
-    id: "max",
-    name: "Max",
-    tagline: "Panels, superdays, hard mode, and priority feedback — when every interview counts.",
-    price: 249,
-    cycleDays: 365,
-    cycleLabel: "Full year",
-    stripeEnvKey: "STRIPE_PRICE_MAX",
-    includedSessions: 40,
-    overagePerSession: 6,
-    overageStripeEnvKey: "STRIPE_PRICE_OVERAGE_MAX",
-    features: {
-      unlimitedDrills: true,
-      allPersonas: true,
-      quoteFeedback: true,
-      firmCalibration: true,
-      sessionMemory: true,
-      endOfInterviewQA: true,
-      panelSimulation: true,
-      superdayMode: true,
-      hardMode: true,
-      priorityFeedback: true,
-      nonVerbalFeedback: true,
-      questionIntelligenceEngine: true,
-      callback: true,
+    key: 'max',
+    label: 'Max',
+    priceUsd: 249,
+    billing: { days: 365, label: '1 year' },
+    requiresStudentVerification: false,
+    stripeEnvKey: 'STRIPE_PRICE_MAX',
+    allotments: {
+      interviewSessions: 16,
+      interviewSessionMaxMinutes: 30,
+      commsSessions: 20,
+      commsSessionMaxMinutes: 10,
+      outreachSendsPerMonth: 100,
     },
-    requiresVerification: false,
+    overage: {
+      sessionPriceUsd: 15,
+      stripeEnvKey: 'STRIPE_PRICE_OVERAGE_MAX',
+    },
+    features: [
+      '16 interview sessions, 30 minutes each',
+      '20 communication training sessions',
+      '100 outreach sends per month',
+      'Panel interviews',
+      'Superday simulations',
+      'Priority feedback queue',
+      'Everything in Pro',
+    ],
   },
 };
 
-// ==========================================================================
-// TRIAL WINDOW CONFIG
-// ==========================================================================
-// Trial is a 15-day window on any paid plan, not a separate tier.
-// Stripe subscriptions are created with trial_period_days=15 on the first
-// purchase per user. After 15 days, the card is charged.
-
+/**
+ * Default trial period in days for first-time subscription purchases.
+ */
 export const TRIAL_DAYS = 15;
 
-// ==========================================================================
-// HELPERS
-// ==========================================================================
+/**
+ * Ordered list of tiers for rendering the pricing page.
+ * Free first, paid tiers ascending.
+ */
+export const TIER_ORDER: TierKey[] = ['free', 'basic', 'pro', 'max'];
 
-export function tierHasFeature(
-  tier: SubscriptionTier,
-  feature: keyof TierFeatureMatrix,
-): boolean {
-  return TIERS[tier].features[feature];
-}
+/**
+ * Paid tier keys. Useful for iterating tiers that have Stripe products.
+ */
+export const PAID_TIER_KEYS: TierKey[] = ['basic', 'pro', 'max'];
 
-export function formatPrice(amount: number): string {
-  if (amount === 0) return "Free";
-  return `$${Math.round(amount)}`;
-}
-
-export function getStripePriceId(tier: SubscriptionTier): string | null {
-  const envKey = TIERS[tier].stripeEnvKey;
-  return process.env[envKey] ?? null;
-}
-
-export function getOverageStripePriceId(tier: SubscriptionTier): string | null {
-  const envKey = TIERS[tier].overageStripeEnvKey;
-  return process.env[envKey] ?? null;
+/**
+ * Resolve the Stripe price ID for a given tier from env vars.
+ * Returns null for free tier or if env var is unset.
+ */
+export function getStripePriceId(tierKey: TierKey): string | null {
+  const tier = TIERS[tierKey];
+  if (!tier.stripeEnvKey) return null;
+  return process.env[tier.stripeEnvKey] ?? null;
 }
 
 /**
- * Amortized per-session cost if the user uses every included session.
- * Used for pricing-page display ("just $6.21 per session at full use").
+ * Resolve the Stripe overage price ID for a given tier from env vars.
  */
-export function pricePerSessionAtFullUse(tier: SubscriptionTier): number {
-  const t = TIERS[tier];
-  return t.price / t.includedSessions;
+export function getOverageStripePriceId(tierKey: TierKey): string | null {
+  const tier = TIERS[tierKey];
+  if (!tier.overage.stripeEnvKey) return null;
+  return process.env[tier.overage.stripeEnvKey] ?? null;
+}
+
+/**
+ * Returns true if the given feature is available on the given tier.
+ * Use this for paywall gating in route handlers.
+ */
+export function isFeatureAvailable(
+  tierKey: TierKey,
+  feature: 'interview' | 'comms' | 'outreach',
+): boolean {
+  const tier = TIERS[tierKey];
+  if (feature === 'interview') {
+    return tier.allotments.interviewSessions > 0;
+  }
+  if (feature === 'comms') {
+    return tier.allotments.commsSessions !== 'locked';
+  }
+  if (feature === 'outreach') {
+    return tier.allotments.outreachSendsPerMonth !== 'locked';
+  }
+  return false;
+}
+
+/**
+ * Returns the included allotment for a given feature on a tier.
+ * Returns 0 for locked features.
+ */
+export function getAllotment(
+  tierKey: TierKey,
+  feature: 'interview' | 'comms' | 'outreach',
+): number {
+  const tier = TIERS[tierKey];
+  if (feature === 'interview') return tier.allotments.interviewSessions;
+  if (feature === 'comms') {
+    return tier.allotments.commsSessions === 'locked'
+      ? 0
+      : tier.allotments.commsSessions;
+  }
+  if (feature === 'outreach') {
+    return tier.allotments.outreachSendsPerMonth === 'locked'
+      ? 0
+      : tier.allotments.outreachSendsPerMonth;
+  }
+  return 0;
+}
+
+/**
+ * Format a USD price as a display string. E.g. 49 → "$49", 0 → "$0".
+ */
+export function formatPrice(amountUsd: number): string {
+  if (amountUsd === 0) return '$0';
+  return `$${amountUsd}`;
+}
+
+/**
+ * Effective price per interview session if the user exhausts all included sessions.
+ * Useful for "as low as $X / session" display on the pricing page.
+ */
+export function pricePerSessionAtFullUse(tierKey: TierKey): number {
+  const tier = TIERS[tierKey];
+  if (tier.allotments.interviewSessions === 0) return 0;
+  return tier.priceUsd / tier.allotments.interviewSessions;
+}
+
+/**
+ * Legacy feature-gate helper. Maps old feature matrix keys to checks against
+ * the new tier structure. Used by session gates and the session picker.
+ */
+export type LegacyFeatureKey =
+  | 'allPersonas'
+  | 'unlimitedDrills'
+  | 'quoteFeedback'
+  | 'firmCalibration'
+  | 'sessionMemory'
+  | 'endOfInterviewQA'
+  | 'panelSimulation'
+  | 'superdayMode'
+  | 'hardMode'
+  | 'priorityFeedback'
+  | 'nonVerbalFeedback'
+  | 'questionIntelligenceEngine';
+
+const FEATURE_TIER_THRESHOLDS: Record<LegacyFeatureKey, TierKey> = {
+  allPersonas: 'basic',
+  unlimitedDrills: 'basic',
+  quoteFeedback: 'basic',
+  firmCalibration: 'pro',
+  sessionMemory: 'pro',
+  endOfInterviewQA: 'pro',
+  panelSimulation: 'max',
+  superdayMode: 'max',
+  hardMode: 'max',
+  priorityFeedback: 'max',
+  nonVerbalFeedback: 'max',
+  questionIntelligenceEngine: 'max',
+};
+
+/**
+ * Returns true if the given tier includes the specified legacy feature.
+ * Tiers are ordered: free < basic < pro < max.
+ */
+export function tierHasFeature(tierKey: TierKey, feature: LegacyFeatureKey): boolean {
+  const tierRank: Record<TierKey, number> = { free: 0, basic: 1, pro: 2, max: 3 };
+  const requiredTier = FEATURE_TIER_THRESHOLDS[feature];
+  return tierRank[tierKey] >= tierRank[requiredTier];
 }

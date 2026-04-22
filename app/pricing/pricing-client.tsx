@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TIERS, formatPrice, pricePerSessionAtFullUse, type TierFeatureMatrix } from "@/lib/tiers";
+import { TIERS, formatPrice, pricePerSessionAtFullUse, tierHasFeature, type LegacyFeatureKey } from "@/lib/tiers";
 import type { SubscriptionTier } from "@/types/supabase";
 
 interface PricingClientProps {
@@ -11,9 +11,9 @@ interface PricingClientProps {
   isVerifiedStudent: boolean;
 }
 
-const DISPLAY_ORDER: SubscriptionTier[] = ["cycle", "pro", "max"];
+const DISPLAY_ORDER: SubscriptionTier[] = ["basic", "pro", "max"];
 
-const FEATURE_ROWS: { label: string; feature: keyof TierFeatureMatrix }[] = [
+const FEATURE_ROWS: { label: string; feature: LegacyFeatureKey }[] = [
   { label: "All 5 recruiter personas", feature: "allPersonas" },
   { label: "Unlimited drill practice", feature: "unlimitedDrills" },
   { label: "Quote-based feedback", feature: "quoteFeedback" },
@@ -41,7 +41,7 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
       return;
     }
 
-    if (tier === "cycle" && !isVerifiedStudent) {
+    if (tier === "basic" && !isVerifiedStudent) {
       router.push("/settings/verify-student");
       return;
     }
@@ -79,7 +79,7 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
               isCurrent,
               isLoading: loadingTier === tierId,
               isSignedIn,
-              requiresVerification: tier.requiresVerification,
+              requiresVerification: tier.requiresStudentVerification,
               isVerifiedStudent,
             });
 
@@ -100,26 +100,26 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
 
                 <div>
                   <h3 className="font-display text-[22px] font-semibold text-text-primary">
-                    {tier.name}
+                    {tier.label}
                   </h3>
                   <p className="mt-2 font-sans text-[13px] leading-relaxed text-text-secondary">
-                    {tier.tagline}
+                    {tier.features[0]}
                   </p>
                 </div>
 
                 <div className="mt-6">
                   <div className="flex items-baseline gap-1.5">
                     <span className="font-display text-[40px] font-semibold text-text-primary">
-                      {formatPrice(tier.price)}
+                      {formatPrice(tier.priceUsd)}
                     </span>
                     <span className="font-sans text-[13px] text-text-tertiary">
-                      / {tier.cycleLabel.toLowerCase()}
+                      / {tier.billing.label.toLowerCase()}
                     </span>
                   </div>
                   <p className="mt-2 font-mono text-[11px] tracking-label text-text-tertiary">
                     AS LOW AS ${perSession.toFixed(2)} / SESSION
                   </p>
-                  {tier.requiresVerification && (
+                  {tier.requiresStudentVerification && (
                     <p className="mt-2 font-mono text-[10px] font-medium tracking-label text-accent">
                       VERIFIED STUDENTS ONLY
                     </p>
@@ -144,19 +144,19 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                 <div className="mt-6 rounded-xl border border-ink-border/60 bg-ink-raised/40 px-4 py-3">
                   <p className="font-mono text-[10px] tracking-label text-text-tertiary">INCLUDED</p>
                   <p className="mt-1 font-display text-[20px] font-semibold text-text-primary">
-                    {tier.includedSessions} full interviews
+                    {tier.allotments.interviewSessions} full interviews
                   </p>
                   <p className="mt-1 font-sans text-[12px] text-text-secondary">
                     + unlimited drill practice
                   </p>
                   <p className="mt-2 font-sans text-[11.5px] leading-relaxed text-text-tertiary">
-                    Need more? ${tier.overagePerSession} per overage session.
+                    Need more? ${tier.overage.sessionPriceUsd} per overage session.
                   </p>
                 </div>
 
                 <ul className="mt-6 space-y-2.5 border-t border-ink-border/40 pt-5">
                   {FEATURE_ROWS.map((row) => {
-                    const included = tier.features[row.feature];
+                    const included = tierHasFeature(tierId, row.feature);
                     return (
                       <li key={row.feature} className="flex items-start gap-2.5">
                         <span

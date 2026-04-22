@@ -9,7 +9,7 @@ export default async function SettingsPage() {
   const profile = await getProfile();
   const tier = await getUserTier();
 
-  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.cycle;
+  const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.free;
   const inTrial = tier?.trial_end && new Date(tier.trial_end).getTime() > Date.now();
 
   return (
@@ -34,10 +34,10 @@ export default async function SettingsPage() {
 
         {/* Subscription */}
         <Panel title="Subscription">
-          <Row label="Plan" value={tierConfig.name} />
+          <Row label="Plan" value={tierConfig.label} />
           <Row
             label="Price"
-            value={`${formatPrice(tierConfig.price)} / ${tierConfig.cycleLabel.toLowerCase()}`}
+            value={`${formatPrice(tierConfig.priceUsd)} / ${tierConfig.billing.label.toLowerCase()}`}
           />
           {tier && (
             <Row
@@ -62,7 +62,7 @@ export default async function SettingsPage() {
           )}
 
           <div className="mt-5 border-t border-ink-border/40 pt-5">
-            <BillingActions tier={tier?.effective_tier ?? "cycle"} hasSubscription={!!tier} />
+            <BillingActions tier={tier?.effective_tier ?? "basic"} hasSubscription={!!tier} />
           </div>
         </Panel>
 

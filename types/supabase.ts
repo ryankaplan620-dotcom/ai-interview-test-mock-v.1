@@ -6,7 +6,7 @@
  *   npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > types/supabase.ts
  */
 
-export type SubscriptionTier = "cycle" | "pro" | "max";
+export type SubscriptionTier = "free" | "basic" | "pro" | "max";
 
 export type SubscriptionStatus =
   | "trialing"

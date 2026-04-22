@@ -559,7 +559,7 @@ async function main() {
       stripe_customer_id: "cus_b",
       stripe_subscription_id: "sub_b_1",
       stripe_price_id: "price_cycle",
-      tier: "cycle",
+      tier: "basic",
       status: "active",
       cycle_start: cycleStart.toISOString(),
       cycle_end: cycleEnd.toISOString(),

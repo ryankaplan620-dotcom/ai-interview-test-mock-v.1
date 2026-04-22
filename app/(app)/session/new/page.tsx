@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import { requireUser, getUserTier } from "@/lib/auth/server";
 import { PERSONAS } from "@/lib/personas";
 import { resolveRuntimeFeatures } from "@/lib/gates/session";
-import { tierHasFeature } from "@/lib/tiers";
+import { tierHasFeature, type TierKey } from "@/lib/tiers";
 import { SessionPicker, type PickerPersona } from "./picker";
 
 export default async function NewSessionPage() {
@@ -23,7 +23,7 @@ export default async function NewSessionPage() {
     defaultDurationMinutes: p.defaultDurationMinutes,
   }));
 
-  const effectiveTier = tier?.effective_tier ?? "cycle";
+  const effectiveTier = tier?.effective_tier ?? "basic";
   const runtime = resolveRuntimeFeatures(effectiveTier);
 
   return (
