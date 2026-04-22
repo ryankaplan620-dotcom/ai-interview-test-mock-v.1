@@ -76,7 +76,11 @@ export const config = {
      * - _next/image
      * - favicon.ico
      * - api/stripe/webhook (Stripe webhooks don't have user sessions)
+     * - api/tavus/webhook  (Tavus webhooks don't have user sessions; the
+     *     middleware's auth-refresh reads request.body, which breaks webhook
+     *     payload handling in the route. Must be excluded for the same reason
+     *     as Stripe's webhook.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|api/stripe/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/stripe/webhook|api/tavus/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
   ],
 };

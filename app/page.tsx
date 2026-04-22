@@ -10,7 +10,6 @@ import { Interviewers } from "@/components/landing/Interviewers";
 import { Stats } from "@/components/landing/Stats";
 import { PricingPreview } from "@/components/landing/PricingPreview";
 import { FAQ } from "@/components/landing/FAQ";
-import { Waitlist } from "@/components/landing/Waitlist";
 import { ClosingCTA } from "@/components/landing/ClosingCTA";
 import { Footer } from "@/components/landing/Footer";
 
@@ -57,7 +56,6 @@ export default function LandingPage() {
         <SectionDivider />
         <PricingPreview />
         <FAQ />
-        <Waitlist />
         <ClosingCTA />
         <Footer />
       </div>

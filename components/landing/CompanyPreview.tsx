@@ -54,7 +54,7 @@ export function CompanyPreview() {
 
         <ScrollReveal className="mt-8">
           <a
-            href="#waitlist"
+            href="/signup"
             className="inline-flex items-center font-sans text-[15px] font-medium text-accent transition-colors hover:text-accent-highlight"
           >
             Explore all companies &rarr;

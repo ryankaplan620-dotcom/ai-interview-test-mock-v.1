@@ -150,8 +150,8 @@ export default function SignupPage() {
 
           <p className="text-center font-sans text-[11px] text-text-tertiary">
             By continuing, you agree to our{" "}
-            <Link href="/terms" className="underline hover:text-accent">Terms</Link>{" "}and{" "}
-            <Link href="/privacy" className="underline hover:text-accent">Privacy Policy</Link>.
+            <Link href="/legal/terms" className="underline hover:text-accent">Terms</Link>{" "}and{" "}
+            <Link href="/legal/privacy" className="underline hover:text-accent">Privacy Policy</Link>.
           </p>
         </form>
 

@@ -27,7 +27,7 @@ export function ClosingCTA() {
 
           <div className="mt-10">
             <Link
-              href="#waitlist"
+              href="/signup"
               className="btn-shimmer inline-flex h-[52px] items-center rounded-full bg-cta-gradient px-8 font-sans text-[15px] font-semibold tracking-body text-text-onAccent transition-all duration-200 ease-brand hover:shadow-accent-glow-lg"
             >
               Start free &rarr;

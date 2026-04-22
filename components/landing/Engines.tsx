@@ -82,7 +82,7 @@ export function Engines() {
                 </p>
 
                 <a
-                  href="#waitlist"
+                  href="/signup"
                   className="mt-6 inline-flex items-center font-sans text-[15px] font-medium text-accent transition-opacity hover:opacity-80"
                 >
                   Learn more &rarr;
