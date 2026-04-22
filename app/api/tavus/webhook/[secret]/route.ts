@@ -23,15 +23,44 @@ export const maxDuration = 30;
  *
  *   - system.replica_joined: informational, no action.
  *
- * Security: Tavus webhooks aren't cryptographically signed by default. We
- * verify by conversation_id → session lookup; an attacker would need to guess
- * a valid conversation_id to inject events. For stronger guarantees in the
- * future, we could enable a shared-secret header check.
+ * Security model (2-layer):
+ *   1. URL-path shared secret. This endpoint is mounted at
+ *      /api/tavus/webhook/[secret]. Tavus-side we pass the secret as the last
+ *      path segment of callback_url. Callers without the secret get a 404.
+ *      Tavus does not currently support custom webhook headers (verified
+ *      against their docs), so embedding the secret in the URL is the
+ *      standard workaround. The URL is TLS-encrypted end-to-end.
+ *   2. conversation_id → session lookup. Even with a valid secret, the
+ *      event must reference a conversation_id we know about. If it doesn't,
+ *      we ack-silently (no session mutation) so the webhook doesn't become
+ *      a side-channel for probing our DB.
  *
  * Uses the service-role Supabase client (not user-scoped) because webhooks
  * don't carry user auth — the conversation_id → session.user_id mapping
  * is the authorization proof.
  */
+
+/**
+ * Constant-time string comparison. Returns false without early-return even if
+ * the lengths differ, to prevent length-oracle timing attacks.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    // Still consume time even on length mismatch
+    let acc = 1;
+    const len = Math.max(a.length, b.length);
+    for (let i = 0; i < len; i++) {
+      acc |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+    }
+    void acc;
+    return false;
+  }
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
 
 interface TavusWebhookPayload {
   event_type: string;
@@ -47,7 +76,32 @@ interface TavusWebhookPayload {
   };
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, { params }: { params: { secret: string } }) {
+  // Secret-in-URL verification. Tavus does not support custom webhook headers,
+  // so we embed a shared secret in the callback URL path — known only to us
+  // (stored in env) and Tavus (stored in their conversation record on our
+  // behalf). Anyone without the secret is ignored with a 404-like response.
+  //
+  // Rotation: changing TAVUS_WEBHOOK_SECRET only affects newly-created
+  // conversations. Active conversations continue to post to the old URL until
+  // they shut down — this is fine since conversations are short-lived.
+  const expectedSecret = process.env.TAVUS_WEBHOOK_SECRET;
+  if (!expectedSecret) {
+    console.error("[tavus.webhook] TAVUS_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "not_configured" }, { status: 503 });
+  }
+
+  // Constant-time comparison to prevent timing attacks, even though URL-embedded
+  // secrets are observable over TLS-terminated proxies. Belt and braces.
+  if (!timingSafeEqual(params.secret, expectedSecret)) {
+    // Return 404-shaped response so scanners get no signal this is a webhook
+    // endpoint. Don't log full secret candidate — only a length hint.
+    console.warn(
+      `[tavus.webhook] bad secret (len=${params.secret.length})`,
+    );
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
   let payload: TavusWebhookPayload;
   try {
     payload = (await req.json()) as TavusWebhookPayload;

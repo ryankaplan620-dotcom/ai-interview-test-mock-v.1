@@ -121,7 +121,16 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   });
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const callbackUrl = `${baseUrl}/api/tavus/webhook`;
+  const webhookSecret = process.env.TAVUS_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("[tavus.conversation] TAVUS_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "webhook_not_configured" }, { status: 503 });
+  }
+  // Secret is embedded in the callback URL path. Tavus doesn't support custom
+  // webhook headers, so this is the standard workaround. The URL is TLS-
+  // encrypted end-to-end. See app/api/tavus/webhook/[secret]/route.ts for
+  // the verification side.
+  const callbackUrl = `${baseUrl}/api/tavus/webhook/${encodeURIComponent(webhookSecret)}`;
 
   let tavusRes;
   try {
