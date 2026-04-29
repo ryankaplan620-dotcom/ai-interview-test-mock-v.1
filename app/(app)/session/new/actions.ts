@@ -145,19 +145,25 @@ export async function startSession(
   const persona = PERSONAS[req.personaId];
   const durationSeconds = persona.defaultDurationMinutes * 60;
 
+  // Insert payload must match the ACTUAL sessions table columns.
+  // The table has legacy columns (session_type, persona_id, company, role)
+  // alongside newer ones (persona, target_firm, target_role, mode, is_panel).
+  // We populate both to ensure compatibility.
   const insertPayload = {
     user_id: user.id,
-    persona: req.personaId as PersonaId,
-    interview_type: req.interviewType as InterviewType,
+    persona: req.personaId,
+    persona_id: req.personaId,
+    interview_type: req.interviewType,
+    session_type: req.interviewType,
     mode: req.mode,
     is_panel: req.isPanel,
     target_firm: req.targetFirm || null,
     target_role: req.targetRole || null,
+    company: req.targetFirm || null,
+    role: req.targetRole || null,
     duration_seconds: durationSeconds,
-    status: "scheduled" as const,
-    // If the user accepted overage, mark it here so the webhook knows to
-    // charge them. Default false for within-quota sessions.
-    is_overage: req.overageAccepted,
+    status: "active",
+    is_overage: req.overageAccepted ?? false,
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
