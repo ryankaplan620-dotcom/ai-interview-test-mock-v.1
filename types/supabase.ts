@@ -282,6 +282,44 @@ export interface SessionQaFeedback {
 }
 
 // ==========================================================================
+// Phase Analytics — Session analytics (migration 0010)
+// ==========================================================================
+
+export interface EmotionalState {
+  emotion: string;
+  intensity: number;
+  timestamp_seconds?: number;
+}
+
+export interface ToneShift {
+  from: string;
+  to: string;
+  at_seconds: number;
+}
+
+export interface KeyDiscussionPoint {
+  topic: string;
+  sentiment: string;
+  details?: string;
+}
+
+export interface SessionAnalytics {
+  id: string;
+  session_id: string;
+  emotional_states: EmotionalState[] | null;
+  tone_shifts: ToneShift[] | null;
+  key_discussion_points: KeyDiscussionPoint[] | null;
+  overall_sentiment: string | null;
+  confidence_level: number | null;
+  engagement_score: number | null;
+  recording_url: string | null;
+  recording_s3_key: string | null;
+  raw_perception_payload: unknown;
+  created_at: string;
+  updated_at: string;
+}
+
+// ==========================================================================
 // Supabase generated-style Database type — used by @supabase/ssr
 // ==========================================================================
 
@@ -372,6 +410,12 @@ export type Database = {
           summary: string;
         };
         Update: Partial<SessionQaFeedback>;
+        Relationships: [];
+      };
+      session_analytics: {
+        Row: SessionAnalytics;
+        Insert: Partial<SessionAnalytics> & { session_id: string };
+        Update: Partial<SessionAnalytics>;
         Relationships: [];
       };
       waitlist: {

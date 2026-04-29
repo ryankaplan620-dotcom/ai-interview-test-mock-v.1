@@ -45,12 +45,22 @@ export function SessionRow({ session }: { session: SessionRowData }) {
         </p>
       </div>
 
-      {/* Right: score badge OR status pill */}
-      <div className="flex-shrink-0">
+      {/* Right: score badge OR status pill, and details link */}
+      <div className="flex flex-shrink-0 items-center gap-3">
         {session.status === "completed" && session.overallScore !== null ? (
           <ScoreBadge score={session.overallScore} />
         ) : (
           <StatusPill status={session.status} />
+        )}
+        {session.status === "completed" && (
+          <Link
+            href={`/session/${session.id}/details`}
+            onClick={(e) => e.stopPropagation()}
+            className="font-mono text-[10px] tracking-label text-text-tertiary transition-colors hover:text-accent"
+            title="View session details"
+          >
+            Details
+          </Link>
         )}
       </div>
     </Link>

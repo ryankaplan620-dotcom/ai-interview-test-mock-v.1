@@ -171,7 +171,14 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   });
 }
 
-export const POST = withRateLimit(RATE_LIMITS.tavus_conversation, handler);
+export async function POST(req: NextRequest) {
+  const { getUser } = await import("@/lib/auth/server");
+  const user = await getUser();
+  if (!user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  return handler(req, { user: { id: user.id } });
+}
 
 // --------------------------------------------------------------------------
 // Context builder (unchanged from Phase I.2)

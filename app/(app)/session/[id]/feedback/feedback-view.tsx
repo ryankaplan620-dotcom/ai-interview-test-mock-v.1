@@ -128,8 +128,18 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
           so we don't need a conditional wrapper here. */}
       <QaFeedbackPanel sessionId={sessionMeta.id} />
 
+      {/* Full analytics link */}
+      <section className="mt-10 text-center">
+        <Link
+          href={`/session/${sessionMeta.id}/details`}
+          className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
+        >
+          View full analytics →
+        </Link>
+      </section>
+
       {/* CTA */}
-      <section className="mt-14 flex flex-col items-start gap-3 border-t border-ink-border pt-10 sm:flex-row sm:items-center sm:justify-between">
+      <section className="mt-10 flex flex-col items-start gap-3 border-t border-ink-border pt-10 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-sans text-[14px] text-text-secondary">
           Ready to run it back?
         </p>

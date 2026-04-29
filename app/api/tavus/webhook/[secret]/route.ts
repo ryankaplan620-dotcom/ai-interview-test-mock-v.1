@@ -73,6 +73,16 @@ interface TavusWebhookPayload {
     shutdown_reason?: string;
     transcript?: Array<{ role: string; content: string }>;
     s3_key?: string;
+    recording_url?: string;
+    // Perception analysis fields
+    perception_analysis?: {
+      emotional_states?: Array<{ emotion: string; intensity: number; timestamp_seconds?: number }>;
+      tone_shifts?: Array<{ from: string; to: string; at_seconds: number }>;
+      key_discussion_points?: Array<{ topic: string; sentiment: string; details?: string }>;
+      overall_sentiment?: string;
+      confidence_level?: number;
+      engagement_score?: number;
+    };
   };
 }
 
@@ -163,10 +173,15 @@ export async function POST(req: NextRequest, { params }: { params: { secret: str
       break;
     }
 
-    case "application.recording_ready":
-    case "application.perception_analysis":
-      // Not wired up in Phase G.1
+    case "application.recording_ready": {
+      await handleRecordingReady(supabase, session, payload);
       break;
+    }
+
+    case "application.perception_analysis": {
+      await handlePerceptionAnalysis(supabase, session, payload);
+      break;
+    }
 
     default:
       console.log(`[tavus.webhook] unhandled event: ${payload.event_type}`);
@@ -305,4 +320,66 @@ async function handleTranscription(
   }
 
   console.log(`[tavus.webhook] persisted ${turns.length} turns for session ${session.id}`);
+}
+
+// --------------------------------------------------------------------------
+
+async function handlePerceptionAnalysis(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  session: { id: string },
+  payload: TavusWebhookPayload,
+): Promise<void> {
+  const perception = payload.properties.perception_analysis;
+  if (!perception) return;
+
+  await supabase.from("session_analytics").upsert(
+    {
+      session_id: session.id,
+      emotional_states: perception.emotional_states ?? null,
+      tone_shifts: perception.tone_shifts ?? null,
+      key_discussion_points: perception.key_discussion_points ?? null,
+      overall_sentiment: perception.overall_sentiment ?? null,
+      confidence_level: perception.confidence_level ?? null,
+      engagement_score: perception.engagement_score ?? null,
+      raw_perception_payload: perception,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "session_id" },
+  );
+
+  console.log(`[tavus.webhook] persisted perception analytics for session ${session.id}`);
+}
+
+// --------------------------------------------------------------------------
+
+async function handleRecordingReady(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  session: { id: string },
+  payload: TavusWebhookPayload,
+): Promise<void> {
+  const s3Key = payload.properties.s3_key;
+  const recordingUrl = payload.properties.recording_url;
+  if (!s3Key && !recordingUrl) return;
+
+  await supabase.from("session_analytics").upsert(
+    {
+      session_id: session.id,
+      recording_url: recordingUrl ?? null,
+      recording_s3_key: s3Key ?? null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "session_id" },
+  );
+
+  // Also update the sessions table recording_url for backward compat
+  if (recordingUrl) {
+    await supabase
+      .from("sessions")
+      .update({ recording_url: recordingUrl })
+      .eq("id", session.id);
+  }
+
+  console.log(`[tavus.webhook] persisted recording for session ${session.id}`);
 }
