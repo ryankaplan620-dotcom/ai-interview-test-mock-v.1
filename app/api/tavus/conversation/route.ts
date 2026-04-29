@@ -50,12 +50,16 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
 
   const supabase = createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: sessionRaw } = await (supabase.from("sessions") as any)
+  const { data: sessionRaw, error: sessionErr } = await (supabase.from("sessions") as any)
     .select(
       "id, user_id, persona, interview_type, mode, target_firm, target_role, duration_seconds, status, tavus_conversation_id, tavus_conversation_url",
     )
     .eq("id", parsed.data.sessionId)
     .single();
+
+  if (sessionErr) {
+    console.error("[tavus.conversation] session fetch error:", sessionErr);
+  }
 
   const session = sessionRaw as
     | {

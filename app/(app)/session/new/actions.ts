@@ -167,6 +167,8 @@ export async function startSession(
     .single();
 
   if (insertError || !inserted) {
+    console.error("[startSession] insert failed:", insertError);
+    console.error("[startSession] payload was:", JSON.stringify(insertPayload, null, 2));
     return {
       ok: false,
       error: insertError?.message ?? "Couldn't create the session. Try again.",
@@ -182,11 +184,18 @@ export async function startSession(
     ? "overages_used_this_cycle"
     : "sessions_used_this_cycle";
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase.rpc as any)("increment_subscription_counter", {
-    p_user_id: user.id,
-    p_field: counterField,
-  }).throwOnError();
+  // In dev mode, skip the counter increment (no subscription row exists)
+  if (!isDev) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.rpc as any)("increment_subscription_counter", {
+        p_user_id: user.id,
+        p_field: counterField,
+      });
+    } catch (err) {
+      console.warn("[startSession] counter increment failed (non-fatal):", err);
+    }
+  }
 
   // ---- 8. Redirect into the room
   redirect(`/session/${(inserted as { id: string }).id}`);
