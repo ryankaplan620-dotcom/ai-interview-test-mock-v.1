@@ -49,7 +49,7 @@ const PERSONAS: PersonaBundle[] = [
   { id: "priya", name: "Priya Patel",    base: PRIYA_BASE_PROMPT,    easy: PRIYA_EASY_OVERLAY,    hard: PRIYA_HARD_OVERLAY,    opening: PRIYA_OPENING },
   { id: "marcus", name: "Marcus Hale",   base: MARCUS_BASE_PROMPT,   easy: MARCUS_EASY_OVERLAY,   hard: MARCUS_HARD_OVERLAY,   opening: MARCUS_OPENING },
   { id: "sarah", name: "Sarah Chen",     base: SARAH_BASE_PROMPT,    easy: SARAH_EASY_OVERLAY,    hard: SARAH_HARD_OVERLAY,    opening: SARAH_OPENING },
-  { id: "david", name: "David Reed",     base: DAVID_BASE_PROMPT,    easy: DAVID_EASY_OVERLAY,    hard: DAVID_HARD_OVERLAY,    opening: DAVID_OPENING },
+  { id: "david", name: "Danielle Carter",     base: DAVID_BASE_PROMPT,    easy: DAVID_EASY_OVERLAY,    hard: DAVID_HARD_OVERLAY,    opening: DAVID_OPENING },
   { id: "jennifer", name: "Jennifer Ortiz", base: JENNIFER_BASE_PROMPT, easy: JENNIFER_EASY_OVERLAY, hard: JENNIFER_HARD_OVERLAY, opening: JENNIFER_OPENING },
 ];
 

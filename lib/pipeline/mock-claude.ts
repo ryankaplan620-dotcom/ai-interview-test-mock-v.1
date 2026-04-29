@@ -29,7 +29,7 @@ const OPENINGS: Record<PersonaId, (firstName: string) => string> = {
   sarah: (n) =>
     `Hey${n ? `, ${n}` : ""}, I'm Sarah. Great to meet you. Before we get into the problem, tell me a little about yourself and what you've been working on lately.`,
   david: () =>
-    `David Reed. Good to meet you. Let's jump in. Why PE?`,
+    `Danielle Carter. Good to meet you. Let's jump in. Why PE?`,
   jennifer: (n) =>
     `Hey${n ? `, ${n}` : ""}, I'm Jen — thanks for making time today. Before we jump into a case, tell me about a product you've used recently that you think is poorly designed, and what you'd change about it.`,
 };

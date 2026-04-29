@@ -22,7 +22,7 @@ const personas = [
     initial: "S",
   },
   {
-    name: "David Reed",
+    name: "Danielle Carter",
     role: "VP, OPERATIONS",
     tone: "Experienced. Calm. Asks the question behind the question.",
     gradient: "linear-gradient(135deg, #2a1f1f, #0D1117)",

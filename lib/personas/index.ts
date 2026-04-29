@@ -136,7 +136,7 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
   },
   david: {
     id: "david",
-    name: "David Reed",
+    name: "Danielle Carter",
     firstName: "David",
     firm: "Bain Capital",
     title: "Partner",

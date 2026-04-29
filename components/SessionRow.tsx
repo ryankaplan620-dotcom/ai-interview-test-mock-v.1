@@ -159,7 +159,7 @@ function personaLabel(p: PersonaId): string {
     priya: "Priya Patel",
     marcus: "Marcus Hale",
     sarah: "Sarah Chen",
-    david: "David Reed",
+    david: "Danielle Carter",
     jennifer: "Jennifer Ortiz",
   };
   return map[p] ?? p;
