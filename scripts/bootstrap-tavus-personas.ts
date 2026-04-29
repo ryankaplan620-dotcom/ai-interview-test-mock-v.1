@@ -1,8 +1,8 @@
 /**
  * Tavus persona bootstrap.
  *
- * One-time setup: creates the 5 Folio personas (Priya, Marcus, Sarah, David,
- * Jennifer) on Tavus using their system prompts from lib/personas. Prints the
+ * One-time setup: creates the 3 Folio personas (Priya, Marcus, Sarah)
+ * on Tavus using their system prompts from lib/personas. Prints the
  * resulting persona IDs as env var assignments you can paste into .env.local.
  *
  * Usage:
@@ -78,7 +78,7 @@ async function main() {
   console.log("Creating Folio personas on Tavus...\n");
 
   const ids: Record<PersonaId, string> = {} as Record<PersonaId, string>;
-  const personaIds: PersonaId[] = ["priya", "marcus", "sarah", "david", "jennifer"];
+  const personaIds: PersonaId[] = ["priya", "marcus", "sarah"];
 
   for (const pid of personaIds) {
     try {

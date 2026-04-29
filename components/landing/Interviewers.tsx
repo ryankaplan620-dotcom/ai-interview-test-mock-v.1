@@ -21,20 +21,6 @@ const personas = [
     gradient: "linear-gradient(135deg, #1a2942, #0D1117)",
     initial: "S",
   },
-  {
-    name: "Danielle Carter",
-    role: "VP, OPERATIONS",
-    tone: "Experienced. Calm. Asks the question behind the question.",
-    gradient: "linear-gradient(135deg, #2a1f1f, #0D1117)",
-    initial: "D",
-  },
-  {
-    name: "Jennifer Park",
-    role: "DIRECTOR, TALENT",
-    tone: "Fast-paced. Efficient. Values clarity over complexity.",
-    gradient: "linear-gradient(135deg, #1f2a24, #0D1117)",
-    initial: "J",
-  },
 ];
 
 export function Interviewers() {
@@ -54,18 +40,18 @@ export function Interviewers() {
           </div>
 
           <h2 className="mt-6 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[44px]">
-            Five personalities. One for every moment.
+            Three personalities. One for every moment.
           </h2>
 
           <p className="mt-4 max-w-[520px] font-sans text-[16px] text-text-secondary">
             Each interviewer brings a different energy, a different style of pressure.
-            Practice with all five to build range.
+            Practice with all three to build range.
           </p>
         </ScrollReveal>
 
         {/* Card grid */}
         <div className="relative mt-16">
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible scrollbar-hide">
+          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible scrollbar-hide">
             {personas.map((persona, i) => (
               <ScrollReveal key={persona.name} delay={i * 100}>
                 <div className={`min-w-[220px] snap-start rounded-2xl border border-ink-border bg-ink-surface overflow-hidden transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-accent/30 hover:shadow-accent-glow ${i === 0 ? "ml-6 md:ml-0" : ""}`}>

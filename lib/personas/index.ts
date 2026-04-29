@@ -37,25 +37,10 @@ import {
   SARAH_HARD_OVERLAY,
   SARAH_OPENING,
 } from "./prompts/sarah";
-import {
-  DAVID_BASE_PROMPT,
-  DAVID_EASY_OVERLAY,
-  DAVID_HARD_OVERLAY,
-  DAVID_OPENING,
-} from "./prompts/david";
-import {
-  JENNIFER_BASE_PROMPT,
-  JENNIFER_EASY_OVERLAY,
-  JENNIFER_HARD_OVERLAY,
-  JENNIFER_OPENING,
-} from "./prompts/jennifer";
-
 import { BEHAVIORAL_BANK } from "./questions/behavioral";
 import { CONSULTING_CASE_BANK } from "./questions/consulting-case";
 import { BANKING_BANK } from "./questions/banking";
 import { TECH_BANK } from "./questions/technical";
-import { PE_FINANCE_BANK } from "./questions/pe-finance";
-import { PRODUCT_SENSE_BANK } from "./questions/product-sense";
 
 // --------------------------------------------------------------------------
 // Persona static registry
@@ -134,54 +119,6 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     hardModeOverlay: SARAH_HARD_OVERLAY,
     openingInstruction: SARAH_OPENING,
   },
-  david: {
-    id: "david",
-    name: "Danielle Carter",
-    firstName: "David",
-    firm: "Bain Capital",
-    title: "Partner",
-    tagline: "PE deal walkthroughs, thesis pitches, LBO conceptuals.",
-    supportedInterviewTypes: ["behavioral", "technical"],
-    defaultDurationMinutes: 30,
-    env: {
-      tavusReplicaId: "TAVUS_REPLICA_ID_DAVID",
-      elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_DAVID",
-    },
-    voiceSettings: {
-      stability: 0.65,
-      similarityBoost: 0.8,
-      style: 0.15,
-      speakerBoost: true,
-    },
-    basePrompt: DAVID_BASE_PROMPT,
-    easyModeOverlay: DAVID_EASY_OVERLAY,
-    hardModeOverlay: DAVID_HARD_OVERLAY,
-    openingInstruction: DAVID_OPENING,
-  },
-  jennifer: {
-    id: "jennifer",
-    name: "Jennifer Ortiz",
-    firstName: "Jen",
-    firm: "Stripe",
-    title: "Product Lead",
-    tagline: "Product sense cases and strategy conversations.",
-    supportedInterviewTypes: ["behavioral", "product_sense"],
-    defaultDurationMinutes: 45,
-    env: {
-      tavusReplicaId: "TAVUS_REPLICA_ID_JENNIFER",
-      elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_JENNIFER",
-    },
-    voiceSettings: {
-      stability: 0.5,
-      similarityBoost: 0.75,
-      style: 0.45,
-      speakerBoost: true,
-    },
-    basePrompt: JENNIFER_BASE_PROMPT,
-    easyModeOverlay: JENNIFER_EASY_OVERLAY,
-    hardModeOverlay: JENNIFER_HARD_OVERLAY,
-    openingInstruction: JENNIFER_OPENING,
-  },
 };
 
 // --------------------------------------------------------------------------
@@ -215,16 +152,6 @@ export function getQuestionBanksFor(
         filterByCategory(TECH_BANK, "tech_coding"),
         filterByCategory(TECH_BANK, "tech_system_design"),
       );
-    if (personaId === "david")
-      banks.push(filterByCategory(PE_FINANCE_BANK, "pe_technical"), filterByCategory(PE_FINANCE_BANK, "pe_fit"));
-  }
-
-  if (interviewType === "product_sense") {
-    if (personaId === "jennifer")
-      banks.push(
-        filterByCategory(PRODUCT_SENSE_BANK, "product_sense"),
-        filterByCategory(PRODUCT_SENSE_BANK, "product_strategy"),
-      );
   }
 
   // Superday + hard_mode draw from everything the persona supports
@@ -233,8 +160,6 @@ export function getQuestionBanksFor(
     if (personaId === "priya") banks.push(CONSULTING_CASE_BANK);
     if (personaId === "marcus") banks.push(BANKING_BANK);
     if (personaId === "sarah") banks.push(TECH_BANK);
-    if (personaId === "david") banks.push(PE_FINANCE_BANK);
-    if (personaId === "jennifer") banks.push(PRODUCT_SENSE_BANK);
   }
 
   return banks.filter((b) => b.length > 0);

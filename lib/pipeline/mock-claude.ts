@@ -28,10 +28,6 @@ const OPENINGS: Record<PersonaId, (firstName: string) => string> = {
     `Hi, I'm Marcus. Walk me through your story. Ninety seconds.`,
   sarah: (n) =>
     `Hey${n ? `, ${n}` : ""}, I'm Sarah. Great to meet you. Before we get into the problem, tell me a little about yourself and what you've been working on lately.`,
-  david: () =>
-    `Danielle Carter. Good to meet you. Let's jump in. Why PE?`,
-  jennifer: (n) =>
-    `Hey${n ? `, ${n}` : ""}, I'm Jen — thanks for making time today. Before we jump into a case, tell me about a product you've used recently that you think is poorly designed, and what you'd change about it.`,
 };
 
 // Per-persona, per-turn response bank. Mocks rotate through these after the opening.
@@ -63,32 +59,12 @@ const FOLLOWUPS: Record<PersonaId, string[]> = {
     "How would you test this? What cases would you write?",
     "Last five minutes are yours — what do you want to ask me about the team?",
   ],
-  david: [
-    "Alright. Walk me through a deal you worked on as an analyst.",
-    "How did the sponsor think about the purchase price? Was it reasonable?",
-    "What was the value creation thesis? What would kill it?",
-    "Pitch me a deal. A company you've been following that you'd take private. Give me the thesis in under two minutes.",
-    "What's the bear case? What do you have to believe for this to work?",
-    "Walk me through a conceptual LBO. Ten times EBITDA, fifty percent equity, five-year hold, eight percent EBITDA growth. Rough IRR?",
-    "One question from you. Then we're done.",
-  ],
-  jennifer: [
-    "Hm, interesting. Who's the user you're most thinking about when you say that?",
-    "Okay, let me give you a case. How would you improve Google Maps for long-haul truck drivers? Take a minute to structure before you dive in.",
-    "Good. Who specifically — what's actually different about their experience?",
-    "What metric tells you this is working? And what's the risk in using that metric alone?",
-    "Nice. What's the downside of this feature for the broader user base?",
-    "One more — zoom out. If you had one month to move one number at a company like this, what number and how?",
-    "Last few minutes — what do you want to ask me?",
-  ],
 };
 
 const WRAPUP: Record<PersonaId, string> = {
   priya: "Thanks for taking the time. You'll hear from recruiting in the next few days.",
   marcus: "Alright. That's our time. Thanks.",
   sarah: "Thanks so much for chatting today. The team will be in touch.",
-  david: "Good. We're done. Thanks.",
-  jennifer: "Really enjoyed this — thanks for the conversation. You'll hear from us soon.",
 };
 
 // Very lightweight acknowledgments the mock can sprinkle in for realism

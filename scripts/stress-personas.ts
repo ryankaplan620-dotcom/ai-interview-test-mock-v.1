@@ -33,8 +33,6 @@
 import { PRIYA_BASE_PROMPT, PRIYA_EASY_OVERLAY, PRIYA_HARD_OVERLAY, PRIYA_OPENING } from "../lib/personas/prompts/priya";
 import { MARCUS_BASE_PROMPT, MARCUS_EASY_OVERLAY, MARCUS_HARD_OVERLAY, MARCUS_OPENING } from "../lib/personas/prompts/marcus";
 import { SARAH_BASE_PROMPT, SARAH_EASY_OVERLAY, SARAH_HARD_OVERLAY, SARAH_OPENING } from "../lib/personas/prompts/sarah";
-import { DAVID_BASE_PROMPT, DAVID_EASY_OVERLAY, DAVID_HARD_OVERLAY, DAVID_OPENING } from "../lib/personas/prompts/david";
-import { JENNIFER_BASE_PROMPT, JENNIFER_EASY_OVERLAY, JENNIFER_HARD_OVERLAY, JENNIFER_OPENING } from "../lib/personas/prompts/jennifer";
 
 interface PersonaBundle {
   id: string;
@@ -49,8 +47,6 @@ const PERSONAS: PersonaBundle[] = [
   { id: "priya", name: "Priya Patel",    base: PRIYA_BASE_PROMPT,    easy: PRIYA_EASY_OVERLAY,    hard: PRIYA_HARD_OVERLAY,    opening: PRIYA_OPENING },
   { id: "marcus", name: "Marcus Hale",   base: MARCUS_BASE_PROMPT,   easy: MARCUS_EASY_OVERLAY,   hard: MARCUS_HARD_OVERLAY,   opening: MARCUS_OPENING },
   { id: "sarah", name: "Sarah Chen",     base: SARAH_BASE_PROMPT,    easy: SARAH_EASY_OVERLAY,    hard: SARAH_HARD_OVERLAY,    opening: SARAH_OPENING },
-  { id: "david", name: "Danielle Carter",     base: DAVID_BASE_PROMPT,    easy: DAVID_EASY_OVERLAY,    hard: DAVID_HARD_OVERLAY,    opening: DAVID_OPENING },
-  { id: "jennifer", name: "Jennifer Ortiz", base: JENNIFER_BASE_PROMPT, easy: JENNIFER_EASY_OVERLAY, hard: JENNIFER_HARD_OVERLAY, opening: JENNIFER_OPENING },
 ];
 
 // --------------------------------------------------------------------------
@@ -113,7 +109,7 @@ for (const p of PERSONAS) {
   check(p.name, "Contains abuse-handling close", hasAbuseClose);
 
   // --- 7. Evaluation list: exactly 4 numbered items under "What you are evaluating" ---
-  //    Sarah, Priya, Marcus, David, Jennifer all use a 4-item list. Consistency
+  //    Sarah, Priya, Marcus all use a 4-item list. Consistency
   //    matters because the feedback rubric maps to these 4 dimensions.
   const evalSection = p.base.match(/## What you are evaluating\n([\s\S]*?)(?=\n## )/);
   if (evalSection) {

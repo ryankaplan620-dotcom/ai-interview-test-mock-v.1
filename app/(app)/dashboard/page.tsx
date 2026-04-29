@@ -243,8 +243,6 @@ export default async function DashboardPage() {
               <PersonaRow name="Priya Patel" role="McKinsey · Consulting" />
               <PersonaRow name="Marcus Hale" role="Goldman Sachs · Banking" />
               <PersonaRow name="Sarah Chen" role="Meta · Tech" />
-              <PersonaRow name="Danielle Carter" role="VP, Operations" />
-              <PersonaRow name="Jennifer Ortiz" role="Stripe · Product" />
             </ul>
           </div>
 
