@@ -112,6 +112,32 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
     personaId: session.persona,
   });
 
+  // Company Intelligence: fetch and inject company context
+  let companyIntelBlock = "";
+  if (session.target_firm) {
+    try {
+      const { fetchCompanyIntel } = await import("@/lib/intel/pipeline/fetch-company");
+      const { composePromptBlock } = await import("@/lib/intel/injector/compose-prompt-block");
+      const { incrementAccessCount } = await import("@/lib/intel/pipeline/cache");
+
+      const intel = await fetchCompanyIntel(session.target_firm, `session-${session.id}`, 3000);
+      companyIntelBlock = composePromptBlock(intel, {
+        interviewType: session.interview_type,
+        role: session.target_role ?? "",
+        level: "mid",
+        difficulty: session.mode,
+      });
+
+      // Track access for refresh prioritization
+      const normalized = session.target_firm.toLowerCase().trim().replace(/\s+/g, " ");
+      await incrementAccessCount(normalized).catch(() => {});
+
+      console.log(`[tavus.conversation] injected company intel for "${session.target_firm}" (${companyIntelBlock.length} chars)`);
+    } catch (err) {
+      console.warn("[tavus.conversation] company intel fetch failed (non-fatal):", err);
+    }
+  }
+
   const conversationalContext = buildSessionContext({
     personaName: persona.name,
     personaFirstName: persona.firstName,
@@ -122,6 +148,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
     targetRole: session.target_role,
     durationSeconds: session.duration_seconds,
     memories,
+    companyIntelBlock,
   });
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -198,6 +225,7 @@ function buildSessionContext(args: {
   targetRole: string | null;
   durationSeconds: number;
   memories: MemoryNote[];
+  companyIntelBlock?: string;
 }): string {
   const sections: string[] = [];
 
@@ -234,6 +262,11 @@ function buildSessionContext(args: {
   basePieces.push(`The session is scheduled for approximately ${minutes} minutes.`);
 
   sections.push(basePieces.join(" "));
+
+  // Company intelligence block (from Phase Intel)
+  if (args.companyIntelBlock) {
+    sections.push(args.companyIntelBlock);
+  }
 
   const memoryBlock = formatMemoriesForContext(args.memories, args.personaFirstName);
   if (memoryBlock) {
