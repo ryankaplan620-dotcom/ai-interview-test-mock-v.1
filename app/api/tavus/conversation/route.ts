@@ -106,11 +106,16 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const replicaId = getTavusReplicaId(session.persona);
   const persona = PERSONAS[session.persona];
 
-  // Phase I.1: memory pull
-  const memories: MemoryNote[] = await loadMemoriesForSession({
-    userId: session.user_id,
-    personaId: session.persona,
-  });
+  // Phase I.1: memory pull (non-fatal — requires service role key)
+  let memories: MemoryNote[] = [];
+  try {
+    memories = await loadMemoriesForSession({
+      userId: session.user_id,
+      personaId: session.persona,
+    });
+  } catch (err) {
+    console.warn("[tavus.conversation] memory load failed (non-fatal):", err instanceof Error ? err.message : err);
+  }
 
   // Company Intelligence: fetch and inject company context
   let companyIntelBlock = "";
