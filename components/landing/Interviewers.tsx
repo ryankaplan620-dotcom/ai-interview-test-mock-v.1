@@ -54,18 +54,18 @@ export function Interviewers() {
         <div className="mt-16 grid gap-6 md:grid-cols-3">
           {personas.map((persona, i) => (
             <ScrollReveal key={persona.name} delay={i * 100}>
-              <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
+              <div className="group overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 {/* Portrait area */}
                 <div className="relative aspect-[4/3] overflow-hidden">
                   {persona.image ? (
                     <img
                       src={persona.image}
                       alt={persona.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                     />
                   ) : (
                     <div
-                      className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${persona.gradient}`}
+                      className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${persona.gradient} group-hover:scale-[1.02] transition-transform duration-300`}
                     >
                       <span className="text-[80px] font-bold text-white/20">
                         {persona.initial}

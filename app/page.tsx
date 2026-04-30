@@ -16,7 +16,14 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function LandingPage() {
   return (
-    <main id="main-content" className="min-h-screen bg-white">
+    <main id="main-content" className="relative min-h-screen bg-white">
+      {/* Subtle grid pattern */}
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+        <div className="h-full w-full" style={{
+          backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+        }} />
+      </div>
       <Nav />
       <Hero />
       <LogoBar />

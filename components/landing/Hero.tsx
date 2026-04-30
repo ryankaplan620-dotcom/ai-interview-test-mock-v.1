@@ -20,8 +20,12 @@ const exchanges = [
 
 export function Hero() {
   return (
-    <section className="bg-white px-6 pt-16 pb-12 sm:px-8 sm:pt-24 sm:pb-16" aria-label="Hero">
-      <div className="mx-auto max-w-[1200px]">
+    <section className="relative overflow-hidden bg-gradient-hero noise-overlay min-h-screen flex items-center px-6 pt-16 pb-12 sm:px-8 sm:pt-24 sm:pb-16" aria-label="Hero">
+      {/* Decorative floating shapes */}
+      <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full bg-[#00DC82]/10 blur-3xl animate-float" aria-hidden />
+      <div className="absolute -bottom-40 -left-20 w-[300px] h-[300px] rounded-full bg-blue-400/5 blur-3xl animate-float [animation-delay:2s]" aria-hidden />
+
+      <div className="relative z-10 mx-auto max-w-[1200px]">
         {/* Centered copy */}
         <div className="mx-auto max-w-[800px] text-center">
           {/* Eyebrow */}
@@ -31,7 +35,9 @@ export function Hero() {
 
           {/* Massive heading */}
           <h1 className="mt-6 text-[clamp(40px,6vw,72px)] font-bold leading-[1.05] tracking-[-0.03em] text-gray-900">
-            Practice interviews that feel real. Get hired.
+            Practice interviews that feel{" "}
+            <span className="bg-gradient-to-r from-[#00DC82] to-emerald-400 bg-clip-text text-transparent">real</span>.
+            Get hired.
           </h1>
 
           {/* Sub-copy */}
@@ -63,7 +69,16 @@ export function Hero() {
 
         {/* Product preview mockup */}
         <div className="mt-16 sm:mt-20">
-          <HeroMockup />
+          <div
+            className="animate-float"
+            style={{ perspective: '1200px', transform: 'rotateX(2deg) rotateY(-1deg)' }}
+          >
+            <div className="relative shadow-[0_20px_60px_rgba(0,220,130,0.15)] rounded-2xl">
+              <HeroMockup />
+              {/* Glass reflection overlay */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent rounded-2xl pointer-events-none" aria-hidden />
+            </div>
+          </div>
         </div>
       </div>
     </section>

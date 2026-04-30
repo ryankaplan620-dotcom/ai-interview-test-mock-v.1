@@ -96,14 +96,14 @@ export function PricingPreview() {
           {tiers.map((tier, i) => (
             <ScrollReveal key={tier.name} delay={i * 100}>
               <div
-                className={`relative flex flex-col rounded-xl border p-6 ${
+                className={`relative flex flex-col rounded-xl border p-6 transition-all duration-300 ${
                   tier.highlighted
-                    ? "border-[#00DC82] bg-white shadow-lg order-first sm:order-none"
-                    : "border-gray-100 bg-white shadow-sm"
+                    ? "glass-card gradient-border animate-glow-pulse shadow-lg order-first sm:order-none"
+                    : "border-gray-100 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1"
                 }`}
               >
                 {tier.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#00DC82] px-3 py-1 font-mono text-[9px] font-semibold tracking-[0.15em] text-white">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#00DC82] to-emerald-400 px-3 py-1 font-mono text-[9px] font-semibold tracking-[0.15em] text-white shadow-lg">
                     MOST POPULAR
                   </span>
                 )}

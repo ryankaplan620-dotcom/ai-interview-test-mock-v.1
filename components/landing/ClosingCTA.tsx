@@ -3,8 +3,13 @@ import { ScrollReveal } from "./ScrollReveal";
 
 export function ClosingCTA() {
   return (
-    <section className="bg-gray-900 px-6 py-32 sm:py-40" aria-label="Final call to action">
-      <div className="mx-auto max-w-[1200px] text-center">
+    <section className="relative overflow-hidden bg-gradient-dark noise-overlay px-6 py-32 sm:py-40" aria-label="Final call to action">
+      {/* Decorative floating shapes */}
+      <div className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full bg-[#00DC82]/15 blur-3xl animate-float" aria-hidden />
+      <div className="absolute -bottom-40 -left-20 w-[250px] h-[250px] rounded-full bg-[#00DC82]/10 blur-3xl animate-float [animation-delay:2s]" aria-hidden />
+      <div className="absolute top-1/2 right-1/4 w-[200px] h-[200px] rounded-full bg-emerald-500/8 blur-3xl animate-float [animation-delay:4s]" aria-hidden />
+
+      <div className="relative z-10 mx-auto max-w-[1200px] text-center">
         <ScrollReveal>
           <h2 className="text-[44px] font-bold tracking-[-0.03em] text-white sm:text-[56px] lg:text-[72px]">
             Show up
@@ -19,7 +24,7 @@ export function ClosingCTA() {
           <div className="mt-10">
             <Link
               href="/signup"
-              className="inline-flex h-12 items-center rounded-lg bg-[#00DC82] px-8 text-[15px] font-medium text-white transition-all duration-200 hover:bg-[#00C574]"
+              className="btn-shimmer inline-flex h-12 items-center rounded-lg bg-[#00DC82] px-8 text-[15px] font-medium text-white transition-all duration-200 hover:bg-[#00C574]"
             >
               Start free
               <span aria-hidden> &rarr;</span>

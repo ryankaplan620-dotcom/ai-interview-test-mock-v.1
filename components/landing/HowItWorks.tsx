@@ -39,10 +39,14 @@ export function HowItWorks() {
         <div className="mt-16 grid gap-8 md:grid-cols-3">
           {steps.map((step, i) => (
             <ScrollReveal key={step.number} delay={i * 150}>
-              <div className="rounded-xl border border-gray-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md">
-                <span className="font-mono text-[13px] text-[#00DC82]">
-                  {step.number}
-                </span>
+              <div className="group relative overflow-hidden rounded-xl border border-gray-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#00DC82]/20">
+                {/* Gradient top border on hover */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00DC82] to-emerald-300 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-xl" aria-hidden />
+
+                {/* Icon circle with step number */}
+                <div className="w-10 h-10 rounded-full bg-[#00DC82]/10 flex items-center justify-center">
+                  <span className="text-[#00DC82] font-semibold text-[14px]">{step.number}</span>
+                </div>
 
                 <h3 className="mt-4 text-xl font-semibold text-gray-900">
                   {step.title}

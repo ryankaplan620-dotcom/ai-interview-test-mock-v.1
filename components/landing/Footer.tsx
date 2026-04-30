@@ -7,6 +7,9 @@ export function Footer() {
       className="border-t border-gray-100 bg-gray-50 px-6 py-12 sm:px-8 lg:px-20"
       aria-label="Site footer"
     >
+      {/* Subtle gradient separator */}
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-[#00DC82]/20 to-transparent -mt-12 mb-12" aria-hidden />
+
       <div className="mx-auto max-w-[1200px]">
         {/* Top row — signature + domain */}
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">

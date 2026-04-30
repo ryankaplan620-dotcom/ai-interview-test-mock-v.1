@@ -29,7 +29,7 @@ export function Nav() {
       className={clsx(
         "sticky top-0 z-50 border-b transition-all duration-300",
         scrolled
-          ? "border-gray-100 bg-white/80 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+          ? "border-gray-100/50 bg-white/70 backdrop-blur-xl shadow-sm"
           : "border-transparent bg-white"
       )}
       aria-label="Primary navigation"

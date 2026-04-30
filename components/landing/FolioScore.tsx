@@ -101,10 +101,15 @@ function AnimatedCounter() {
   return (
     <ScrollReveal>
       <div ref={ref}>
-        <p className="text-[60px] font-bold tracking-tight text-gray-900 sm:text-[80px] md:text-[96px]">
-          {count}
-        </p>
-        <p className="text-sm text-gray-400">out of 100</p>
+        {/* Animated gradient ring around the score */}
+        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#00DC82] to-emerald-400 p-[3px] animate-glow-pulse">
+          <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+            <span className="text-[48px] font-bold tracking-tight text-gray-900">
+              {count}
+            </span>
+          </div>
+        </div>
+        <p className="mt-3 text-sm text-gray-400">out of 100</p>
 
         <p
           className={`mt-6 text-[15px] italic text-gray-500 transition-opacity duration-700 ${
