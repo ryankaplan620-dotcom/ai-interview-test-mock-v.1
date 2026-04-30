@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/server";
 import { fetchCompanyIntel } from "@/lib/intel/pipeline/fetch-company";
 
+export const dynamic = "force-dynamic";
+
 const ADMIN_EMAILS = (process.env.INTEL_ADMIN_EMAILS ?? "")
   .split(",")
   .filter(Boolean);
