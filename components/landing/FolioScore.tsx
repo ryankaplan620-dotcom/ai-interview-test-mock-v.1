@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, lazy, useState, useEffect, useRef } from "react";
 import { ScrollReveal } from "./ScrollReveal";
+
+const ScoreOrb = lazy(() => import("@/components/3d/ScoreOrb"));
 
 const TARGET_SCORE = 74;
 const COUNTER_DURATION = 1500;
@@ -53,7 +55,14 @@ export function FolioScore() {
 
         <div className="mt-16 grid items-center gap-16 md:grid-cols-2">
           <AnimatedCounter />
-          <RadarChart />
+          <div className="relative">
+            <div className="relative h-[300px]">
+              <Suspense fallback={null}>
+                <ScoreOrb />
+              </Suspense>
+            </div>
+            <RadarChart />
+          </div>
         </div>
       </div>
     </section>

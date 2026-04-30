@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
+
+const HeroScene = lazy(() => import("@/components/3d/HeroScene"));
 
 const exchanges = [
   {
@@ -21,9 +23,12 @@ const exchanges = [
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-hero noise-overlay min-h-screen flex items-center px-6 pt-16 pb-12 sm:px-8 sm:pt-24 sm:pb-16" aria-label="Hero">
-      {/* Decorative floating shapes */}
-      <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full bg-[#00DC82]/10 blur-3xl animate-float" aria-hidden />
-      <div className="absolute -bottom-40 -left-20 w-[300px] h-[300px] rounded-full bg-blue-400/5 blur-3xl animate-float [animation-delay:2s]" aria-hidden />
+      {/* 3D particle background */}
+      <div className="absolute inset-0 z-0">
+        <Suspense fallback={null}>
+          <HeroScene />
+        </Suspense>
+      </div>
 
       <div className="relative z-10 mx-auto max-w-[1200px]">
         {/* Centered copy */}

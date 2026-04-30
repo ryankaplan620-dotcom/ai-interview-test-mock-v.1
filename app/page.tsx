@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Nav } from "@/components/landing/Nav";
 import { Hero } from "@/components/landing/Hero";
 import { LogoBar } from "@/components/landing/LogoBar";
@@ -14,6 +15,8 @@ import { FAQ } from "@/components/landing/FAQ";
 import { ClosingCTA } from "@/components/landing/ClosingCTA";
 import { Footer } from "@/components/landing/Footer";
 
+const FloatingShapes = lazy(() => import("@/components/3d/FloatingShapes"));
+
 export default function LandingPage() {
   return (
     <main id="main-content" className="relative min-h-screen bg-white">
@@ -28,6 +31,11 @@ export default function LandingPage() {
       <Hero />
       <LogoBar />
       <HowItWorks />
+      <div className="relative h-[200px] overflow-hidden">
+        <Suspense fallback={null}>
+          <FloatingShapes />
+        </Suspense>
+      </div>
       <ProductDemo />
       <Engines />
       <FolioScore />
