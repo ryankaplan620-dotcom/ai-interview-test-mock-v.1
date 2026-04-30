@@ -42,6 +42,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 Practice
               </Link>
               <Link
+                href="/outreach"
+                className="font-sans text-[13.5px] font-medium tracking-body text-text-secondary transition-colors hover:text-text-primary"
+              >
+                Outreach
+              </Link>
+              <Link
                 href="/settings"
                 className="font-sans text-[13.5px] font-medium tracking-body text-text-secondary transition-colors hover:text-text-primary"
               >
