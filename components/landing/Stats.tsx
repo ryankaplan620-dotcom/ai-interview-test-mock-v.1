@@ -9,15 +9,15 @@ const stats = [
 
 export function Stats() {
   return (
-    <section className="border-t border-ink-border/40 px-6 py-20 sm:px-12 lg:px-20" aria-label="Key stats">
-      <div className="mx-auto max-w-[1440px]">
+    <section className="bg-gray-50 px-6 py-16 sm:px-8" aria-label="Key stats">
+      <div className="mx-auto max-w-[1200px]">
         <div className="grid gap-8 text-center md:grid-cols-4">
           {stats.map((stat, i) => (
             <ScrollReveal key={stat.label} delay={i * 100}>
               <div>
-                <p className="font-display text-[48px] font-bold text-accent">{stat.value}</p>
-                <div className="mx-auto mt-2 h-px w-12 bg-accent/30" aria-hidden />
-                <p className="mt-2 font-sans text-sm text-text-tertiary">{stat.label}</p>
+                <p className="text-[48px] font-bold text-gray-900">{stat.value}</p>
+                <div className="mx-auto mt-2 h-px w-12 bg-[#00DC82]" aria-hidden />
+                <p className="mt-2 text-[14px] text-gray-500">{stat.label}</p>
               </div>
             </ScrollReveal>
           ))}

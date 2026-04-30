@@ -32,7 +32,7 @@ export function ScrollReveal({
   return (
     <div
       ref={ref}
-      className={`opacity-0 translate-y-3 transition-all duration-700 ease-out-expo [&.visible]:opacity-100 [&.visible]:translate-y-0 ${className}`}
+      className={`opacity-0 translate-y-4 transition-all duration-700 ease-out [&.visible]:opacity-100 [&.visible]:translate-y-0 ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}

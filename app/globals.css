@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ===========================================
-   Folio base styles
+   Folio base styles — light, premium
    =========================================== */
 
 :root {
@@ -13,69 +13,39 @@
 }
 
 html {
+  background: #FFFFFF;
+  color: #111827;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: theme("colors.ink.DEFAULT");
-  color: theme("colors.text.primary");
-  font-family: theme("fontFamily.sans");
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
   font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
 }
 
 ::selection {
-  background-color: theme("colors.accent.DEFAULT");
-  color: theme("colors.text.onAccent");
+  background: rgba(0, 220, 130, 0.15);
+  color: #111827;
 }
 
-/* Atmospheric grid overlay — subtle */
-.grid-overlay {
-  background-image: linear-gradient(rgba(42, 49, 57, 0.35) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(42, 49, 57, 0.35) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-position: -1px -1px;
-}
-
-/* Focus ring — brand-specific */
+/* Focus ring */
 *:focus-visible {
-  outline: 2px solid theme("colors.accent.DEFAULT");
+  outline: 2px solid #00DC82;
   outline-offset: 2px;
   border-radius: 2px;
 }
 
-/* Disable focus ring on mouse clicks, keep on keyboard */
 *:focus:not(:focus-visible) {
   outline: none;
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Shimmer effect for CTA buttons */
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.btn-shimmer { position: relative; overflow: hidden; }
-.btn-shimmer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-/* Tagline pulse animation */
-@keyframes tagline-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-.animate-tagline-pulse {
-  animation: tagline-pulse 4s ease-in-out infinite;
+/* Waveform animation for product demo */
+@keyframes waveform {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
 }
 
 /* Skip to content — a11y */
@@ -94,11 +64,20 @@ html {
   width: auto;
   height: auto;
   padding: 12px 24px;
-  background: #00F590;
-  color: #0D1117;
+  background: #00DC82;
+  color: #111827;
   font-weight: 600;
   border-radius: 8px;
   z-index: 9999;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
