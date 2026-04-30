@@ -109,34 +109,67 @@ export function brandFrame({
 // NAMED TEMPLATES
 // ==========================================================================
 
-export async function sendWelcomeEmail({ to }: { to: string }) {
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io";
+
+export async function sendWelcomeEmail(to: string, name: string) {
   const html = brandFrame({
     heading: "Welcome to",
     headingItalic: "Folio.",
     body: `
-      <p>Your 15-day free trial is live.</p>
-      <p>You have full access to your plan's features. Practice interviews with all five recruiter personas, drills, and feedback on every session.</p>
-      <p>Start practicing anytime. The interview before the interview is already here.</p>
+      <p>Hi ${name},</p>
+      <p>Your 15-day free trial is live. You have full access to every interviewer persona, drill, and feedback dimension from day one.</p>
+      <p>Your first session is free — no credit card required. Start a practice interview, get your Folio Score in under 90 seconds, and see exactly where you stand.</p>
     `,
     ctaText: "Start your first session →",
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/dashboard`,
+    ctaUrl: `${APP_URL}/session/new`,
   });
-  const text = `Welcome to Folio.\n\nYour 15-day free trial is live. Full access to your plan's features — practice interviews with all five recruiter personas, drills, and feedback on every session.\n\nStart here: ${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/dashboard\n\n— Built to get you hired.\nfolio.io`;
-  return sendEmail({ to, subject: "Your Folio trial is live.", html, text });
+  const text = `Hi ${name},\n\nWelcome to Folio. Your 15-day free trial is live — full access from day one. Your first session is free, no credit card required.\n\nStart here: ${APP_URL}/session/new\n\n— Built to get you hired.\nfolio.io`;
+  return sendEmail({ to, subject: "Welcome to Folio", html, text });
 }
 
-export async function sendTrialEndingEmail({ to, daysLeft }: { to: string; daysLeft: number }) {
+export async function sendTrialEndingEmail(to: string, name: string, daysLeft: number) {
   const html = brandFrame({
     heading: `Your trial ends in ${daysLeft} days.`,
     body: `
-      <p>Pick a plan and keep practicing.</p>
+      <p>Hi ${name},</p>
+      <p>Your Folio trial wraps up in ${daysLeft} days. Check your Folio Score to see how far you've come — then pick a plan to keep practicing.</p>
       <p>Cycle is $49 for 90 days (students only). Pro is $149 for a full year with firm calibration. Max is $249 for panels, superdays, hard mode, and priority feedback.</p>
     `,
     ctaText: "Pick a plan →",
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing`,
+    ctaUrl: `${APP_URL}/pricing`,
   });
-  const text = `Your Folio trial ends in ${daysLeft} days.\n\nPick a plan: ${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing\n\n— Built to get you hired.`;
-  return sendEmail({ to, subject: `Your Folio trial ends in ${daysLeft} days.`, html, text });
+  const text = `Hi ${name},\n\nYour Folio trial ends in ${daysLeft} days. Check your score and pick a plan: ${APP_URL}/pricing\n\n— Built to get you hired.`;
+  return sendEmail({ to, subject: `Your Folio trial ends in ${daysLeft} days`, html, text });
+}
+
+export async function sendSessionSummaryEmail(to: string, name: string, sessionId: string, score: number) {
+  const html = brandFrame({
+    heading: `Your Folio Score:`,
+    headingItalic: `${score}`,
+    body: `
+      <p>Hi ${name},</p>
+      <p>Your latest session has been scored. You received a Folio Score of <strong style="color:#00F590;">${score}</strong> across six dimensions.</p>
+      <p>View your full feedback — including quote-level breakdowns, improvement areas, and interviewer notes — on the session detail page.</p>
+    `,
+    ctaText: "View full feedback →",
+    ctaUrl: `${APP_URL}/session/${sessionId}/feedback`,
+  });
+  const text = `Hi ${name},\n\nYour Folio Score: ${score}\n\nView your full feedback: ${APP_URL}/session/${sessionId}/feedback\n\n— Built to get you hired.\nfolio.io`;
+  return sendEmail({ to, subject: `Your Folio Score: ${score}`, html, text });
+}
+
+export async function sendPasswordResetEmail(to: string, resetUrl: string) {
+  const html = brandFrame({
+    heading: "Reset your password.",
+    body: `
+      <p>We received a request to reset your Folio password. Click the button below to choose a new one.</p>
+      <p style="color:#6E7681;font-size:13px;">If you didn't request this, you can safely ignore this email. The link expires in 1 hour.</p>
+    `,
+    ctaText: "Reset password →",
+    ctaUrl: resetUrl,
+  });
+  const text = `Reset your Folio password:\n\n${resetUrl}\n\nIf you didn't request this, ignore this email. The link expires in 1 hour.\n\n— folio.io`;
+  return sendEmail({ to, subject: "Reset your Folio password", html, text });
 }
 
 export async function sendPaymentFailedEmail({ to }: { to: string }) {
@@ -146,9 +179,9 @@ export async function sendPaymentFailedEmail({ to }: { to: string }) {
       <p>We couldn't charge your card for this month's subscription. Your access continues for a few more days while we retry — but you'll need to update your payment method to avoid interruption.</p>
     `,
     ctaText: "Update payment method →",
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/settings`,
+    ctaUrl: `${APP_URL}/settings`,
   });
-  const text = `Your Folio payment failed.\n\nUpdate your payment method: ${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/settings`;
+  const text = `Your Folio payment failed.\n\nUpdate your payment method: ${APP_URL}/settings`;
   return sendEmail({ to, subject: "Your Folio payment failed.", html, text });
 }
 
@@ -160,8 +193,8 @@ export async function sendStudentVerifiedEmail({ to }: { to: string }) {
       <p>Verification stays active for one year, then automatically re-verifies.</p>
     `,
     ctaText: "Pick your plan →",
-    ctaUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing`,
+    ctaUrl: `${APP_URL}/pricing`,
   });
-  const text = `You're verified as a student. The Cycle tier at $49 for 90 days is now available.\n\n${process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io"}/pricing`;
+  const text = `You're verified as a student. The Cycle tier at $49 for 90 days is now available.\n\n${APP_URL}/pricing`;
   return sendEmail({ to, subject: "Student status confirmed.", html, text });
 }
