@@ -20,23 +20,56 @@ import type {
 } from "./types";
 
 import {
-  PRIYA_BASE_PROMPT,
-  PRIYA_EASY_OVERLAY,
-  PRIYA_HARD_OVERLAY,
-  PRIYA_OPENING,
+  PRIYA_CORE_IDENTITY,
+  PRIYA_SELF_INTRODUCTION_TEMPLATE,
+  PRIYA_TURN_TAKING_AND_VOICE_HYGIENE,
+  PRIYA_END_OF_INTERVIEW_QA,
+  PRIYA_CLOSING,
+  PRIYA_DIFFICULTY_OVERLAYS,
+  PRIYA_SESSION_MEMORY_HOOK,
+  PRIYA_MID_SESSION_RECALIBRATION,
 } from "./prompts/priya";
 import {
-  MARCUS_BASE_PROMPT,
-  MARCUS_EASY_OVERLAY,
-  MARCUS_HARD_OVERLAY,
-  MARCUS_OPENING,
+  MARCUS_CORE_IDENTITY,
+  MARCUS_SELF_INTRODUCTION_TEMPLATE,
+  MARCUS_TURN_TAKING_AND_VOICE_HYGIENE,
+  MARCUS_END_OF_INTERVIEW_QA,
+  MARCUS_CLOSING,
+  MARCUS_DIFFICULTY_OVERLAYS,
+  MARCUS_SESSION_MEMORY_HOOK,
+  MARCUS_MID_SESSION_RECALIBRATION,
 } from "./prompts/marcus";
 import {
-  SARAH_BASE_PROMPT,
-  SARAH_EASY_OVERLAY,
-  SARAH_HARD_OVERLAY,
-  SARAH_OPENING,
+  SARAH_CORE_IDENTITY,
+  SARAH_SELF_INTRODUCTION_TEMPLATE,
+  SARAH_TURN_TAKING_AND_VOICE_HYGIENE,
+  SARAH_END_OF_INTERVIEW_QA,
+  SARAH_CLOSING,
+  SARAH_DIFFICULTY_OVERLAYS,
+  SARAH_SESSION_MEMORY_HOOK,
+  SARAH_MID_SESSION_RECALIBRATION,
 } from "./prompts/sarah";
+
+// Compose the modular prompts into the base/overlay/opening format
+// that the rest of the codebase expects.
+function composeBase(core: string, turnTaking: string, endQa: string, closing: string, memoryHook: string, recalibration: string): string {
+  return [core, turnTaking, endQa, memoryHook, recalibration, closing].join("\n\n");
+}
+
+const PRIYA_BASE_PROMPT = composeBase(PRIYA_CORE_IDENTITY, PRIYA_TURN_TAKING_AND_VOICE_HYGIENE, PRIYA_END_OF_INTERVIEW_QA, PRIYA_CLOSING, PRIYA_SESSION_MEMORY_HOOK, PRIYA_MID_SESSION_RECALIBRATION);
+const PRIYA_EASY_OVERLAY = PRIYA_DIFFICULTY_OVERLAYS.easy;
+const PRIYA_HARD_OVERLAY = PRIYA_DIFFICULTY_OVERLAYS.hard;
+const PRIYA_OPENING = PRIYA_SELF_INTRODUCTION_TEMPLATE;
+
+const MARCUS_BASE_PROMPT = composeBase(MARCUS_CORE_IDENTITY, MARCUS_TURN_TAKING_AND_VOICE_HYGIENE, MARCUS_END_OF_INTERVIEW_QA, MARCUS_CLOSING, MARCUS_SESSION_MEMORY_HOOK, MARCUS_MID_SESSION_RECALIBRATION);
+const MARCUS_EASY_OVERLAY = MARCUS_DIFFICULTY_OVERLAYS.easy;
+const MARCUS_HARD_OVERLAY = MARCUS_DIFFICULTY_OVERLAYS.hard;
+const MARCUS_OPENING = MARCUS_SELF_INTRODUCTION_TEMPLATE;
+
+const SARAH_BASE_PROMPT = composeBase(SARAH_CORE_IDENTITY, SARAH_TURN_TAKING_AND_VOICE_HYGIENE, SARAH_END_OF_INTERVIEW_QA, SARAH_CLOSING, SARAH_SESSION_MEMORY_HOOK, SARAH_MID_SESSION_RECALIBRATION);
+const SARAH_EASY_OVERLAY = SARAH_DIFFICULTY_OVERLAYS.easy;
+const SARAH_HARD_OVERLAY = SARAH_DIFFICULTY_OVERLAYS.hard;
+const SARAH_OPENING = SARAH_SELF_INTRODUCTION_TEMPLATE;
 import { BEHAVIORAL_BANK } from "./questions/behavioral";
 import { CONSULTING_CASE_BANK } from "./questions/consulting-case";
 import { BANKING_BANK } from "./questions/banking";
@@ -51,10 +84,10 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     id: "priya",
     name: "Priya Patel",
     firstName: "Priya",
-    firm: "McKinsey & Company",
+    firm: "Folio",
     title: "Senior Recruiter",
-    tagline: "Consulting behavioral and case screens.",
-    supportedInterviewTypes: ["behavioral", "case"],
+    tagline: "Warm, curious, tests baseline when comfortable.",
+    supportedInterviewTypes: ["behavioral", "case", "technical", "product_sense", "superday", "hard_mode"],
     defaultDurationMinutes: 30,
     env: {
       tavusReplicaId: "TAVUS_REPLICA_ID_PRIYA",
@@ -75,10 +108,10 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     id: "marcus",
     name: "Marcus Hale",
     firstName: "Marcus",
-    firm: "Goldman Sachs",
-    title: "Managing Director",
-    tagline: "Banking behavioral plus foundational technicals.",
-    supportedInterviewTypes: ["behavioral", "technical"],
+    firm: "Folio",
+    title: "Hiring Manager",
+    tagline: "Direct, efficient, tests clarity under pressure.",
+    supportedInterviewTypes: ["behavioral", "case", "technical", "product_sense", "superday", "hard_mode"],
     defaultDurationMinutes: 30,
     env: {
       tavusReplicaId: "TAVUS_REPLICA_ID_MARCUS",
@@ -99,10 +132,10 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
     id: "sarah",
     name: "Sarah Chen",
     firstName: "Sarah",
-    firm: "Meta",
+    firm: "Folio",
     title: "Engineering Manager",
-    tagline: "Tech behavioral and coding problems, walk-through style.",
-    supportedInterviewTypes: ["behavioral", "technical"],
+    tagline: "Technical but human. Collaborative problem-solving.",
+    supportedInterviewTypes: ["behavioral", "case", "technical", "product_sense", "superday", "hard_mode"],
     defaultDurationMinutes: 45,
     env: {
       tavusReplicaId: "TAVUS_REPLICA_ID_SARAH",
