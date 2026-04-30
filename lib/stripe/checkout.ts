@@ -72,8 +72,8 @@ export async function createSubscriptionCheckout({
     cancel_url: `${APP_URL}/pricing?checkout=canceled`,
     allow_promotion_codes: true,
     billing_address_collection: "auto",
-    tax_id_collection: { enabled: true },
-    automatic_tax: { enabled: true },
+    tax_id_collection: { enabled: false },
+    automatic_tax: { enabled: false },
     metadata: {
       user_id: userId,
       tier,
@@ -121,7 +121,7 @@ export async function createOverageCheckout({
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${APP_URL}/session/${sessionId}?overage=paid`,
     cancel_url: `${APP_URL}/session/new?overage=canceled`,
-    automatic_tax: { enabled: true },
+    automatic_tax: { enabled: false },
     metadata: {
       user_id: userId,
       session_id: sessionId,
