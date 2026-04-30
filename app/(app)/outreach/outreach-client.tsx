@@ -49,8 +49,10 @@ export function OutreachClient({
   // Scout form state
   const [targetCompany, setTargetCompany] = useState("");
   const [targetRole, setTargetRole] = useState("");
+  const [targetCity, setTargetCity] = useState("");
   const [scouting, setScouting] = useState(false);
   const [scoutError, setScoutError] = useState<string | null>(null);
+  const [scoutResults, setScoutResults] = useState<Array<{name:string;title:string;company:string;city:string;relevanceReason:string;suggestedApproach:string}>>([]);
 
   // Draft generation state
   const [draftingContactId, setDraftingContactId] = useState<string | null>(null);
@@ -71,11 +73,11 @@ export function OutreachClient({
       const res = await fetch("/api/outreach/scout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ targetCompany: targetCompany.trim(), targetRole: targetRole.trim() }),
+        body: JSON.stringify({ targetCompany: targetCompany.trim(), targetRole: targetRole.trim(), targetCity: targetCity.trim() || undefined }),
       });
       if (!res.ok) throw new Error("Scout request failed");
       const { contacts: newContacts } = await res.json();
-      setContacts((prev) => [...newContacts, ...prev]);
+      setScoutResults(newContacts);
     } catch {
       setScoutError("Failed to find contacts. Please try again.");
     } finally {
@@ -213,13 +215,16 @@ export function OutreachClient({
       {tab === "scout" && (
         <ScoutTab
           contacts={contacts}
+          scoutResults={scoutResults}
           targetCompany={targetCompany}
           targetRole={targetRole}
+          targetCity={targetCity}
           scouting={scouting}
           scoutError={scoutError}
           draftingContactId={draftingContactId}
           onCompanyChange={setTargetCompany}
           onRoleChange={setTargetRole}
+          onCityChange={setTargetCity}
           onScout={handleScout}
           onDraftEmail={handleDraftEmail}
         />
@@ -253,27 +258,40 @@ export function OutreachClient({
 
 function ScoutTab({
   contacts,
+  scoutResults,
   targetCompany,
   targetRole,
+  targetCity,
   scouting,
   scoutError,
   draftingContactId,
   onCompanyChange,
   onRoleChange,
+  onCityChange,
   onScout,
   onDraftEmail,
 }: {
   contacts: OutreachContact[];
+  scoutResults: Array<{name:string;title:string;company:string;city:string;relevanceReason:string;suggestedApproach:string}>;
   targetCompany: string;
   targetRole: string;
+  targetCity: string;
   scouting: boolean;
   scoutError: string | null;
   draftingContactId: string | null;
   onCompanyChange: (v: string) => void;
   onRoleChange: (v: string) => void;
+  onCityChange: (v: string) => void;
   onScout: () => void;
   onDraftEmail: (id: string) => void;
 }) {
+  const CITIES = [
+    "", "New York", "San Francisco", "Los Angeles", "Chicago", "Boston",
+    "Seattle", "Austin", "Denver", "Atlanta", "Miami", "Dallas", "Houston",
+    "Washington DC", "Philadelphia", "Minneapolis", "Charlotte", "Nashville",
+    "Portland", "Salt Lake City", "Remote",
+  ];
+
   return (
     <div className="space-y-8">
       {/* Scout form */}
@@ -281,7 +299,7 @@ function ScoutTab({
         <h2 className="mb-4 font-display text-lg font-semibold tracking-heading text-text-primary">
           Find contacts
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary">
               TARGET COMPANY
@@ -306,6 +324,21 @@ function ScoutTab({
               className="w-full rounded-lg border border-ink-border bg-ink px-3.5 py-2.5 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
+          <div>
+            <label className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+              CITY / OFFICE
+            </label>
+            <select
+              value={targetCity}
+              onChange={(e) => onCityChange(e.target.value)}
+              className="w-full rounded-lg border border-ink-border bg-ink px-3.5 py-2.5 font-sans text-[14px] text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              <option value="">Any location</option>
+              {CITIES.filter(Boolean).map((city) => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <button
           onClick={onScout}
@@ -325,6 +358,32 @@ function ScoutTab({
           <p className="mt-3 font-sans text-[13px] text-red-400">{scoutError}</p>
         )}
       </div>
+
+      {/* Scout results (from latest search) */}
+      {scoutResults.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+            SUGGESTED CONTACTS ({scoutResults.length})
+          </h3>
+          {scoutResults.map((c, i) => (
+            <div key={i} className="rounded-xl border border-ink-border bg-ink-surface p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-display text-[15px] font-semibold text-text-primary">{c.name}</p>
+                  <p className="mt-0.5 font-sans text-[13px] text-text-secondary">{c.title} · {c.company}</p>
+                  {c.city && <p className="mt-0.5 font-mono text-[11px] text-text-tertiary">{c.city}</p>}
+                </div>
+              </div>
+              <p className="mt-3 font-sans text-[13px] leading-relaxed text-text-secondary">
+                <span className="font-medium text-accent">Why: </span>{c.relevanceReason}
+              </p>
+              <p className="mt-1.5 font-sans text-[13px] leading-relaxed text-text-secondary">
+                <span className="font-medium text-text-primary">Approach: </span>{c.suggestedApproach}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Contact cards */}
       {contacts.length > 0 && (
