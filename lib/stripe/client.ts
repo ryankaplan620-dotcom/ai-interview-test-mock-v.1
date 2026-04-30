@@ -16,7 +16,7 @@ export function requireStripe(): Stripe {
   }
 
   _stripe = new Stripe(key, {
-    apiVersion: "2024-12-18.acacia",
+    apiVersion: "2025-02-24.acacia",
     typescript: true,
     appInfo: {
       name: "Folio",

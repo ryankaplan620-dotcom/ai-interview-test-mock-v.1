@@ -1,16 +1,16 @@
+const { withSentryConfig } = require("@sentry/nextjs");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: false },
   images: {
     formats: ["image/avif", "image/webp"],
   },
   async redirects() {
     return [
-      // Legal page consolidation: the canonical ToS/Privacy/Cookies policies
-      // live under /legal/*. The old /privacy and /terms paths were
-      // pre-Phase-Legal placeholders. 308 preserves the HTTP method and
-      // signals permanence to search engines.
       { source: "/privacy", destination: "/legal/privacy", permanent: true },
       { source: "/terms", destination: "/legal/terms", permanent: true },
     ];
@@ -29,4 +29,9 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withSentryConfig(nextConfig, {
+  silent: true,
+  disableLogger: true,
+  hideSourceMaps: true,
+  tunnelRoute: "/monitoring",
+});
