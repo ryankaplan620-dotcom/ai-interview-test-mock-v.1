@@ -37,13 +37,26 @@ export function CompanyPreview() {
         <div className="mt-16 grid gap-3 md:grid-cols-3">
           {companies.map((company, i) => (
             <ScrollReveal key={company.name} delay={i * 60}>
-              <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md hover:border-[#00DC82]/20 hover:shadow-[0_4px_20px_rgba(0,220,130,0.1)]">
-                <span className="text-[14px] font-medium text-gray-900">
-                  {company.name}
-                </span>
-                <span className="font-mono text-[11px] text-gray-400">
-                  {company.count} questions
-                </span>
+              <div className="group flex items-center justify-between rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md hover:border-[#00DC82]/20 hover:shadow-[0_4px_20px_rgba(0,220,130,0.1)]">
+                <div>
+                  <span className="text-[14px] font-medium text-gray-900">
+                    {company.name}
+                  </span>
+                  <p className="mt-1 font-mono text-[11px] text-gray-400">
+                    {company.count} questions
+                  </p>
+                </div>
+                {/* Arrow that appears on hover */}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  className="shrink-0 text-gray-300 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-[#00DC82] group-hover:translate-x-0.5"
+                  aria-hidden
+                >
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </div>
             </ScrollReveal>
           ))}

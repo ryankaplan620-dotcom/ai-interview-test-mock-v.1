@@ -83,6 +83,7 @@ const config: Config = {
         "pulse-ring": "pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "fade-up": "fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "waveform": "waveform 0.8s ease-in-out infinite",
+        "marquee": "marquee 30s linear infinite",
       },
       keyframes: {
         "pulse-ring": {
@@ -96,6 +97,10 @@ const config: Config = {
         "waveform": {
           "0%, 100%": { transform: "scaleY(0.4)" },
           "50%": { transform: "scaleY(1)" },
+        },
+        "marquee": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
       },
     },

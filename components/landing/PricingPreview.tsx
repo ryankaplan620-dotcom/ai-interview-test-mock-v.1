@@ -7,6 +7,7 @@ const tiers = [
     tagline: "See what Folio feels like.",
     price: "$0",
     period: "",
+    periodLabel: "",
     cta: "Start free",
     highlighted: false,
     preamble: null,
@@ -22,6 +23,7 @@ const tiers = [
     tagline: "A full recruiting cycle of practice.",
     price: "$49",
     period: "/90 days",
+    periodLabel: "per cycle",
     cta: "Get Basic",
     highlighted: false,
     preamble: "Everything in Free, and:",
@@ -39,6 +41,7 @@ const tiers = [
     tagline: "Serious prep for serious interviews.",
     price: "$149",
     period: "/year",
+    periodLabel: "per year",
     cta: "Get Pro",
     highlighted: true,
     preamble: "Everything in Basic, and:",
@@ -58,6 +61,7 @@ const tiers = [
     tagline: "Every feature. Maximum volume.",
     price: "$249",
     period: "/year",
+    periodLabel: "per year",
     cta: "Get Max",
     highlighted: false,
     preamble: "Everything in Pro, and:",
@@ -73,6 +77,15 @@ const tiers = [
     ],
   },
 ];
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
+      <circle cx="8" cy="8" r="7" stroke="#00DC82" strokeWidth="1" fill="none" opacity="0.2" />
+      <path d="M5 8.5L7 10.5L11 5.5" stroke="#00DC82" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export function PricingPreview() {
   return (
@@ -92,18 +105,18 @@ export function PricingPreview() {
           </div>
         </ScrollReveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start">
           {tiers.map((tier, i) => (
             <ScrollReveal key={tier.name} delay={i * 100}>
               <div
                 className={`relative flex flex-col rounded-xl border p-6 transition-all duration-300 ${
                   tier.highlighted
-                    ? "glass-card gradient-border animate-glow-pulse shadow-lg order-first sm:order-none"
+                    ? "scale-[1.02] bg-gradient-to-b from-white to-emerald-50 border-[#00DC82]/30 shadow-lg shadow-[#00DC82]/10 order-first sm:order-none"
                     : "border-gray-100 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1"
                 }`}
               >
                 {tier.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#00DC82] to-emerald-400 px-3 py-1 font-mono text-[9px] font-semibold tracking-[0.15em] text-white shadow-lg">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#00DC82] px-4 py-1 font-mono text-[9px] font-semibold tracking-[0.15em] text-white">
                     MOST POPULAR
                   </span>
                 )}
@@ -123,6 +136,9 @@ export function PricingPreview() {
                   </span>
                   {tier.period && (
                     <span className="text-[14px] text-gray-400">{tier.period}</span>
+                  )}
+                  {tier.periodLabel && (
+                    <p className="mt-0.5 text-[12px] text-gray-400">{tier.periodLabel}</p>
                   )}
                 </div>
 
@@ -148,9 +164,7 @@ export function PricingPreview() {
                   <ul className="flex flex-col gap-2.5">
                     {tier.features.map((f) => (
                       <li key={f} className="flex items-start gap-2 text-[13px] text-gray-500">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
-                          <path d="M3 8.5L6.5 12L13 4" stroke="#00DC82" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <CheckIcon />
                         {f}
                       </li>
                     ))}

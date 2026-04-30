@@ -7,6 +7,7 @@ import * as THREE from "three";
 function GradientSphere() {
   const meshRef = useRef<THREE.Mesh>(null!);
   const wireRef = useRef<THREE.Mesh>(null!);
+  const glowRef = useRef<THREE.Mesh>(null!);
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetRotation = useRef({ x: 0, y: 0 });
   const { viewport } = useThree();
@@ -73,6 +74,11 @@ function GradientSphere() {
     meshRef.current.rotation.y += (targetRotation.current.y - meshRef.current.rotation.y) * 0.02;
     wireRef.current.rotation.x += (targetRotation.current.x - wireRef.current.rotation.x) * 0.015;
     wireRef.current.rotation.y += (targetRotation.current.y - wireRef.current.rotation.y) * 0.015;
+    // Pulsing glow
+    if (glowRef.current) {
+      const mat = glowRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = 0.02 + Math.sin(t * 0.8) * 0.02;
+    }
   });
 
   useEffect(() => {
@@ -85,20 +91,24 @@ function GradientSphere() {
   }, []);
 
   return (
-    <group position={[viewport.width * 0.18, -0.3, 0]}>
+    <group position={[viewport.width * 0.25, -0.3, 0]}>
       <mesh ref={meshRef} material={gradientMaterial}>
         <icosahedronGeometry args={[2.2, 64]} />
       </mesh>
+      {/* Refined wireframe overlay — 20 segments */}
       <mesh ref={wireRef}>
-        <icosahedronGeometry args={[2.4, 12]} />
+        <icosahedronGeometry args={[2.4, 20]} />
         <meshBasicMaterial color="#00DC82" wireframe transparent opacity={0.05} />
       </mesh>
-      <mesh>
-        <sphereGeometry args={[1.8, 32, 32]} />
-        <meshBasicMaterial color="#00DC82" transparent opacity={0.02} />
+      {/* Pulsing glow halo */}
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[2.8, 32, 32]} />
+        <meshBasicMaterial color="#00DC82" transparent opacity={0.03} />
       </mesh>
       <OrbitRing />
+      <OuterOrbitRing />
       <AmbientDots />
+      <ParticleTrails />
     </group>
   );
 }
@@ -118,8 +128,71 @@ function OrbitRing() {
   );
 }
 
+function OuterOrbitRing() {
+  const ref = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    ref.current.rotation.x = Math.PI * 0.6 + Math.cos(t * 0.15) * 0.12;
+    ref.current.rotation.y = t * 0.08;
+    ref.current.rotation.z = Math.sin(t * 0.1) * 0.1;
+  });
+  return (
+    <mesh ref={ref}>
+      <torusGeometry args={[3.8, 0.005, 16, 120]} />
+      <meshBasicMaterial color="#00DC82" transparent opacity={0.15} />
+    </mesh>
+  );
+}
+
+function ParticleTrails() {
+  const trailCount = 3;
+  const pointsPerTrail = 40;
+  const totalPoints = trailCount * pointsPerTrail;
+  const meshRef = useRef<THREE.InstancedMesh>(null!);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  const trailParams = useMemo(() => {
+    return Array.from({ length: trailCount }, (_, i) => ({
+      radius: 2.8 + i * 0.5,
+      speed: 0.25 + i * 0.1,
+      tiltX: Math.PI * (0.3 + i * 0.2),
+      tiltY: i * 0.4,
+    }));
+  }, []);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    let idx = 0;
+    for (let trail = 0; trail < trailCount; trail++) {
+      const { radius, speed, tiltX, tiltY } = trailParams[trail];
+      for (let p = 0; p < pointsPerTrail; p++) {
+        const frac = p / pointsPerTrail;
+        const angle = t * speed + frac * Math.PI * 2;
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle) * Math.sin(tiltX);
+        const z = radius * Math.sin(angle) * Math.cos(tiltX) + Math.cos(angle + tiltY) * 0.3;
+        dummy.position.set(x, y, z);
+        // Fade out at tail
+        const scale = 0.008 + (1 - frac) * 0.012;
+        dummy.scale.setScalar(scale);
+        dummy.updateMatrix();
+        meshRef.current.setMatrixAt(idx, dummy.matrix);
+        idx++;
+      }
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, totalPoints]}>
+      <sphereGeometry args={[1, 4, 4]} />
+      <meshBasicMaterial color="#00DC82" transparent opacity={0.2} />
+    </instancedMesh>
+  );
+}
+
 function AmbientDots() {
-  const count = 60;
+  const count = 80;
   const meshRef = useRef<THREE.InstancedMesh>(null!);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const positions = useMemo(() => {
@@ -127,10 +200,20 @@ function AmbientDots() {
     for (let i = 0; i < count; i++) {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-      const r = 3.5 + Math.random() * 1.5;
+      const r = 3.5 + Math.random() * 2.0;
       arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
       arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
       arr[i * 3 + 2] = r * Math.cos(phi);
+    }
+    return arr;
+  }, []);
+
+  // Pre-compute base sizes: mix of tiny and larger dots
+  const baseSizes = useMemo(() => {
+    const arr = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      // 30% chance of being a larger dot
+      arr[i] = Math.random() < 0.3 ? 0.025 + Math.random() * 0.02 : 0.005 + Math.random() * 0.01;
     }
     return arr;
   }, []);
@@ -144,7 +227,7 @@ function AmbientDots() {
         positions[i3 + 1] + Math.cos(t * 0.2 + i * 0.5) * 0.15,
         positions[i3 + 2],
       );
-      dummy.scale.setScalar(0.012 + Math.sin(t + i) * 0.005);
+      dummy.scale.setScalar(baseSizes[i] + Math.sin(t * 0.7 + i * 1.3) * 0.003);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }

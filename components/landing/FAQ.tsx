@@ -102,11 +102,11 @@ export function FAQ() {
                   <div
                     className="overflow-hidden transition-all duration-300 ease-out"
                     style={{
-                      maxHeight: isOpen ? "300px" : "0px",
+                      maxHeight: isOpen ? "400px" : "0px",
                       opacity: isOpen ? 1 : 0,
                     }}
                   >
-                    <p className="pb-5 text-[14px] leading-relaxed text-gray-500">
+                    <p className="pt-2 pb-6 text-[14px] leading-relaxed text-gray-500">
                       {faq.answer}
                     </p>
                   </div>

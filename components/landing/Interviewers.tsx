@@ -55,8 +55,8 @@ export function Interviewers() {
           {personas.map((persona, i) => (
             <ScrollReveal key={persona.name} delay={i * 100}>
               <div className="group overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                {/* Portrait area */}
-                <div className="relative aspect-[4/3] overflow-hidden">
+                {/* Portrait area — taller aspect ratio with gradient overlay */}
+                <div className="relative aspect-[4/5] overflow-hidden">
                   {persona.image ? (
                     <img
                       src={persona.image}
@@ -67,16 +67,18 @@ export function Interviewers() {
                     <div
                       className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${persona.gradient} group-hover:scale-[1.02] transition-transform duration-300`}
                     >
-                      <span className="text-[80px] font-bold text-white/20">
+                      <span className="text-[100px] font-bold text-white/20">
                         {persona.initial}
                       </span>
                     </div>
                   )}
+                  {/* Bottom gradient overlay */}
+                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" aria-hidden />
                 </div>
 
                 {/* Info */}
                 <div className="p-5">
-                  <p className="text-[16px] font-semibold text-gray-900">
+                  <p className="text-[20px] font-bold text-gray-900">
                     {persona.name}
                   </p>
                   <p className="mt-1 font-mono text-[10px] tracking-[0.15em] text-gray-400">
@@ -85,6 +87,17 @@ export function Interviewers() {
                   <p className="mt-3 text-[14px] leading-relaxed text-gray-500">
                     {persona.tone}
                   </p>
+
+                  {/* CTA link */}
+                  <a
+                    href="/signup"
+                    className="mt-4 inline-flex items-center text-[14px] font-medium text-[#00DC82] transition-opacity hover:opacity-80"
+                  >
+                    Start session
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="ml-1" aria-hidden>
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
                 </div>
               </div>
             </ScrollReveal>

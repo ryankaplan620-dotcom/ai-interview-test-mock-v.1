@@ -14,10 +14,10 @@ export function Stats() {
         <div className="grid gap-8 text-center md:grid-cols-4">
           {stats.map((stat, i) => (
             <ScrollReveal key={stat.label} delay={i * 100}>
-              <div className="glass-card p-8 rounded-xl">
-                <p className="text-[48px] font-bold text-gray-900">{stat.value}</p>
-                <div className="mx-auto mt-2 h-0.5 w-16 bg-gradient-to-r from-[#00DC82] to-emerald-300" aria-hidden />
-                <p className="mt-2 text-[14px] text-gray-500">{stat.label}</p>
+              <div className="py-8">
+                <p className="text-[56px] font-bold tracking-tight text-gray-900">{stat.value}</p>
+                <div className="mx-auto mt-3 h-[2px] w-12 bg-[#00DC82]" aria-hidden />
+                <p className="mt-3 text-[14px] text-gray-500">{stat.label}</p>
               </div>
             </ScrollReveal>
           ))}
