@@ -1,187 +1,184 @@
 "use client";
 
-import { useRef, useMemo, useEffect, useState, useCallback } from "react";
-import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 
-const PARTICLE_COUNT = 2000;
-const REPULSION_RADIUS = 2;
-const RETURN_SPEED = 0.5; // spring-like return over ~2s
+function GradientSphere() {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const wireRef = useRef<THREE.Mesh>(null!);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const targetRotation = useRef({ x: 0, y: 0 });
+  const { viewport } = useThree();
 
-function Particles() {
-  const meshRef = useRef<THREE.InstancedMesh>(null);
-  const mouse = useRef(new THREE.Vector3(0, 0, 0));
-  const mouseActive = useRef(false);
+  const gradientMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uMouse: { value: new THREE.Vector2(0, 0) },
+        uColor1: { value: new THREE.Color("#00DC82") },
+        uColor2: { value: new THREE.Color("#00A862") },
+        uColor3: { value: new THREE.Color("#004D35") },
+      },
+      vertexShader: `
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        uniform float uTime;
 
-  // Generate rest positions in a spherical volume
-  const restPositions = useMemo(() => {
-    const positions = new Float32Array(PARTICLE_COUNT * 3);
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = Math.cbrt(Math.random()) * 3.5; // sphere radius 3.5
-      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = r * Math.cos(phi);
-    }
-    return positions;
-  }, []);
-
-  // Current positions (start at rest)
-  const currentPositions = useMemo(
-    () => new Float32Array(restPositions),
-    [restPositions]
-  );
-
-  // Per-particle phase offsets for drift
-  const phases = useMemo(() => {
-    const p = new Float32Array(PARTICLE_COUNT * 3);
-    for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
-      p[i] = Math.random() * Math.PI * 2;
-    }
-    return p;
-  }, []);
-
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-
-  useFrame(({ clock }) => {
-    const mesh = meshRef.current;
-    if (!mesh) return;
-
-    const t = clock.getElapsedTime();
-    const mx = mouse.current.x;
-    const my = mouse.current.y;
-    const mz = mouse.current.z;
-    const isActive = mouseActive.current;
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const i3 = i * 3;
-
-      // Target = rest position + gentle drift
-      const driftX =
-        Math.sin(t * 0.3 + phases[i3]) * 0.08 +
-        Math.cos(t * 0.2 + phases[i3 + 1]) * 0.05;
-      const driftY =
-        Math.sin(t * 0.25 + phases[i3 + 1]) * 0.08 +
-        Math.cos(t * 0.15 + phases[i3 + 2]) * 0.05;
-      const driftZ =
-        Math.sin(t * 0.2 + phases[i3 + 2]) * 0.06 +
-        Math.cos(t * 0.3 + phases[i3]) * 0.04;
-
-      let targetX = restPositions[i3] + driftX;
-      let targetY = restPositions[i3 + 1] + driftY;
-      let targetZ = restPositions[i3 + 2] + driftZ;
-
-      // Mouse repulsion
-      if (isActive) {
-        const dx = currentPositions[i3] - mx;
-        const dy = currentPositions[i3 + 1] - my;
-        const dz = currentPositions[i3 + 2] - mz;
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-        if (dist < REPULSION_RADIUS && dist > 0.01) {
-          const force = (1 - dist / REPULSION_RADIUS) * 1.5;
-          targetX += (dx / dist) * force;
-          targetY += (dy / dist) * force;
-          targetZ += (dz / dist) * force;
+        void main() {
+          vPosition = position;
+          vNormal = normal;
+          float displacement = sin(position.x * 3.0 + uTime * 0.5) * 0.03
+            + sin(position.y * 4.0 + uTime * 0.3) * 0.02
+            + sin(position.z * 2.0 + uTime * 0.7) * 0.025;
+          vec3 newPosition = position + normal * displacement;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
         }
-      }
+      `,
+      fragmentShader: `
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        uniform float uTime;
+        uniform vec2 uMouse;
+        uniform vec3 uColor1;
+        uniform vec3 uColor2;
+        uniform vec3 uColor3;
 
-      // Spring-like return
-      currentPositions[i3] += (targetX - currentPositions[i3]) * RETURN_SPEED * 0.016;
-      currentPositions[i3 + 1] +=
-        (targetY - currentPositions[i3 + 1]) * RETURN_SPEED * 0.016;
-      currentPositions[i3 + 2] +=
-        (targetZ - currentPositions[i3 + 2]) * RETURN_SPEED * 0.016;
+        void main() {
+          float t = (vPosition.y + 1.5) / 3.0;
+          t += sin(vPosition.x * 2.0 + uTime * 0.3) * 0.1;
+          vec3 color;
+          if (t < 0.5) {
+            color = mix(uColor3, uColor2, t * 2.0);
+          } else {
+            color = mix(uColor2, uColor1, (t - 0.5) * 2.0);
+          }
+          vec3 viewDir = normalize(cameraPosition - vPosition);
+          float fresnel = pow(1.0 - max(dot(vNormal, viewDir), 0.0), 3.0);
+          color += vec3(0.0, 0.86, 0.51) * fresnel * 0.4;
+          gl_FragColor = vec4(color, 0.85);
+        }
+      `,
+      transparent: true,
+    });
+  }, []);
 
-      dummy.position.set(
-        currentPositions[i3],
-        currentPositions[i3 + 1],
-        currentPositions[i3 + 2]
-      );
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-    }
-
-    mesh.instanceMatrix.needsUpdate = true;
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    gradientMaterial.uniforms.uTime.value = t;
+    gradientMaterial.uniforms.uMouse.value.set(mouseRef.current.x, mouseRef.current.y);
+    targetRotation.current.x = mouseRef.current.y * 0.3;
+    targetRotation.current.y = mouseRef.current.x * 0.3 + t * 0.1;
+    meshRef.current.rotation.x += (targetRotation.current.x - meshRef.current.rotation.x) * 0.02;
+    meshRef.current.rotation.y += (targetRotation.current.y - meshRef.current.rotation.y) * 0.02;
+    wireRef.current.rotation.x += (targetRotation.current.x - wireRef.current.rotation.x) * 0.015;
+    wireRef.current.rotation.y += (targetRotation.current.y - wireRef.current.rotation.y) * 0.015;
   });
 
-  const handlePointerMove = useCallback((e: ThreeEvent<PointerEvent>) => {
-    if (e.point) {
-      mouse.current.copy(e.point);
-      mouseActive.current = true;
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
     }
-  }, []);
-
-  const handlePointerLeave = useCallback(() => {
-    mouseActive.current = false;
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
   return (
-    <>
-      {/* Invisible plane for raycasting mouse position */}
-      <mesh
-        visible={false}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={handlePointerLeave}
-      >
-        <planeGeometry args={[20, 20]} />
-        <meshBasicMaterial transparent opacity={0} />
+    <group position={[viewport.width * 0.18, -0.3, 0]}>
+      <mesh ref={meshRef} material={gradientMaterial}>
+        <icosahedronGeometry args={[2.2, 64]} />
       </mesh>
-
-      <instancedMesh ref={meshRef} args={[undefined, undefined, PARTICLE_COUNT]}>
-        <sphereGeometry args={[0.03, 6, 6]} />
-        <meshBasicMaterial color="#00DC82" transparent opacity={0.6} />
-      </instancedMesh>
-    </>
+      <mesh ref={wireRef}>
+        <icosahedronGeometry args={[2.4, 12]} />
+        <meshBasicMaterial color="#00DC82" wireframe transparent opacity={0.05} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[1.8, 32, 32]} />
+        <meshBasicMaterial color="#00DC82" transparent opacity={0.02} />
+      </mesh>
+      <OrbitRing />
+      <AmbientDots />
+    </group>
   );
 }
 
-function CameraOrbit() {
-  const { camera } = useThree();
-
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    const angle = t * 0.05;
-    const radius = 8;
-    camera.position.x = Math.sin(angle) * radius;
-    camera.position.z = Math.cos(angle) * radius;
-    camera.lookAt(0, 0, 0);
+function OrbitRing() {
+  const ref = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    ref.current.rotation.x = Math.PI * 0.4 + Math.sin(t * 0.2) * 0.1;
+    ref.current.rotation.z = t * 0.15;
   });
-
-  return null;
+  return (
+    <mesh ref={ref}>
+      <torusGeometry args={[3, 0.008, 16, 100]} />
+      <meshBasicMaterial color="#00DC82" transparent opacity={0.25} />
+    </mesh>
+  );
 }
 
-function HeroScene() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    // Check for reduced motion preference
-    const prefersReduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    // Check for mobile
-    const isMobile = window.innerWidth < 768;
-
-    if (!prefersReduced && !isMobile) {
-      setVisible(true);
+function AmbientDots() {
+  const count = 60;
+  const meshRef = useRef<THREE.InstancedMesh>(null!);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const positions = useMemo(() => {
+    const arr = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 3.5 + Math.random() * 1.5;
+      arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      arr[i * 3 + 2] = r * Math.cos(phi);
     }
+    return arr;
   }, []);
 
-  if (!visible) return null;
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      dummy.position.set(
+        positions[i3] + Math.sin(t * 0.3 + i) * 0.15,
+        positions[i3 + 1] + Math.cos(t * 0.2 + i * 0.5) * 0.15,
+        positions[i3 + 2],
+      );
+      dummy.scale.setScalar(0.012 + Math.sin(t + i) * 0.005);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+      <sphereGeometry args={[1, 6, 6]} />
+      <meshBasicMaterial color="#00DC82" transparent opacity={0.3} />
+    </instancedMesh>
+  );
+}
+
+export default function HeroScene() {
+  const [canRender, setCanRender] = useState(false);
+  useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile = window.innerWidth < 768;
+    if (!prefersReduced && !isMobile) setCanRender(true);
+  }, []);
+  if (!canRender) return null;
 
   return (
     <Canvas
       className="absolute inset-0 z-0"
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0, 8], fov: 50 }}
-      gl={{ antialias: false, alpha: true }}
-      style={{ pointerEvents: "auto" }}
+      camera={{ position: [0, 0, 8], fov: 45 }}
+      gl={{ antialias: true, alpha: true }}
     >
-      <Particles />
-      <CameraOrbit />
+      <ambientLight intensity={0.3} />
+      <pointLight position={[5, 5, 5]} intensity={0.5} color="#00DC82" />
+      <pointLight position={[-5, -3, 3]} intensity={0.3} color="#ffffff" />
+      <GradientSphere />
     </Canvas>
   );
 }
-
-export default HeroScene;
