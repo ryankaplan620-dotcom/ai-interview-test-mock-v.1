@@ -7,6 +7,35 @@ interface Band {
   body: string;
   features: string[];
   mirrored?: boolean;
+  bg: string;
+  number: string;
+  icon: React.ReactNode;
+}
+
+function SimulateIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="text-[#00DC82]">
+      <circle cx="14" cy="14" r="10" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M14 8v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TrainIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="text-[#00DC82]">
+      <path d="M6 22L12 8l4 8 3-4 3 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function OutreachIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="text-[#00DC82]">
+      <rect x="4" y="8" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4 10l10 6 10-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 const bands: Band[] = [
@@ -21,6 +50,9 @@ const bands: Band[] = [
       "Cross-session memory",
       "Adaptive follow-ups",
     ],
+    bg: "bg-white",
+    number: "01",
+    icon: <SimulateIcon />,
   },
   {
     eyebrow: "02 \u00B7 TRAIN",
@@ -34,6 +66,9 @@ const bands: Band[] = [
       "Before/after trajectory",
     ],
     mirrored: true,
+    bg: "bg-gray-50",
+    number: "02",
+    icon: <TrainIcon />,
   },
   {
     eyebrow: "03 \u00B7 OUTREACH",
@@ -46,56 +81,83 @@ const bands: Band[] = [
       "Human-in-the-loop review",
       "Relationship tracking",
     ],
+    bg: "bg-white",
+    number: "03",
+    icon: <OutreachIcon />,
   },
 ];
+
+function FeatureCheck() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
+      <path d="M3 8.5L6.5 12L13 4" stroke="#00DC82" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export function Engines() {
   return (
     <section id="product" aria-label="Product engines">
-      {bands.map((band, i) => (
-        <div key={band.eyebrow} className="border-t border-ink-border/40 px-6 py-20 sm:px-12 lg:px-20">
-          <div className="mx-auto max-w-[1440px]">
+      {bands.map((band) => (
+        <div key={band.eyebrow} className={`${band.bg} px-6 py-20 sm:px-8 lg:py-24`}>
+          <div className="mx-auto max-w-[1200px]">
             <div
-              className={`grid items-center gap-12 md:grid-cols-[1fr_1fr] ${
+              className={`grid items-center gap-12 md:grid-cols-2 ${
                 band.mirrored ? "md:[direction:rtl]" : ""
               }`}
             >
               {/* Text side */}
               <ScrollReveal className={band.mirrored ? "md:[direction:ltr]" : ""}>
-                <span className="font-mono text-[11px] tracking-label text-accent">
-                  {band.eyebrow}
-                </span>
+                <div className="relative">
+                  {/* Large light number badge behind heading */}
+                  <span className="absolute -top-8 -left-2 text-[96px] font-bold leading-none text-gray-100 select-none pointer-events-none" aria-hidden>
+                    {band.number}
+                  </span>
 
-                <h3 className="mt-4 font-display text-[32px] font-semibold tracking-heading text-text-primary sm:text-[40px]">
-                  {band.heading.split(band.accentWord).map((part, j) => (
-                    <span key={j}>
-                      {part}
-                      {j === 0 && (
-                        <span className="text-accent">{band.accentWord}</span>
-                      )}
-                    </span>
-                  ))}
-                </h3>
+                  <div className="relative">
+                    {/* Icon + eyebrow */}
+                    <div className="flex items-center gap-3">
+                      {band.icon}
+                      <span className="font-mono text-[13px] tracking-[0.1em] text-[#00DC82]">
+                        {band.eyebrow}
+                      </span>
+                    </div>
 
-                <p className="mt-4 max-w-[500px] font-sans text-[15px] leading-relaxed text-text-secondary">
-                  {band.body}
-                </p>
+                    <h3 className="mt-4 text-[32px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[40px]">
+                      {band.heading.split(band.accentWord).map((part, j) => (
+                        <span key={j}>
+                          {part}
+                          {j === 0 && (
+                            <span className="text-[#00DC82]">{band.accentWord}</span>
+                          )}
+                        </span>
+                      ))}
+                    </h3>
 
-                <a
-                  href="/signup"
-                  className="mt-6 inline-flex items-center font-sans text-[15px] font-medium text-accent transition-opacity hover:opacity-80"
-                >
-                  Learn more &rarr;
-                </a>
+                    <p className="mt-4 max-w-[500px] text-[15px] leading-relaxed text-gray-500">
+                      {band.body}
+                    </p>
+
+                    <a
+                      href="/signup"
+                      className="mt-6 inline-flex items-center text-[15px] font-medium text-[#00DC82] transition-opacity hover:opacity-80"
+                    >
+                      Learn more
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-1" aria-hidden>
+                        <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
               </ScrollReveal>
 
               {/* Features side */}
               <ScrollReveal delay={200} className={band.mirrored ? "md:[direction:ltr]" : ""}>
                 <ul className="space-y-5">
                   {band.features.map((feat) => (
-                    <li key={feat} className="flex items-center gap-3">
-                      <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
-                      <span className="font-sans text-[15px] text-text-primary">{feat}</span>
+                    <li key={feat} className="flex items-start gap-3">
+                      <FeatureCheck />
+                      <span className="text-[15px] text-gray-900">{feat}</span>
                     </li>
                   ))}
                 </ul>

@@ -7,8 +7,8 @@ const tiers = [
     tagline: "See what Folio feels like.",
     price: "$0",
     period: "",
+    periodLabel: "",
     cta: "Start free",
-    ctaStyle: "border border-ink-border bg-ink-surface text-text-primary hover:border-accent/40",
     highlighted: false,
     preamble: null,
     features: [
@@ -23,8 +23,8 @@ const tiers = [
     tagline: "A full recruiting cycle of practice.",
     price: "$49",
     period: "/90 days",
+    periodLabel: "per cycle",
     cta: "Get Basic",
-    ctaStyle: "border border-ink-border bg-ink-surface text-text-primary hover:border-accent/40",
     highlighted: false,
     preamble: "Everything in Free, and:",
     features: [
@@ -41,8 +41,8 @@ const tiers = [
     tagline: "Serious prep for serious interviews.",
     price: "$149",
     period: "/year",
+    periodLabel: "per year",
     cta: "Get Pro",
-    ctaStyle: "bg-accent text-ink hover:brightness-110",
     highlighted: true,
     preamble: "Everything in Basic, and:",
     features: [
@@ -61,8 +61,8 @@ const tiers = [
     tagline: "Every feature. Maximum volume.",
     price: "$249",
     period: "/year",
+    periodLabel: "per year",
     cta: "Get Max",
-    ctaStyle: "border border-ink-border bg-ink-surface text-text-primary hover:border-accent/40",
     highlighted: false,
     preamble: "Everything in Pro, and:",
     features: [
@@ -78,82 +78,93 @@ const tiers = [
   },
 ];
 
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
+      <circle cx="8" cy="8" r="7" stroke="#00DC82" strokeWidth="1" fill="none" opacity="0.2" />
+      <path d="M5 8.5L7 10.5L11 5.5" stroke="#00DC82" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function PricingPreview() {
   return (
-    <section id="pricing" className="px-6 py-24 sm:px-12 sm:py-32 lg:px-20" aria-label="Pricing">
-      <div className="mx-auto max-w-[1440px]">
+    <section id="pricing" className="bg-white px-6 py-24 sm:px-8 md:py-32" aria-label="Pricing">
+      <div className="mx-auto max-w-[1200px]">
         <ScrollReveal>
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-              <span className="font-mono text-[11px] font-medium tracking-label text-accent">
-                PRICING
-              </span>
-            </div>
-            <h2 className="mt-6 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[44px]">
+            <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
+              PRICING
+            </span>
+            <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
               Start free. Scale when it&apos;s real.
             </h2>
-            <p className="mt-4 font-sans text-text-secondary">
+            <p className="mt-4 text-gray-500">
               Try your first interview free. No credit card required.
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="mt-16 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start">
           {tiers.map((tier, i) => (
             <ScrollReveal key={tier.name} delay={i * 100}>
               <div
-                className={`relative flex flex-col rounded-2xl border p-6 ${
+                className={`relative flex flex-col rounded-xl border p-6 transition-all duration-300 ${
                   tier.highlighted
-                    ? "border-accent/40 bg-ink-surface shadow-accent-glow order-first sm:order-none"
-                    : "border-ink-border bg-ink-surface"
+                    ? "scale-[1.02] bg-gradient-to-b from-white to-emerald-50 border-[#00DC82]/30 shadow-lg shadow-[#00DC82]/10 order-first sm:order-none"
+                    : "border-gray-100 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1"
                 }`}
               >
                 {tier.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 font-mono text-[9px] font-semibold tracking-[0.15em] text-ink">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#00DC82] px-4 py-1 font-mono text-[9px] font-semibold tracking-[0.15em] text-white">
                     MOST POPULAR
                   </span>
                 )}
 
                 {/* Tier name + tagline */}
-                <h3 className="font-display text-[22px] font-semibold text-text-primary">
+                <h3 className="text-[22px] font-semibold text-gray-900">
                   {tier.name}
                 </h3>
-                <p className="mt-1 font-sans text-[13px] text-text-secondary">
+                <p className="mt-1 text-[13px] text-gray-500">
                   {tier.tagline}
                 </p>
 
                 {/* Price */}
                 <div className="mt-5">
-                  <span className="font-display text-[40px] font-bold tracking-tight text-text-primary">
+                  <span className="text-[40px] font-bold tracking-tight text-gray-900">
                     {tier.price}
                   </span>
                   {tier.period && (
-                    <span className="font-sans text-[14px] text-text-tertiary">{tier.period}</span>
+                    <span className="text-[14px] text-gray-400">{tier.period}</span>
+                  )}
+                  {tier.periodLabel && (
+                    <p className="mt-0.5 text-[12px] text-gray-400">{tier.periodLabel}</p>
                   )}
                 </div>
 
                 {/* CTA */}
                 <Link
                   href="/signup"
-                  className={`mt-5 flex h-10 items-center justify-center rounded-full font-sans text-[14px] font-semibold transition-all duration-200 ${tier.ctaStyle}`}
+                  className={`mt-5 flex h-10 items-center justify-center rounded-lg text-[14px] font-medium transition-all duration-200 ${
+                    tier.highlighted
+                      ? "bg-[#00DC82] text-white hover:bg-[#00C574]"
+                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                  }`}
                 >
-                  {tier.cta} →
+                  {tier.cta}
                 </Link>
 
                 {/* Feature list */}
-                <div className="mt-6 border-t border-ink-border pt-5">
+                <div className="mt-6 border-t border-gray-100 pt-5">
                   {tier.preamble && (
-                    <p className="mb-3 font-sans text-[13px] font-medium text-text-primary">
+                    <p className="mb-3 text-[13px] font-medium text-gray-900">
                       {tier.preamble}
                     </p>
                   )}
                   <ul className="flex flex-col gap-2.5">
                     {tier.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 font-sans text-[13px] text-text-secondary">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
-                          <path d="M3 8.5L6.5 12L13 4" stroke="#00F590" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                      <li key={f} className="flex items-start gap-2 text-[13px] text-gray-500">
+                        <CheckIcon />
                         {f}
                       </li>
                     ))}
@@ -165,10 +176,11 @@ export function PricingPreview() {
         </div>
 
         <ScrollReveal>
-          <p className="mt-10 text-center font-sans text-[13px] text-text-tertiary">
+          <p className="mt-10 text-center text-[13px] text-gray-400">
             First interview is free. Paid plans include a 15-day trial.{" "}
-            <Link href="/pricing" className="text-accent transition-opacity hover:opacity-80">
-              See full comparison →
+            <Link href="/pricing" className="text-[#00DC82] transition-opacity hover:opacity-80">
+              See full comparison
+              <span aria-hidden> &rarr;</span>
             </Link>
           </p>
         </ScrollReveal>

@@ -1,5 +1,7 @@
+import { Suspense, lazy } from "react";
 import { Nav } from "@/components/landing/Nav";
 import { Hero } from "@/components/landing/Hero";
+import { LogoBar } from "@/components/landing/LogoBar";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { ProductDemo } from "@/components/landing/ProductDemo";
 import { Engines } from "@/components/landing/Engines";
@@ -13,52 +15,38 @@ import { FAQ } from "@/components/landing/FAQ";
 import { ClosingCTA } from "@/components/landing/ClosingCTA";
 import { Footer } from "@/components/landing/Footer";
 
-function SectionDivider() {
-  return (
-    <div className="mx-auto h-px max-w-[1200px] bg-gradient-to-r from-transparent via-ink-border/40 to-transparent" />
-  );
-}
-
-function SectionDots() {
-  return (
-    <div className="flex items-center justify-center gap-2 py-8" aria-hidden>
-      <span className="h-1 w-1 rounded-full bg-ink-border" />
-      <span className="h-1 w-1 rounded-full bg-accent/40" />
-      <span className="h-1 w-1 rounded-full bg-ink-border" />
-    </div>
-  );
-}
+const FloatingShapes = lazy(() => import("@/components/3d/FloatingShapes"));
 
 export default function LandingPage() {
   return (
-    <main id="main-content" className="relative min-h-screen bg-ink text-text-primary">
-      {/* Subtle ambient glow — no grid */}
-      <div className="pointer-events-none fixed inset-0 bg-depth-glow opacity-50" aria-hidden />
-
-      {/* Content layers */}
-      <div className="relative">
-        <Nav />
-        <Hero />
-        <SectionDivider />
-        <HowItWorks />
-        <ProductDemo />
-        <SectionDots />
-        <Engines />
-        <SectionDivider />
-        <FolioScore />
-        <QuoteDemo />
-        <SectionDots />
-        <CompanyPreview />
-        <SectionDivider />
-        <Interviewers />
-        <SectionDots />
-        <Stats />
-        <SectionDivider />
-        <PricingPreview />
-        <FAQ />
-        <ClosingCTA />
-        <Footer />
+    <main id="main-content" className="relative min-h-screen bg-white">
+      {/* Subtle grid pattern */}
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+        <div className="h-full w-full" style={{
+          backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+        }} />
       </div>
+      <Nav />
+      <Hero />
+      <LogoBar />
+      <HowItWorks />
+      <div className="relative h-[200px] overflow-hidden">
+        <Suspense fallback={null}>
+          <FloatingShapes />
+        </Suspense>
+      </div>
+      <ProductDemo />
+      <Engines />
+      <FolioScore />
+      <QuoteDemo />
+      <CompanyPreview />
+      <Interviewers />
+      <Stats />
+      <PricingPreview />
+      <FAQ />
+      <ClosingCTA />
+      <Footer />
     </main>
   );
 }
