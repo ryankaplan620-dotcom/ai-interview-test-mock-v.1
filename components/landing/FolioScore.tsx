@@ -1,13 +1,11 @@
 "use client";
 
-import { Suspense, lazy, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ScrollReveal } from "./ScrollReveal";
 
-const ScoreOrb = lazy(() => import("@/components/3d/ScoreOrb"));
-
 const TARGET_SCORE = 74;
-const COUNTER_DURATION = 1500;
-const RADAR_DURATION = 1200;
+const COUNTER_DURATION = 1500; // ms
+const RADAR_DURATION = 1200; // ms
 
 const dimensions = [
   { label: "Structure", value: 82 },
@@ -25,12 +23,14 @@ function easeOut(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
+/** Convert a value (0-100) + angle index to SVG coordinates */
 function polarToCartesian(index: number, value: number, radius: number): [number, number] {
-  const angle = (Math.PI / 2) + index * ((2 * Math.PI) / 6);
+  const angle = (Math.PI / 2) + index * ((2 * Math.PI) / 6); // start from top
   const r = (value / 100) * radius;
   return [CENTER - r * Math.cos(angle), CENTER - r * Math.sin(angle)];
 }
 
+/** Build a hexagon path at a given fraction of the radius */
 function hexagonPath(fraction: number): string {
   const points = Array.from({ length: 6 }, (_, i) => {
     const [x, y] = polarToCartesian(i, fraction * 100, RADIUS);
@@ -41,28 +41,24 @@ function hexagonPath(fraction: number): string {
 
 export function FolioScore() {
   return (
-    <section className="bg-[#0D1117] px-6 py-24 sm:px-8 md:py-32" aria-label="The Folio Score">
-      <div className="mx-auto max-w-[1200px]">
+    <section className="border-t border-ink-border/40 px-6 py-24 sm:px-12 sm:py-32 lg:px-20" aria-label="The Folio Score">
+      <div className="mx-auto max-w-[1440px]">
         <ScrollReveal>
-          <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
-            THE FOLIO SCORE
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+            <span className="font-mono text-[11px] font-medium tracking-label text-accent">
+              THE FOLIO SCORE
+            </span>
+          </div>
 
-          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
+          <h2 className="mt-6 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[44px]">
             One number. The one that matters.
           </h2>
         </ScrollReveal>
 
         <div className="mt-16 grid items-center gap-16 md:grid-cols-2">
           <AnimatedCounter />
-          <div className="relative">
-            <div className="relative h-[300px]">
-              <Suspense fallback={null}>
-                <ScoreOrb />
-              </Suspense>
-            </div>
-            <RadarChart />
-          </div>
+          <RadarChart />
         </div>
       </div>
     </section>
@@ -109,19 +105,14 @@ function AnimatedCounter() {
 
   return (
     <ScrollReveal>
-      <div ref={ref}>
-        {/* Animated gradient ring around the score */}
-        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#00DC82] to-emerald-400 p-[3px] animate-glow-pulse">
-          <div className="w-full h-full rounded-full bg-[#0D1117] flex items-center justify-center">
-            <span className="text-[48px] font-bold tracking-tight text-[#F0F6FC]">
-              {count}
-            </span>
-          </div>
-        </div>
-        <p className="mt-3 text-sm text-[#6E7681]">out of 100</p>
+      <div ref={ref} className="max-w-[1120px]">
+        <p className="font-display text-[60px] font-bold tracking-tight text-text-primary sm:text-[80px] md:text-[96px]">
+          {count}
+        </p>
+        <p className="font-sans text-sm text-text-tertiary">out of 100</p>
 
         <p
-          className={`mt-6 text-[15px] italic text-[#8B949E] transition-opacity duration-700 ${
+          className={`mt-6 font-sans text-[15px] italic text-text-secondary transition-opacity duration-700 ${
             done ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -129,7 +120,7 @@ function AnimatedCounter() {
         </p>
 
         <span
-          className={`mt-4 inline-block rounded-full bg-[#00DC82]/10 px-3 py-1 font-mono text-[11px] text-[#00DC82] transition-opacity duration-700 ${
+          className={`mt-4 inline-block rounded-full bg-accent/10 px-3 py-1 font-mono text-[11px] text-accent transition-opacity duration-700 ${
             done ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -171,12 +162,16 @@ function RadarChart() {
     return () => obs.disconnect();
   }, []);
 
+  // Data polygon points
   const dataPoints = dimensions.map((d, i) =>
     polarToCartesian(i, d.value * progress, RADIUS)
   );
   const dataPath = dataPoints.map(([x, y]) => `${x},${y}`).join(" ");
 
+  // Axis vertices (full radius)
   const axisVertices = dimensions.map((_, i) => polarToCartesian(i, 100, RADIUS));
+
+  // Label positions (slightly outside)
   const labelPositions = dimensions.map((_, i) => polarToCartesian(i, 118, RADIUS));
 
   return (
@@ -189,7 +184,7 @@ function RadarChart() {
               key={frac}
               points={hexagonPath(frac)}
               fill="none"
-              stroke="#21262D"
+              stroke="#2A3139"
               strokeWidth="0.5"
             />
           ))}
@@ -202,7 +197,7 @@ function RadarChart() {
               y1={CENTER}
               x2={x}
               y2={y}
-              stroke="#21262D"
+              stroke="#2A3139"
               strokeWidth="0.5"
             />
           ))}
@@ -210,21 +205,22 @@ function RadarChart() {
           {/* Data polygon */}
           <polygon
             points={dataPath}
-            fill="rgba(0,220,130,0.08)"
-            stroke="#00DC82"
+            fill="rgba(0,245,144,0.08)"
+            stroke="#00F590"
             strokeWidth="2"
           />
 
           {/* Data point circles */}
           {dataPoints.map(([x, y], i) => (
             <g key={i}>
+              {/* Pulse ring on weakest (Confidence, index 2) */}
               {i === 2 && (
                 <circle
                   cx={x}
                   cy={y}
                   r={6}
                   fill="none"
-                  stroke="#00DC82"
+                  stroke="#00F590"
                   strokeWidth="1"
                   opacity="0.5"
                 >
@@ -242,13 +238,14 @@ function RadarChart() {
                   />
                 </circle>
               )}
-              <circle cx={x} cy={y} r={3} fill="#00DC82" />
+              <circle cx={x} cy={y} r={3} fill="#00F590" />
             </g>
           ))}
 
           {/* Labels */}
           {dimensions.map((d, i) => {
             const [x, y] = labelPositions[i];
+            // Adjust text anchor based on position
             let anchor: "start" | "middle" | "end" = "middle";
             if (x < CENTER - 20) anchor = "end";
             if (x > CENTER + 20) anchor = "start";

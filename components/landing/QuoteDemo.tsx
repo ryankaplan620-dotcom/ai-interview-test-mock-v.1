@@ -26,14 +26,17 @@ const quotes = [
 
 export function QuoteDemo() {
   return (
-    <section className="bg-[#161B22] px-6 py-24 sm:px-8 md:py-32" aria-label="The feedback loop">
-      <div className="mx-auto max-w-[1200px]">
+    <section className="px-6 py-24 sm:px-12 sm:py-32 lg:px-20" aria-label="The feedback loop">
+      <div className="mx-auto max-w-[1440px]">
         <ScrollReveal>
           <div className="text-center">
-            <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
-              THE FEEDBACK LOOP
-            </span>
-            <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
+            <div className="flex items-center justify-center gap-2">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+              <span className="font-mono text-[11px] font-medium tracking-label text-accent">
+                THE FEEDBACK LOOP
+              </span>
+            </div>
+            <h2 className="mt-6 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[44px]">
               Every word gets stronger.
             </h2>
           </div>
@@ -60,31 +63,42 @@ function QuoteCard() {
   const quote = quotes[activeIndex];
 
   return (
-    <div className="mx-auto max-w-[680px] rounded-xl border border-[#21262D] bg-[#0D1117] p-8 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+    <div className="mx-auto max-w-[680px] rounded-2xl border border-ink-border bg-ink-surface p-8">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+          <div className="absolute inset-0 h-1.5 w-1.5 animate-pulse-ring rounded-full border border-accent" />
+        </div>
+        <span className="font-mono text-[10px] tracking-label text-accent">
+          EXTRACT &rarr; REPHRASE
+        </span>
+      </div>
+
       {/* Before */}
-      <div>
-        <span className="font-mono text-[10px] tracking-[0.15em] text-[#6E7681]">
+      <div className="mt-6">
+        <span className="font-mono text-[9px] tracking-label text-text-tertiary">
           WHAT YOU SAID
         </span>
         <p
           key={`before-${activeIndex}`}
-          className="mt-2 italic text-[#8B949E] transition-opacity duration-500"
+          className="mt-2 font-serif italic text-text-secondary transition-opacity duration-500"
         >
           &ldquo;{quote.before}&rdquo;
         </p>
       </div>
 
       {/* Divider */}
-      <div className="my-6 h-px bg-[#21262D]" />
+      <div className="my-6 h-px bg-ink-border" />
 
       {/* After */}
       <div>
-        <span className="font-mono text-[10px] tracking-[0.15em] text-[#00DC82]">
+        <span className="font-mono text-[9px] tracking-label text-accent">
           THE STRONGER VERSION
         </span>
         <p
           key={`after-${activeIndex}`}
-          className="mt-2 font-medium text-[#F0F6FC] transition-opacity duration-500"
+          className="mt-2 font-sans font-medium text-text-primary transition-opacity duration-500"
         >
           &ldquo;{quote.after}&rdquo;
         </p>
@@ -98,8 +112,8 @@ function QuoteCard() {
             onClick={() => setActiveIndex(i)}
             className={`h-1.5 rounded-full transition-all duration-300 ${
               i === activeIndex
-                ? "w-6 bg-[#00DC82]"
-                : "w-1.5 bg-[#30363D]"
+                ? "w-6 bg-accent"
+                : "w-1.5 bg-ink-border"
             }`}
             aria-label={`View quote ${i + 1}`}
           />

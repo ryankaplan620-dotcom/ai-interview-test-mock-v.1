@@ -5,19 +5,19 @@ const steps = [
     number: "01",
     title: "Practice under real conditions",
     body: "Five distinct interviewer personalities, each calibrated to your target firm. Voice-only, real-time, adaptive.",
-    gradient: "bg-gradient-to-br from-[#0D2818] to-[#161B22]",
+    icon: MicIcon,
   },
   {
     number: "02",
     title: "See your exact words, made stronger",
     body: "After every session, Folio pulls the sentences that cost you the round and shows you the stronger version.",
-    gradient: "bg-gradient-to-br from-[#0D1525] to-[#161B22]",
+    icon: QuoteIcon,
   },
   {
     number: "03",
     title: "Open doors while you sleep",
     body: "Folio finds the recruiters who can open the door, drafts in your voice, and waits for your review before sending.",
-    gradient: "bg-gradient-to-br from-[#1A1508] to-[#161B22]",
+    icon: PlaneIcon,
   },
 ];
 
@@ -25,16 +25,19 @@ export function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="bg-[#0D1117] px-6 py-24 sm:px-8 md:py-32 lg:py-40"
+      className="px-6 py-24 sm:px-12 sm:py-32 lg:px-20"
       aria-label="How Folio works"
     >
-      <div className="mx-auto max-w-[1200px]">
+      <div className="mx-auto max-w-[1440px]">
         <ScrollReveal>
-          <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
-            HOW IT WORKS
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+            <span className="font-mono text-[11px] font-medium tracking-label text-accent">
+              HOW FOLIO WORKS
+            </span>
+          </div>
 
-          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
+          <h2 className="mt-6 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[44px]">
             Three engines. One career.
           </h2>
         </ScrollReveal>
@@ -42,20 +45,20 @@ export function HowItWorks() {
         <div className="mt-16 grid gap-8 md:grid-cols-3">
           {steps.map((step, i) => (
             <ScrollReveal key={step.number} delay={i * 150}>
-              <div className={`group relative overflow-hidden rounded-xl border border-[#21262D] ${step.gradient} p-8 shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:border-[#00DC82]/20`}>
-                {/* Gradient top border on hover */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00DC82] to-emerald-300 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-xl" aria-hidden />
+              <div className="rounded-2xl border border-ink-border bg-ink-surface p-8 transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-accent/30 hover:shadow-accent-glow">
+                <span className="font-mono text-[11px] tracking-label text-accent">
+                  {step.number}
+                </span>
 
-                {/* Large step number */}
-                <div className="w-14 h-14 rounded-full bg-[#00DC82]/10 flex items-center justify-center">
-                  <span className="text-[#00DC82] font-bold text-[20px]">{step.number}</span>
+                <div className="mt-4">
+                  <step.icon />
                 </div>
 
-                <h3 className="mt-5 text-[24px] font-semibold text-[#F0F6FC] leading-snug">
+                <h3 className="mt-5 font-display text-xl font-semibold text-text-primary">
                   {step.title}
                 </h3>
 
-                <p className="mt-3 text-[15px] leading-relaxed text-[#8B949E]">
+                <p className="mt-3 font-sans text-[15px] leading-relaxed text-text-secondary">
                   {step.body}
                 </p>
               </div>
@@ -64,5 +67,62 @@ export function HowItWorks() {
         </div>
       </div>
     </section>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="#00F590"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      aria-hidden
+    >
+      <rect x="5" y="2" width="6" height="8" rx="3" />
+      <path d="M3 8a5 5 0 0 0 10 0" />
+      <path d="M8 13v2" />
+    </svg>
+  );
+}
+
+function QuoteIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="#00F590"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M3 9.5C3 7 4.5 4.5 7 3.5L6.5 5C7.5 5 8 6 8 7c0 1.5-1 2.5-2.5 2.5S3 8.5 3 9.5z" />
+      <path d="M9 9.5C9 7 10.5 4.5 13 3.5L12.5 5C13.5 5 14 6 14 7c0 1.5-1 2.5-2.5 2.5S9 8.5 9 9.5z" />
+    </svg>
+  );
+}
+
+function PlaneIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="#00F590"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M14.5 1.5L6.5 9.5" />
+      <path d="M14.5 1.5L10 14.5L6.5 9.5L1.5 6L14.5 1.5Z" />
+    </svg>
   );
 }

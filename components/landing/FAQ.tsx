@@ -51,16 +51,19 @@ export function FAQ() {
 
   return (
     <section
-      className="bg-[#0D1117] px-6 py-24 sm:px-8 md:py-32"
+      className="border-t border-ink-border/40 px-6 py-24 sm:px-12 sm:py-32 lg:px-20"
       aria-label="Frequently asked questions"
     >
-      <div className="mx-auto max-w-[1200px]">
+      <div className="mx-auto max-w-[1440px]">
         <ScrollReveal>
-          <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
-            QUESTIONS
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+            <span className="font-mono text-[11px] font-medium tracking-label text-accent">
+              QUESTIONS
+            </span>
+          </div>
 
-          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
+          <h2 className="mt-6 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[44px]">
             Everything you need to know.
           </h2>
         </ScrollReveal>
@@ -71,14 +74,14 @@ export function FAQ() {
 
             return (
               <ScrollReveal key={i} delay={i * 50}>
-                <div className="border-b border-[#21262D]">
+                <div className="border-b border-ink-border/40">
                   <button
                     type="button"
                     className="flex w-full items-center justify-between py-5 text-left"
                     onClick={() => setOpenIndex(isOpen ? null : i)}
                     aria-expanded={isOpen}
                   >
-                    <span className="text-[15px] font-medium text-[#F0F6FC]">
+                    <span className="font-sans text-[15px] font-medium text-text-primary">
                       {faq.question}
                     </span>
                     <svg
@@ -90,7 +93,7 @@ export function FAQ() {
                       strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className={`ml-4 shrink-0 text-[#6E7681] transition-transform duration-300 ${
+                      className={`ml-4 shrink-0 text-text-tertiary transition-transform duration-300 ${
                         isOpen ? "rotate-180" : ""
                       }`}
                       aria-hidden
@@ -102,11 +105,11 @@ export function FAQ() {
                   <div
                     className="overflow-hidden transition-all duration-300 ease-out"
                     style={{
-                      maxHeight: isOpen ? "400px" : "0px",
+                      maxHeight: isOpen ? "300px" : "0px",
                       opacity: isOpen ? 1 : 0,
                     }}
                   >
-                    <p className="pt-2 pb-6 text-[14px] leading-relaxed text-[#8B949E]">
+                    <p className="pb-5 font-sans text-[14px] leading-relaxed text-text-secondary">
                       {faq.answer}
                     </p>
                   </div>
