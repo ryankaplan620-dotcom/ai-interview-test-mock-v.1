@@ -283,6 +283,12 @@ export default async function SessionDetailsPage({ params }: PageProps) {
           {/* Links */}
           <div className="flex flex-col gap-2">
             <Link
+              href={`/session/${session.id}/insights`}
+              className="rounded-xl border border-accent/40 bg-accent/5 px-5 py-3 text-center font-sans text-[13px] font-medium text-accent transition-all hover:border-accent/60"
+            >
+              View detailed insights →
+            </Link>
+            <Link
               href={`/session/${session.id}/feedback`}
               className="rounded-xl border border-ink-border bg-ink-surface px-5 py-3 text-center font-sans text-[13px] font-medium text-text-primary transition-all hover:border-accent/60"
             >

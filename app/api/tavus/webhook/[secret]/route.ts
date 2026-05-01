@@ -76,12 +76,25 @@ interface TavusWebhookPayload {
     recording_url?: string;
     // Perception analysis fields
     perception_analysis?: {
+      // Existing
       emotional_states?: Array<{ emotion: string; intensity: number; timestamp_seconds?: number }>;
       tone_shifts?: Array<{ from: string; to: string; at_seconds: number }>;
       key_discussion_points?: Array<{ topic: string; sentiment: string; details?: string }>;
       overall_sentiment?: string;
       confidence_level?: number;
       engagement_score?: number;
+      // New detailed fields
+      user_appearance?: unknown;
+      user_behavior?: unknown;
+      gestures?: unknown;
+      screen_activities?: unknown;
+      network_diagnostics?: unknown;
+      perception_summary?: string;
+      appearance_description?: string;
+      behavior_description?: string;
+      gesture_observations?: string[];
+      emotional_summary?: string;
+      notable_moments?: unknown;
     };
   };
 }
@@ -342,6 +355,17 @@ async function handlePerceptionAnalysis(
       overall_sentiment: perception.overall_sentiment ?? null,
       confidence_level: perception.confidence_level ?? null,
       engagement_score: perception.engagement_score ?? null,
+      user_appearance: perception.user_appearance ?? null,
+      user_behavior: perception.user_behavior ?? null,
+      gestures: perception.gestures ?? null,
+      screen_activities: perception.screen_activities ?? null,
+      network_diagnostics: perception.network_diagnostics ?? null,
+      perception_summary: perception.perception_summary ?? null,
+      appearance_description: perception.appearance_description ?? null,
+      behavior_description: perception.behavior_description ?? null,
+      gesture_observations: perception.gesture_observations ?? null,
+      emotional_summary: perception.emotional_summary ?? null,
+      notable_moments: perception.notable_moments ?? null,
       raw_perception_payload: perception,
       updated_at: new Date().toISOString(),
     },

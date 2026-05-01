@@ -129,10 +129,16 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
       <QaFeedbackPanel sessionId={sessionMeta.id} />
 
       {/* Full analytics link */}
-      <section className="mt-10 text-center">
+      <section className="mt-10 flex flex-col items-center gap-3">
+        <Link
+          href={`/session/${sessionMeta.id}/insights`}
+          className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
+        >
+          View detailed insights →
+        </Link>
         <Link
           href={`/session/${sessionMeta.id}/details`}
-          className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
+          className="inline-flex items-center gap-1 font-sans text-[12px] text-text-tertiary transition-opacity hover:opacity-80"
         >
           View full analytics →
         </Link>

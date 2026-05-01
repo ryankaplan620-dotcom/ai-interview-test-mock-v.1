@@ -303,6 +303,47 @@ export interface KeyDiscussionPoint {
   details?: string;
 }
 
+export interface UserAppearance {
+  description: string;
+  estimated_age_range: string;
+  clothing: string;
+  background: string;
+  notable_features: string[];
+}
+
+export interface UserBehavior {
+  eye_contact: string;
+  posture: string;
+  engagement_level: string;
+  speaking_style: string;
+  notable_patterns: string[];
+}
+
+export interface GestureObservation {
+  gesture: string;
+  frequency: string;
+  context: string;
+}
+
+export interface ScreenActivity {
+  activity: string;
+  timestamp_seconds: number;
+  description: string;
+}
+
+export interface NetworkDiagnostics {
+  connection_quality: string;
+  latency_ms: number | null;
+  packet_loss_pct: number | null;
+}
+
+export interface NotableMoment {
+  timestamp_seconds: number;
+  type: string;
+  description: string;
+  significance: string;
+}
+
 export interface SessionAnalytics {
   id: string;
   session_id: string;
@@ -315,6 +356,17 @@ export interface SessionAnalytics {
   recording_url: string | null;
   recording_s3_key: string | null;
   raw_perception_payload: unknown;
+  user_appearance: UserAppearance | null;
+  user_behavior: UserBehavior | null;
+  gestures: GestureObservation[] | null;
+  screen_activities: ScreenActivity[] | null;
+  network_diagnostics: NetworkDiagnostics | null;
+  perception_summary: string | null;
+  appearance_description: string | null;
+  behavior_description: string | null;
+  gesture_observations: string[] | null;
+  emotional_summary: string | null;
+  notable_moments: NotableMoment[] | null;
   created_at: string;
   updated_at: string;
 }

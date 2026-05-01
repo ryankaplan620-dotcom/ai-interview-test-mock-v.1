@@ -53,14 +53,24 @@ export function SessionRow({ session }: { session: SessionRowData }) {
           <StatusPill status={session.status} />
         )}
         {session.status === "completed" && (
-          <Link
-            href={`/session/${session.id}/details`}
-            onClick={(e) => e.stopPropagation()}
-            className="font-mono text-[10px] tracking-label text-text-tertiary transition-colors hover:text-accent"
-            title="View session details"
-          >
-            Details
-          </Link>
+          <>
+            <Link
+              href={`/session/${session.id}/insights`}
+              onClick={(e) => e.stopPropagation()}
+              className="font-mono text-[10px] tracking-label text-accent/70 transition-colors hover:text-accent"
+              title="View session insights"
+            >
+              Insights
+            </Link>
+            <Link
+              href={`/session/${session.id}/details`}
+              onClick={(e) => e.stopPropagation()}
+              className="font-mono text-[10px] tracking-label text-text-tertiary transition-colors hover:text-accent"
+              title="View session details"
+            >
+              Details
+            </Link>
+          </>
         )}
       </div>
     </Link>
