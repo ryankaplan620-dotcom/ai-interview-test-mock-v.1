@@ -31,7 +31,7 @@ export function Interviewers() {
   return (
     <section
       id="interviewers"
-      className="bg-gray-50 px-6 py-24 sm:px-8 md:py-32"
+      className="bg-[#161B22] px-6 py-24 sm:px-8 md:py-32"
       aria-label="The interviewers"
     >
       <div className="mx-auto max-w-[1200px]">
@@ -40,11 +40,11 @@ export function Interviewers() {
             THE INTERVIEWERS
           </span>
 
-          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
+          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
             Three personalities. One for every moment.
           </h2>
 
-          <p className="mt-4 max-w-[520px] text-[16px] text-gray-500">
+          <p className="mt-4 max-w-[520px] text-[16px] text-[#8B949E]">
             Each interviewer brings a different energy, a different style of pressure.
             Practice with all three to build range.
           </p>
@@ -54,7 +54,7 @@ export function Interviewers() {
         <div className="mt-16 grid gap-6 md:grid-cols-3">
           {personas.map((persona, i) => (
             <ScrollReveal key={persona.name} delay={i * 100}>
-              <div className="group overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+              <div className="group overflow-hidden rounded-xl border border-[#21262D] bg-[#0D1117] shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
                 {/* Portrait area — taller aspect ratio with gradient overlay */}
                 <div className="relative aspect-[4/5] overflow-hidden">
                   {persona.image ? (
@@ -78,13 +78,13 @@ export function Interviewers() {
 
                 {/* Info */}
                 <div className="p-5">
-                  <p className="text-[20px] font-bold text-gray-900">
+                  <p className="text-[20px] font-bold text-[#F0F6FC]">
                     {persona.name}
                   </p>
-                  <p className="mt-1 font-mono text-[10px] tracking-[0.15em] text-gray-400">
+                  <p className="mt-1 font-mono text-[10px] tracking-[0.15em] text-[#6E7681]">
                     {persona.role}
                   </p>
-                  <p className="mt-3 text-[14px] leading-relaxed text-gray-500">
+                  <p className="mt-3 text-[14px] leading-relaxed text-[#8B949E]">
                     {persona.tone}
                   </p>
 

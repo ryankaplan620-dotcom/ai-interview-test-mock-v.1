@@ -25,7 +25,7 @@ export function ClosingCTA() {
             <span className="text-[#00DC82]">unmistakable.</span>
           </h2>
 
-          <p className="mt-8 text-[18px] text-gray-400">
+          <p className="mt-8 text-[18px] text-[#6E7681]">
             Under 90 seconds to your first Folio Score. No credit card.
           </p>
 
@@ -39,7 +39,7 @@ export function ClosingCTA() {
             </Link>
           </div>
 
-          <p className="mt-8 font-serif text-[20px] italic text-gray-500">
+          <p className="mt-8 font-serif text-[20px] italic text-[#8B949E]">
             Built to get you hired.
           </p>
         </ScrollReveal>

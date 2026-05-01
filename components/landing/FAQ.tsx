@@ -51,7 +51,7 @@ export function FAQ() {
 
   return (
     <section
-      className="bg-white px-6 py-24 sm:px-8 md:py-32"
+      className="bg-[#0D1117] px-6 py-24 sm:px-8 md:py-32"
       aria-label="Frequently asked questions"
     >
       <div className="mx-auto max-w-[1200px]">
@@ -60,7 +60,7 @@ export function FAQ() {
             QUESTIONS
           </span>
 
-          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
+          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
             Everything you need to know.
           </h2>
         </ScrollReveal>
@@ -71,14 +71,14 @@ export function FAQ() {
 
             return (
               <ScrollReveal key={i} delay={i * 50}>
-                <div className="border-b border-gray-100">
+                <div className="border-b border-[#21262D]">
                   <button
                     type="button"
                     className="flex w-full items-center justify-between py-5 text-left"
                     onClick={() => setOpenIndex(isOpen ? null : i)}
                     aria-expanded={isOpen}
                   >
-                    <span className="text-[15px] font-medium text-gray-900">
+                    <span className="text-[15px] font-medium text-[#F0F6FC]">
                       {faq.question}
                     </span>
                     <svg
@@ -90,7 +90,7 @@ export function FAQ() {
                       strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className={`ml-4 shrink-0 text-gray-400 transition-transform duration-300 ${
+                      className={`ml-4 shrink-0 text-[#6E7681] transition-transform duration-300 ${
                         isOpen ? "rotate-180" : ""
                       }`}
                       aria-hidden
@@ -106,7 +106,7 @@ export function FAQ() {
                       opacity: isOpen ? 1 : 0,
                     }}
                   >
-                    <p className="pt-2 pb-6 text-[14px] leading-relaxed text-gray-500">
+                    <p className="pt-2 pb-6 text-[14px] leading-relaxed text-[#8B949E]">
                       {faq.answer}
                     </p>
                   </div>

@@ -4,7 +4,7 @@ import { FolioMark } from "../FolioMark";
 export function Footer() {
   return (
     <footer
-      className="border-t border-gray-100 bg-gray-50 px-6 py-12 sm:px-8 lg:px-20"
+      className="border-t border-[#21262D] bg-[#161B22] px-6 py-12 sm:px-8 lg:px-20"
       aria-label="Site footer"
     >
       {/* Subtle gradient separator */}
@@ -16,22 +16,22 @@ export function Footer() {
           <p className="font-serif text-[20px] italic text-[#00DC82]">
             Built to get you hired.
           </p>
-          <p className="text-[15px] font-medium text-gray-900">folio.io</p>
+          <p className="text-[15px] font-medium text-[#F0F6FC]">folio.io</p>
         </div>
 
         {/* Divider */}
-        <div className="my-10 h-px w-full bg-gray-200" />
+        <div className="my-10 h-px w-full bg-[#30363D]" />
 
         {/* Link columns */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="inline-flex items-center gap-2">
               <FolioMark className="h-5 w-5" color="#00DC82" />
-              <span className="text-[14px] font-semibold tracking-[-0.02em] text-gray-900">
+              <span className="text-[14px] font-semibold tracking-[-0.02em] text-[#F0F6FC]">
                 Folio
               </span>
             </Link>
-            <p className="mt-3 max-w-[240px] text-[13px] leading-relaxed text-gray-500">
+            <p className="mt-3 max-w-[240px] text-[13px] leading-relaxed text-[#8B949E]">
               Live voice interview practice, indistinguishable from the real thing.
             </p>
           </div>
@@ -70,19 +70,19 @@ export function Footer() {
         <div className="mt-12 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
             <FolioMark className="h-4 w-4" color="#9CA3AF" />
-            <p className="font-mono text-[11px] tracking-[0.1em] text-gray-400">
+            <p className="font-mono text-[11px] tracking-[0.1em] text-[#6E7681]">
               &copy; {new Date().getFullYear()} FOLIO, INC.
             </p>
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="https://x.com" className="text-[13px] text-gray-400 transition-colors hover:text-gray-600" target="_blank" rel="noopener noreferrer">
+            <a href="https://x.com" className="text-[13px] text-[#6E7681] transition-colors hover:text-[#A8B0BA]" target="_blank" rel="noopener noreferrer">
               X / Twitter
             </a>
-            <a href="https://linkedin.com" className="text-[13px] text-gray-400 transition-colors hover:text-gray-600" target="_blank" rel="noopener noreferrer">
+            <a href="https://linkedin.com" className="text-[13px] text-[#6E7681] transition-colors hover:text-[#A8B0BA]" target="_blank" rel="noopener noreferrer">
               LinkedIn
             </a>
-            <a href="https://instagram.com" className="text-[13px] text-gray-400 transition-colors hover:text-gray-600" target="_blank" rel="noopener noreferrer">
+            <a href="https://instagram.com" className="text-[13px] text-[#6E7681] transition-colors hover:text-[#A8B0BA]" target="_blank" rel="noopener noreferrer">
               Instagram
             </a>
           </div>
@@ -101,7 +101,7 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-gray-900">
+      <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#F0F6FC]">
         {heading}
       </h3>
       <ul className="mt-4 space-y-3">
@@ -109,7 +109,7 @@ function FooterColumn({
           <li key={link.href}>
             <Link
               href={link.href}
-              className="inline-block text-[14px] text-gray-500 transition-colors duration-200 hover:text-gray-900"
+              className="inline-block text-[14px] text-[#8B949E] transition-colors duration-200 hover:text-[#F0F6FC]"
             >
               {link.label}
             </Link>

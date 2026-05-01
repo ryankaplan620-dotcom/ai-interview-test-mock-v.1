@@ -24,14 +24,14 @@ export function Hero() {
           </span>
 
           {/* Massive heading */}
-          <h1 className="mt-6 font-bold leading-[1.05] tracking-[-0.03em] text-gray-900" style={{ fontSize: "clamp(44px, 7vw, 80px)" }}>
+          <h1 className="mt-6 font-bold leading-[1.05] tracking-[-0.03em] text-[#F0F6FC]" style={{ fontSize: "clamp(44px, 7vw, 80px)" }}>
             Practice interviews that feel{" "}
             <span className="bg-gradient-to-r from-[#00DC82] to-emerald-400 bg-clip-text text-transparent">real</span>.
             Get hired.
           </h1>
 
           {/* Sub-copy */}
-          <p className="mt-6 max-w-[540px] text-[18px] leading-relaxed text-gray-500 md:text-[20px]">
+          <p className="mt-6 max-w-[540px] text-[18px] leading-relaxed text-[#8B949E] md:text-[20px]">
             Folio runs voice interviews with distinct personas calibrated to your
             target role. Get scored feedback, track your improvement, and show up
             unmistakable.
@@ -47,7 +47,7 @@ export function Hero() {
             </Link>
             <Link
               href="#how-it-works"
-              className="inline-flex items-center text-[15px] font-medium text-gray-900 transition-colors hover:text-[#00DC82]"
+              className="inline-flex items-center text-[15px] font-medium text-[#F0F6FC] transition-colors hover:text-[#00DC82]"
             >
               See how it works
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-1.5" aria-hidden>
@@ -57,7 +57,7 @@ export function Hero() {
           </div>
 
           {/* Social proof metric */}
-          <p className="mt-8 text-[14px] text-gray-400">
+          <p className="mt-8 text-[14px] text-[#6E7681]">
             Join 2,000+ professionals practicing with Folio
           </p>
         </div>

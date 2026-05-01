@@ -50,7 +50,7 @@ const bands: Band[] = [
       "Cross-session memory",
       "Adaptive follow-ups",
     ],
-    bg: "bg-white",
+    bg: "bg-[#0D1117]",
     number: "01",
     icon: <SimulateIcon />,
   },
@@ -66,7 +66,7 @@ const bands: Band[] = [
       "Before/after trajectory",
     ],
     mirrored: true,
-    bg: "bg-gray-50",
+    bg: "bg-[#161B22]",
     number: "02",
     icon: <TrainIcon />,
   },
@@ -81,7 +81,7 @@ const bands: Band[] = [
       "Human-in-the-loop review",
       "Relationship tracking",
     ],
-    bg: "bg-white",
+    bg: "bg-[#0D1117]",
     number: "03",
     icon: <OutreachIcon />,
   },
@@ -110,7 +110,7 @@ export function Engines() {
               <ScrollReveal className={band.mirrored ? "md:[direction:ltr]" : ""}>
                 <div className="relative">
                   {/* Large light number badge behind heading */}
-                  <span className="absolute -top-8 -left-2 text-[96px] font-bold leading-none text-gray-100 select-none pointer-events-none" aria-hidden>
+                  <span className="absolute -top-8 -left-2 text-[96px] font-bold leading-none text-[#161B22] select-none pointer-events-none" aria-hidden>
                     {band.number}
                   </span>
 
@@ -123,7 +123,7 @@ export function Engines() {
                       </span>
                     </div>
 
-                    <h3 className="mt-4 text-[32px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[40px]">
+                    <h3 className="mt-4 text-[32px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[40px]">
                       {band.heading.split(band.accentWord).map((part, j) => (
                         <span key={j}>
                           {part}
@@ -134,7 +134,7 @@ export function Engines() {
                       ))}
                     </h3>
 
-                    <p className="mt-4 max-w-[500px] text-[15px] leading-relaxed text-gray-500">
+                    <p className="mt-4 max-w-[500px] text-[15px] leading-relaxed text-[#8B949E]">
                       {band.body}
                     </p>
 
@@ -157,7 +157,7 @@ export function Engines() {
                   {band.features.map((feat) => (
                     <li key={feat} className="flex items-start gap-3">
                       <FeatureCheck />
-                      <span className="text-[15px] text-gray-900">{feat}</span>
+                      <span className="text-[15px] text-[#F0F6FC]">{feat}</span>
                     </li>
                   ))}
                 </ul>

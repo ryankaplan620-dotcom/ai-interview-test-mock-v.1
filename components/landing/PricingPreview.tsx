@@ -89,17 +89,17 @@ function CheckIcon() {
 
 export function PricingPreview() {
   return (
-    <section id="pricing" className="bg-white px-6 py-24 sm:px-8 md:py-32" aria-label="Pricing">
+    <section id="pricing" className="bg-[#0D1117] px-6 py-24 sm:px-8 md:py-32" aria-label="Pricing">
       <div className="mx-auto max-w-[1200px]">
         <ScrollReveal>
           <div className="text-center">
             <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
               PRICING
             </span>
-            <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
+            <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
               Start free. Scale when it&apos;s real.
             </h2>
-            <p className="mt-4 text-gray-500">
+            <p className="mt-4 text-[#8B949E]">
               Try your first interview free. No credit card required.
             </p>
           </div>
@@ -111,8 +111,8 @@ export function PricingPreview() {
               <div
                 className={`relative flex flex-col rounded-xl border p-6 transition-all duration-300 ${
                   tier.highlighted
-                    ? "scale-[1.02] bg-gradient-to-b from-white to-emerald-50 border-[#00DC82]/30 shadow-lg shadow-[#00DC82]/10 order-first sm:order-none"
-                    : "border-gray-100 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1"
+                    ? "scale-[1.02] bg-gradient-to-b from-[#161B22] to-[#0D2818] border-[#00DC82]/30 shadow-[0_8px_30px_rgba(0,0,0,0.4)] shadow-[#00DC82]/10 order-first sm:order-none"
+                    : "border-[#21262D] bg-[#161B22] shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:-translate-y-1"
                 }`}
               >
                 {tier.highlighted && (
@@ -122,23 +122,23 @@ export function PricingPreview() {
                 )}
 
                 {/* Tier name + tagline */}
-                <h3 className="text-[22px] font-semibold text-gray-900">
+                <h3 className="text-[22px] font-semibold text-[#F0F6FC]">
                   {tier.name}
                 </h3>
-                <p className="mt-1 text-[13px] text-gray-500">
+                <p className="mt-1 text-[13px] text-[#8B949E]">
                   {tier.tagline}
                 </p>
 
                 {/* Price */}
                 <div className="mt-5">
-                  <span className="text-[40px] font-bold tracking-tight text-gray-900">
+                  <span className="text-[40px] font-bold tracking-tight text-[#F0F6FC]">
                     {tier.price}
                   </span>
                   {tier.period && (
-                    <span className="text-[14px] text-gray-400">{tier.period}</span>
+                    <span className="text-[14px] text-[#6E7681]">{tier.period}</span>
                   )}
                   {tier.periodLabel && (
-                    <p className="mt-0.5 text-[12px] text-gray-400">{tier.periodLabel}</p>
+                    <p className="mt-0.5 text-[12px] text-[#6E7681]">{tier.periodLabel}</p>
                   )}
                 </div>
 
@@ -148,22 +148,22 @@ export function PricingPreview() {
                   className={`mt-5 flex h-10 items-center justify-center rounded-lg text-[14px] font-medium transition-all duration-200 ${
                     tier.highlighted
                       ? "bg-[#00DC82] text-white hover:bg-[#00C574]"
-                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+                      : "bg-[#21262D] text-[#F0F6FC] hover:bg-[#30363D]"
                   }`}
                 >
                   {tier.cta}
                 </Link>
 
                 {/* Feature list */}
-                <div className="mt-6 border-t border-gray-100 pt-5">
+                <div className="mt-6 border-t border-[#21262D] pt-5">
                   {tier.preamble && (
-                    <p className="mb-3 text-[13px] font-medium text-gray-900">
+                    <p className="mb-3 text-[13px] font-medium text-[#F0F6FC]">
                       {tier.preamble}
                     </p>
                   )}
                   <ul className="flex flex-col gap-2.5">
                     {tier.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-[13px] text-gray-500">
+                      <li key={f} className="flex items-start gap-2 text-[13px] text-[#8B949E]">
                         <CheckIcon />
                         {f}
                       </li>
@@ -176,7 +176,7 @@ export function PricingPreview() {
         </div>
 
         <ScrollReveal>
-          <p className="mt-10 text-center text-[13px] text-gray-400">
+          <p className="mt-10 text-center text-[13px] text-[#6E7681]">
             First interview is free. Paid plans include a 15-day trial.{" "}
             <Link href="/pricing" className="text-[#00DC82] transition-opacity hover:opacity-80">
               See full comparison

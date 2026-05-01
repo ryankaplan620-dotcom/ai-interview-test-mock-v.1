@@ -41,14 +41,14 @@ function hexagonPath(fraction: number): string {
 
 export function FolioScore() {
   return (
-    <section className="bg-white px-6 py-24 sm:px-8 md:py-32" aria-label="The Folio Score">
+    <section className="bg-[#0D1117] px-6 py-24 sm:px-8 md:py-32" aria-label="The Folio Score">
       <div className="mx-auto max-w-[1200px]">
         <ScrollReveal>
           <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
             THE FOLIO SCORE
           </span>
 
-          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
+          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
             One number. The one that matters.
           </h2>
         </ScrollReveal>
@@ -112,16 +112,16 @@ function AnimatedCounter() {
       <div ref={ref}>
         {/* Animated gradient ring around the score */}
         <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#00DC82] to-emerald-400 p-[3px] animate-glow-pulse">
-          <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-            <span className="text-[48px] font-bold tracking-tight text-gray-900">
+          <div className="w-full h-full rounded-full bg-[#0D1117] flex items-center justify-center">
+            <span className="text-[48px] font-bold tracking-tight text-[#F0F6FC]">
               {count}
             </span>
           </div>
         </div>
-        <p className="mt-3 text-sm text-gray-400">out of 100</p>
+        <p className="mt-3 text-sm text-[#6E7681]">out of 100</p>
 
         <p
-          className={`mt-6 text-[15px] italic text-gray-500 transition-opacity duration-700 ${
+          className={`mt-6 text-[15px] italic text-[#8B949E] transition-opacity duration-700 ${
             done ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -129,7 +129,7 @@ function AnimatedCounter() {
         </p>
 
         <span
-          className={`mt-4 inline-block rounded-full bg-green-50 px-3 py-1 font-mono text-[11px] text-[#00DC82] transition-opacity duration-700 ${
+          className={`mt-4 inline-block rounded-full bg-[#00DC82]/10 px-3 py-1 font-mono text-[11px] text-[#00DC82] transition-opacity duration-700 ${
             done ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -189,7 +189,7 @@ function RadarChart() {
               key={frac}
               points={hexagonPath(frac)}
               fill="none"
-              stroke="#E5E7EB"
+              stroke="#21262D"
               strokeWidth="0.5"
             />
           ))}
@@ -202,7 +202,7 @@ function RadarChart() {
               y1={CENTER}
               x2={x}
               y2={y}
-              stroke="#E5E7EB"
+              stroke="#21262D"
               strokeWidth="0.5"
             />
           ))}
@@ -262,7 +262,7 @@ function RadarChart() {
                 x={x}
                 y={y + dy}
                 textAnchor={anchor}
-                fill="#9CA3AF"
+                fill="#6E7681"
                 fontSize="9"
                 fontFamily="var(--font-jetbrains-mono), monospace"
               >

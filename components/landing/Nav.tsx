@@ -29,8 +29,8 @@ export function Nav() {
       className={clsx(
         "sticky top-0 z-50 border-b transition-all duration-300",
         scrolled
-          ? "border-gray-100/50 bg-white/70 backdrop-blur-xl shadow-sm"
-          : "border-transparent bg-white"
+          ? "border-[#21262D]/50 bg-[#0D1117]/80 backdrop-blur-xl shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+          : "border-transparent bg-[#0D1117]"
       )}
       aria-label="Primary navigation"
     >
@@ -42,7 +42,7 @@ export function Nav() {
           aria-label="Folio home"
         >
           <FolioMark className="h-6 w-6" color="#00DC82" />
-          <span className="text-[17px] font-semibold tracking-[-0.02em] text-gray-900">
+          <span className="text-[17px] font-semibold tracking-[-0.02em] text-[#F0F6FC]">
             Folio
           </span>
         </Link>
@@ -53,7 +53,7 @@ export function Nav() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-[15px] font-medium text-gray-600 transition-colors duration-200 hover:text-gray-900"
+              className="text-[15px] font-medium text-[#A8B0BA] transition-colors duration-200 hover:text-[#F0F6FC]"
             >
               {link.label}
             </Link>
@@ -64,7 +64,7 @@ export function Nav() {
         <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="hidden text-[14px] font-medium text-gray-600 transition-colors duration-200 hover:text-gray-900 sm:inline-flex"
+            className="hidden text-[14px] font-medium text-[#A8B0BA] transition-colors duration-200 hover:text-[#F0F6FC] sm:inline-flex"
           >
             Sign in
           </Link>
@@ -78,17 +78,17 @@ export function Nav() {
           {/* Mobile hamburger */}
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50 md:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#30363D] bg-[#0D1117] transition-colors hover:bg-[#161B22] md:hidden"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A8B0BA" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
                 <path d="M4 4l8 8M12 4l-8 8" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#A8B0BA" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
                 <path d="M2 4h12M2 8h12M2 12h12" />
               </svg>
             )}
@@ -98,23 +98,23 @@ export function Nav() {
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div className="border-t border-gray-100 bg-white md:hidden">
+        <div className="border-t border-[#21262D] bg-[#0D1117] md:hidden">
           <div className="mx-auto max-w-[1200px] px-6 py-4 sm:px-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="flex min-h-[44px] items-center text-[15px] font-medium text-gray-600 transition-colors hover:text-gray-900"
+                className="flex min-h-[44px] items-center text-[15px] font-medium text-[#A8B0BA] transition-colors hover:text-[#F0F6FC]"
               >
                 {link.label}
               </Link>
             ))}
-            <div className="mt-2 flex flex-col gap-2 border-t border-gray-100 pt-4">
+            <div className="mt-2 flex flex-col gap-2 border-t border-[#21262D] pt-4">
               <Link
                 href="/login"
                 onClick={() => setMobileOpen(false)}
-                className="flex min-h-[44px] items-center text-[15px] font-medium text-gray-600 transition-colors hover:text-gray-900"
+                className="flex min-h-[44px] items-center text-[15px] font-medium text-[#A8B0BA] transition-colors hover:text-[#F0F6FC]"
               >
                 Sign in
               </Link>

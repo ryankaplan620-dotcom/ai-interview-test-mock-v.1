@@ -26,14 +26,14 @@ const quotes = [
 
 export function QuoteDemo() {
   return (
-    <section className="bg-gray-50 px-6 py-24 sm:px-8 md:py-32" aria-label="The feedback loop">
+    <section className="bg-[#161B22] px-6 py-24 sm:px-8 md:py-32" aria-label="The feedback loop">
       <div className="mx-auto max-w-[1200px]">
         <ScrollReveal>
           <div className="text-center">
             <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
               THE FEEDBACK LOOP
             </span>
-            <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
+            <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-[#F0F6FC] sm:text-[44px]">
               Every word gets stronger.
             </h2>
           </div>
@@ -60,22 +60,22 @@ function QuoteCard() {
   const quote = quotes[activeIndex];
 
   return (
-    <div className="mx-auto max-w-[680px] rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
+    <div className="mx-auto max-w-[680px] rounded-xl border border-[#21262D] bg-[#0D1117] p-8 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       {/* Before */}
       <div>
-        <span className="font-mono text-[10px] tracking-[0.15em] text-gray-400">
+        <span className="font-mono text-[10px] tracking-[0.15em] text-[#6E7681]">
           WHAT YOU SAID
         </span>
         <p
           key={`before-${activeIndex}`}
-          className="mt-2 italic text-gray-500 transition-opacity duration-500"
+          className="mt-2 italic text-[#8B949E] transition-opacity duration-500"
         >
           &ldquo;{quote.before}&rdquo;
         </p>
       </div>
 
       {/* Divider */}
-      <div className="my-6 h-px bg-gray-100" />
+      <div className="my-6 h-px bg-[#21262D]" />
 
       {/* After */}
       <div>
@@ -84,7 +84,7 @@ function QuoteCard() {
         </span>
         <p
           key={`after-${activeIndex}`}
-          className="mt-2 font-medium text-gray-900 transition-opacity duration-500"
+          className="mt-2 font-medium text-[#F0F6FC] transition-opacity duration-500"
         >
           &ldquo;{quote.after}&rdquo;
         </p>
@@ -99,7 +99,7 @@ function QuoteCard() {
             className={`h-1.5 rounded-full transition-all duration-300 ${
               i === activeIndex
                 ? "w-6 bg-[#00DC82]"
-                : "w-1.5 bg-gray-200"
+                : "w-1.5 bg-[#30363D]"
             }`}
             aria-label={`View quote ${i + 1}`}
           />
