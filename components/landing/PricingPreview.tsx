@@ -59,7 +59,7 @@ const tiers = [
     highlighted: false,
     preamble: "Everything in Pro, and:",
     features: [
-      "16 interview sessions",
+      "Unlimited interviews",
       "50 outreach sends",
       "Superday mode",
       "Hard mode",

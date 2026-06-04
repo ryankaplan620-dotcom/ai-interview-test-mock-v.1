@@ -133,7 +133,7 @@ export const TIERS: Record<TierKey, Tier> = {
     requiresStudentVerification: false,
     stripeEnvKey: 'STRIPE_PRICE_MAX',
     allotments: {
-      interviewSessions: 16,
+      interviewSessions: Infinity,
       interviewSessionMaxMinutes: 30,
       commsSessions: 20,
       commsSessionMaxMinutes: 10,
@@ -144,7 +144,7 @@ export const TIERS: Record<TierKey, Tier> = {
       stripeEnvKey: 'STRIPE_PRICE_OVERAGE_MAX',
     },
     features: [
-      '16 interview sessions, 30 minutes each',
+      'Unlimited interview sessions, 30 minutes each',
       '20 communication training sessions',
       '100 outreach sends per month',
       'Panel interviews',
@@ -248,8 +248,16 @@ export function formatPrice(amountUsd: number): string {
  */
 export function pricePerSessionAtFullUse(tierKey: TierKey): number {
   const tier = TIERS[tierKey];
-  if (tier.allotments.interviewSessions === 0) return 0;
-  return tier.priceUsd / tier.allotments.interviewSessions;
+  const included = tier.allotments.interviewSessions;
+  if (!Number.isFinite(included) || included === 0) return 0;
+  return tier.priceUsd / included;
+}
+
+/**
+ * True when a tier includes unlimited interview sessions (no cap, no overage).
+ */
+export function hasUnlimitedInterviews(tierKey: TierKey): boolean {
+  return !Number.isFinite(TIERS[tierKey].allotments.interviewSessions);
 }
 
 /**

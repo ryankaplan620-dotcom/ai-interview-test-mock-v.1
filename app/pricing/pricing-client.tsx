@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TIERS, formatPrice, pricePerSessionAtFullUse, tierHasFeature, type LegacyFeatureKey } from "@/lib/tiers";
+import { TIERS, formatPrice, pricePerSessionAtFullUse, tierHasFeature, hasUnlimitedInterviews, type LegacyFeatureKey } from "@/lib/tiers";
 import type { SubscriptionTier } from "@/types/supabase";
 
 interface PricingClientProps {
@@ -74,6 +74,7 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
             const isCurrent = currentTier === tierId;
             const isRecommended = tierId === "pro";
             const perSession = pricePerSessionAtFullUse(tierId);
+            const unlimited = hasUnlimitedInterviews(tierId);
             const buttonLabel = getButtonLabel({
               tierId,
               isCurrent,
@@ -110,9 +111,11 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                     </span>
                     <span className="text-[13px] text-gray-400">/ {tier.billing.label.toLowerCase()}</span>
                   </div>
-                  <p className="mt-2 font-mono text-[11px] tracking-[0.1em] text-gray-400">
-                    AS LOW AS ${perSession.toFixed(2)} / SESSION
-                  </p>
+                  {!unlimited && (
+                    <p className="mt-2 font-mono text-[11px] tracking-[0.1em] text-gray-400">
+                      AS LOW AS ${perSession.toFixed(2)} / SESSION
+                    </p>
+                  )}
                   {tier.requiresStudentVerification && (
                     <p className="mt-2 font-mono text-[10px] font-semibold tracking-[0.1em] text-brand-700">
                       VERIFIED STUDENTS ONLY
@@ -138,12 +141,14 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                 <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3.5">
                   <p className="font-mono text-[10px] font-semibold tracking-[0.12em] text-gray-400">INCLUDED</p>
                   <p className="mt-1 font-display text-[20px] font-semibold text-gray-900">
-                    {tier.allotments.interviewSessions} full interviews
+                    {unlimited ? "Unlimited interviews" : `${tier.allotments.interviewSessions} full interviews`}
                   </p>
                   <p className="mt-1 text-[12px] text-gray-500">+ unlimited drill practice</p>
-                  <p className="mt-2 text-[11.5px] leading-relaxed text-gray-400">
-                    Need more? ${tier.overage.sessionPriceUsd} per overage session.
-                  </p>
+                  {!unlimited && (
+                    <p className="mt-2 text-[11.5px] leading-relaxed text-gray-400">
+                      Need more? ${tier.overage.sessionPriceUsd} per overage session.
+                    </p>
+                  )}
                 </div>
 
                 <ul className="mt-6 space-y-2.5 border-t border-gray-100 pt-5">
