@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "How it works",
   description:
     "How Folio works: configure a session, talk to a calibrated interviewer in real time, and get a scored, quote-level breakdown the moment you finish.",
+  alternates: { canonical: "/how-it-works" },
 };
 
 const steps = [

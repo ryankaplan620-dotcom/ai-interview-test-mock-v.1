@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "FAQ",
   description:
     "Answers about Folio — how the live voice interviews work, what's included in each plan, the free trial, and how your data is handled.",
+  alternates: { canonical: "/faq" },
 };
 
 const categories: FaqCategory[] = [
@@ -82,6 +83,22 @@ export default function FaqPage() {
   return (
     <main className="min-h-screen bg-white">
       <Nav />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: categories.flatMap((c) =>
+              c.items.map((it) => ({
+                "@type": "Question",
+                name: it.q,
+                acceptedAnswer: { "@type": "Answer", text: it.a },
+              })),
+            ),
+          }),
+        }}
+      />
 
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-white">

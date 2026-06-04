@@ -63,20 +63,11 @@ export const metadata: Metadata = {
     siteName: "Folio",
     title: "Folio — The interview before the interview",
     description: "Live video interview practice, indistinguishable from the real thing.",
-    images: [
-      {
-        url: "/og-default.png",
-        width: 1200,
-        height: 630,
-        alt: "Folio — The interview before the interview",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Folio — The interview before the interview",
     description: "Live video interview practice, indistinguishable from the real thing.",
-    images: ["/og-default.png"],
     creator: "@folio",
   },
   icons: {
@@ -122,6 +113,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={fontVariables}>
       <body>
         <a href="#main-content" className="skip-to-content">Skip to content</a>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Folio",
+                url: SITE_URL,
+                logo: `${SITE_URL}/favicon-96.png`,
+                description:
+                  "Live voice interview practice, indistinguishable from the real thing.",
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Folio",
+                url: SITE_URL,
+              },
+            ]),
+          }}
+        />
         {children}
         <CookieBanner />
       </body>

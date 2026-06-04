@@ -7,6 +7,7 @@ import { Section, Container, Eyebrow, SectionHeading, Lede } from "@/components/
 export const metadata: Metadata = {
   title: "Contact",
   description: "Get in touch with Folio — general questions, product support, security, privacy, careers, and press.",
+  alternates: { canonical: "/contact" },
 };
 
 type Channel = {
