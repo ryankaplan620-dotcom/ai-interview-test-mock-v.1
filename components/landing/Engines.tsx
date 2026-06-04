@@ -92,7 +92,7 @@ export function Engines() {
       {bands.map((band, idx) => {
         const mirrored = idx % 2 === 1;
         return (
-          <div key={band.eyebrow} className={band.tone === "tint" ? "bg-gray-50" : "bg-white"}>
+          <div key={band.eyebrow} className={band.tone === "tint" ? "bg-canvas-tint" : "bg-canvas"}>
             <Container className="py-20 lg:py-24">
               <div className="grid items-center gap-10 md:grid-cols-2 lg:gap-16">
                 {/* Text side */}

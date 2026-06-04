@@ -18,7 +18,7 @@ export default async function PricingPage() {
   const isVerifiedStudent = tier?.is_verified_student ?? false;
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Hero */}

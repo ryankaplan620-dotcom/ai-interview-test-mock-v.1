@@ -38,7 +38,7 @@ const socials: { label: string; href: string }[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200/70 bg-gray-50" aria-label="Site footer">
+    <footer className="border-t border-gray-200/70 bg-canvas-tint" aria-label="Site footer">
       <div className="mx-auto max-w-[1200px] px-6 py-16 sm:px-8 sm:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           {/* Brand block */}

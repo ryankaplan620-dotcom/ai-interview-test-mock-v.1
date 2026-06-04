@@ -1,25 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Instrument_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { CookieBanner } from "@/components/legal/cookie-banner";
 import "./globals.css";
 
 // ==========================================
 // Font loading — all brand fonts via next/font
 // ==========================================
-// Note: Inter Display isn't on Google Fonts yet, so we use Inter with display setting.
-// When Inter Display lands on Google Fonts, swap here.
-const inter = Inter({
+const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-sans",
   weight: ["400", "500", "600", "700"],
 });
 
-const interDisplay = Inter({
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter-display",
-  weight: ["500", "600", "700"],
+  variable: "--font-serif",
+  weight: ["400"],
+  style: ["normal", "italic"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -104,8 +103,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const fontVariables = [
-    inter.variable,
-    interDisplay.variable,
+    instrumentSans.variable,
+    instrumentSerif.variable,
     jetbrainsMono.variable,
   ].join(" ");
 

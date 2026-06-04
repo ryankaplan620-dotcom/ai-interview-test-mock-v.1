@@ -34,6 +34,11 @@ const config: Config = {
           DEFAULT: "#00DC82",
           ink: "#04140D", // near-black text for use on top of brand fills
         },
+        // ------ Warm premium canvas (page background) + white cards ------
+        canvas: {
+          DEFAULT: "#FAF8F4",
+          tint: "#F0EDE6",
+        },
         // ------ Canvas: Ink-navy dark ------
         ink: {
           DEFAULT: "#0D1117",
@@ -57,9 +62,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-inter-display)", "Inter", "Söhne", "system-ui", "sans-serif"],
-        sans: ["var(--font-inter)", "Inter", "Söhne", "system-ui", "sans-serif"],
-        serif: ["Georgia", "'Times New Roman'", "serif"],
+        display: ["var(--font-sans)", "Instrument Sans", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "Instrument Sans", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Instrument Serif", "Georgia", "serif"],
         mono: ["var(--font-jetbrains-mono)", "'JetBrains Mono'", "Consolas", "monospace"],
         // Wordmark-style serifs for the proof row
         wordmark: {

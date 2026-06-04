@@ -7,30 +7,9 @@ const avatars = [
   "from-violet-400 to-purple-600",
 ];
 
-function WaveBars({ className }: { className?: string }) {
-  // Lightweight CSS equalizer — the brand's voice-first motif, no 3D.
-  const bars = [0.5, 0.85, 0.35, 1, 0.6, 0.9, 0.45];
-  return (
-    <span className={`flex items-center gap-[3px] ${className ?? ""}`} aria-hidden>
-      {bars.map((h, i) => (
-        <span
-          key={i}
-          className="w-[3px] rounded-full bg-brand-500 animate-waveform"
-          style={{
-            height: `${Math.round(h * 18)}px`,
-            transformOrigin: "center",
-            animationDelay: `${i * 0.12}s`,
-            animationDuration: `${0.9 + (i % 3) * 0.15}s`,
-          }}
-        />
-      ))}
-    </span>
-  );
-}
-
 export function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-white" aria-label="Hero">
+    <section className="relative isolate overflow-hidden bg-canvas" aria-label="Hero">
       {/* Backdrop */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-brand-wash" aria-hidden />
       <div
@@ -41,7 +20,10 @@ export function Hero() {
       <Container className="flex min-h-[82vh] flex-col items-center justify-center py-24 text-center sm:py-28">
         {/* Live voice pill */}
         <span className="inline-flex items-center gap-2.5 rounded-full border border-gray-200/80 bg-white/70 py-1.5 pl-3 pr-4 text-[12.5px] font-medium text-gray-600 shadow-card backdrop-blur">
-          <WaveBars />
+          <span className="relative flex h-2 w-2" aria-hidden>
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+          </span>
           Voice-first interview practice
         </span>
 

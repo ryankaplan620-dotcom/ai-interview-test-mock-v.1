@@ -13,11 +13,11 @@ const legalLinks = [
  */
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Legal sub-navigation */}
-      <div className="border-b border-gray-200/70 bg-gray-50/60">
+      <div className="border-b border-gray-200/70 bg-canvas-tint">
         <div className="mx-auto flex h-12 max-w-[720px] items-center gap-6 px-6 sm:px-10">
           {legalLinks.map((link) => (
             <Link

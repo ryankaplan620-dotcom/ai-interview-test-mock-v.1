@@ -13,7 +13,7 @@
 }
 
 html {
-  background: #FFFFFF;
+  background: #FAF8F4;
   color: #111827;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -22,7 +22,7 @@ html {
 }
 
 body {
-  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-family: var(--font-sans), "Instrument Sans", system-ui, sans-serif;
   font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
 }
 

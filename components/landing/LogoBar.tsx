@@ -26,7 +26,7 @@ function Track() {
 
 export function LogoBar() {
   return (
-    <section className="border-y border-gray-200/70 bg-white py-14 sm:py-16" aria-label="Companies we cover">
+    <section className="border-y border-gray-200/70 bg-canvas py-14 sm:py-16" aria-label="Companies we cover">
       <div className="mx-auto max-w-[1200px] px-6 sm:px-8">
         <p className="text-center font-mono text-[12px] font-medium uppercase tracking-[0.18em] text-gray-400">
           Question banks for the rooms you&apos;re walking into
@@ -35,8 +35,8 @@ export function LogoBar() {
 
       {/* Marquee with edge fades */}
       <div className="relative mt-9 overflow-hidden">
-        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent sm:w-32" aria-hidden />
-        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent sm:w-32" aria-hidden />
+        <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-canvas to-transparent sm:w-32" aria-hidden />
+        <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-canvas to-transparent sm:w-32" aria-hidden />
         <div className="flex w-max animate-marquee">
           <Track />
           <Track />

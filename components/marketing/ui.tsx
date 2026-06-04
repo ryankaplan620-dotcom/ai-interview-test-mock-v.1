@@ -29,8 +29,8 @@ export function Container({
 type SectionTone = "white" | "tint" | "ink";
 
 const sectionTone: Record<SectionTone, string> = {
-  white: "bg-white",
-  tint: "bg-gray-50",
+  white: "bg-canvas",
+  tint: "bg-canvas-tint",
   ink: "bg-ink text-white",
 };
 

@@ -39,7 +39,7 @@ const cards = [
 
 export default function SecurityPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Hero */}

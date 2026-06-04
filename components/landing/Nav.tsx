@@ -31,8 +31,8 @@ export function Nav() {
       className={clsx(
         "sticky top-0 z-50 border-b transition-all duration-300",
         scrolled
-          ? "border-gray-200/70 bg-white/80 shadow-[0_1px_0_rgba(16,24,40,0.04)] backdrop-blur-xl"
-          : "border-transparent bg-white",
+          ? "border-gray-200/70 bg-canvas/80 shadow-[0_1px_0_rgba(16,24,40,0.04)] backdrop-blur-xl"
+          : "border-transparent bg-canvas",
       )}
       aria-label="Primary navigation"
     >
@@ -97,7 +97,7 @@ export function Nav() {
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div className="border-t border-gray-100 bg-white md:hidden">
+        <div className="border-t border-gray-100 bg-canvas md:hidden">
           <div className="mx-auto max-w-[1200px] px-6 py-3 sm:px-8">
             {navLinks.map((link) => (
               <Link
