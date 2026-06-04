@@ -29,9 +29,12 @@ function GradientSphere() {
         void main() {
           vPosition = position;
           vNormal = normal;
+          // Layered displacement with a slow "speech-like" pulse so the form
+          // reads as voice-reactive rather than a uniform wobble.
+          float pulse = 0.6 + 0.4 * sin(uTime * 1.4);
           float displacement = sin(position.x * 3.0 + uTime * 0.5) * 0.03
             + sin(position.y * 4.0 + uTime * 0.3) * 0.02
-            + sin(position.z * 2.0 + uTime * 0.7) * 0.025;
+            + sin(position.z * 2.0 + uTime * 0.7) * 0.025 * pulse;
           vec3 newPosition = position + normal * displacement;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
         }
@@ -74,7 +77,6 @@ function GradientSphere() {
     meshRef.current.rotation.y += (targetRotation.current.y - meshRef.current.rotation.y) * 0.02;
     wireRef.current.rotation.x += (targetRotation.current.x - wireRef.current.rotation.x) * 0.015;
     wireRef.current.rotation.y += (targetRotation.current.y - wireRef.current.rotation.y) * 0.015;
-    // Pulsing glow
     if (glowRef.current) {
       const mat = glowRef.current.material as THREE.MeshBasicMaterial;
       mat.opacity = 0.02 + Math.sin(t * 0.8) * 0.02;
@@ -95,20 +97,18 @@ function GradientSphere() {
       <mesh ref={meshRef} material={gradientMaterial}>
         <icosahedronGeometry args={[2.2, 64]} />
       </mesh>
-      {/* Refined wireframe overlay — 20 segments */}
+      {/* Refined wireframe overlay */}
       <mesh ref={wireRef}>
         <icosahedronGeometry args={[2.4, 20]} />
         <meshBasicMaterial color="#00DC82" wireframe transparent opacity={0.05} />
       </mesh>
-      {/* Pulsing glow halo */}
+      {/* Soft glow halo */}
       <mesh ref={glowRef}>
         <sphereGeometry args={[2.8, 32, 32]} />
         <meshBasicMaterial color="#00DC82" transparent opacity={0.03} />
       </mesh>
       <OrbitRing />
-      <OuterOrbitRing />
-      <AmbientDots />
-      <ParticleTrails />
+      <VoiceWaveRing />
     </group>
   );
 }
@@ -123,122 +123,43 @@ function OrbitRing() {
   return (
     <mesh ref={ref}>
       <torusGeometry args={[3, 0.008, 16, 100]} />
-      <meshBasicMaterial color="#00DC82" transparent opacity={0.25} />
+      <meshBasicMaterial color="#00DC82" transparent opacity={0.22} />
     </mesh>
   );
 }
 
-function OuterOrbitRing() {
-  const ref = useRef<THREE.Mesh>(null!);
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    ref.current.rotation.x = Math.PI * 0.6 + Math.cos(t * 0.15) * 0.12;
-    ref.current.rotation.y = t * 0.08;
-    ref.current.rotation.z = Math.sin(t * 0.1) * 0.1;
-  });
-  return (
-    <mesh ref={ref}>
-      <torusGeometry args={[3.8, 0.005, 16, 120]} />
-      <meshBasicMaterial color="#00DC82" transparent opacity={0.15} />
-    </mesh>
-  );
-}
-
-function ParticleTrails() {
-  const trailCount = 3;
-  const pointsPerTrail = 40;
-  const totalPoints = trailCount * pointsPerTrail;
-  const meshRef = useRef<THREE.InstancedMesh>(null!);
+// Radial "equalizer" — bars around the sphere that pulse like a voice waveform.
+function VoiceWaveRing() {
+  const COUNT = 56;
+  const RADIUS = 2.7;
+  const ref = useRef<THREE.InstancedMesh>(null!);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
-  const trailParams = useMemo(() => {
-    return Array.from({ length: trailCount }, (_, i) => ({
-      radius: 2.8 + i * 0.5,
-      speed: 0.25 + i * 0.1,
-      tiltX: Math.PI * (0.3 + i * 0.2),
-      tiltY: i * 0.4,
-    }));
-  }, []);
-
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    let idx = 0;
-    for (let trail = 0; trail < trailCount; trail++) {
-      const { radius, speed, tiltX, tiltY } = trailParams[trail];
-      for (let p = 0; p < pointsPerTrail; p++) {
-        const frac = p / pointsPerTrail;
-        const angle = t * speed + frac * Math.PI * 2;
-        const x = radius * Math.cos(angle);
-        const y = radius * Math.sin(angle) * Math.sin(tiltX);
-        const z = radius * Math.sin(angle) * Math.cos(tiltX) + Math.cos(angle + tiltY) * 0.3;
-        dummy.position.set(x, y, z);
-        // Fade out at tail
-        const scale = 0.008 + (1 - frac) * 0.012;
-        dummy.scale.setScalar(scale);
-        dummy.updateMatrix();
-        meshRef.current.setMatrixAt(idx, dummy.matrix);
-        idx++;
-      }
-    }
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, totalPoints]}>
-      <sphereGeometry args={[1, 4, 4]} />
-      <meshBasicMaterial color="#00DC82" transparent opacity={0.2} />
-    </instancedMesh>
-  );
-}
-
-function AmbientDots() {
-  const count = 80;
-  const meshRef = useRef<THREE.InstancedMesh>(null!);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  const positions = useMemo(() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = 3.5 + Math.random() * 2.0;
-      arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      arr[i * 3 + 2] = r * Math.cos(phi);
-    }
-    return arr;
-  }, []);
-
-  // Pre-compute base sizes: mix of tiny and larger dots
-  const baseSizes = useMemo(() => {
-    const arr = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      // 30% chance of being a larger dot
-      arr[i] = Math.random() < 0.3 ? 0.025 + Math.random() * 0.02 : 0.005 + Math.random() * 0.01;
-    }
-    return arr;
-  }, []);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      dummy.position.set(
-        positions[i3] + Math.sin(t * 0.3 + i) * 0.15,
-        positions[i3 + 1] + Math.cos(t * 0.2 + i * 0.5) * 0.15,
-        positions[i3 + 2],
-      );
-      dummy.scale.setScalar(baseSizes[i] + Math.sin(t * 0.7 + i * 1.3) * 0.003);
+    for (let i = 0; i < COUNT; i++) {
+      const a = (i / COUNT) * Math.PI * 2;
+      // Layered sine waves read as speech-like amplitude rather than a uniform hum.
+      const amp =
+        0.12 +
+        Math.abs(Math.sin(a * 3 + t * 1.7)) * 0.2 +
+        Math.abs(Math.sin(a * 7 - t * 1.1)) * 0.1;
+      dummy.position.set(Math.cos(a) * RADIUS, Math.sin(a) * RADIUS, 0);
+      dummy.rotation.set(0, 0, a + Math.PI / 2);
+      dummy.scale.set(1, amp, 1);
       dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
+      ref.current.setMatrixAt(i, dummy.matrix);
     }
-    meshRef.current.instanceMatrix.needsUpdate = true;
+    ref.current.instanceMatrix.needsUpdate = true;
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <sphereGeometry args={[1, 6, 6]} />
-      <meshBasicMaterial color="#00DC82" transparent opacity={0.3} />
-    </instancedMesh>
+    <group rotation={[Math.PI * 0.42, 0, 0]}>
+      <instancedMesh ref={ref} args={[undefined, undefined, COUNT]}>
+        <boxGeometry args={[0.03, 1, 0.03]} />
+        <meshBasicMaterial color="#00DC82" transparent opacity={0.5} />
+      </instancedMesh>
+    </group>
   );
 }
 
