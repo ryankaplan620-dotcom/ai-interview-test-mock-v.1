@@ -17,6 +17,23 @@ const config: Config = {
           soft: "#C8FAE1",
           highlight: "#33FAA6",
         },
+        // ------ Marketing brand emerald (light surfaces) ------
+        // Calibrated for white backgrounds — slightly deeper than `accent`
+        // so it holds contrast and pairs with near-black ink text.
+        brand: {
+          50: "#ECFDF5",
+          100: "#D1FAE5",
+          200: "#A7F3D0",
+          300: "#6EE7B7",
+          400: "#34D399",
+          500: "#00DC82",
+          600: "#00C574",
+          700: "#00A862",
+          800: "#047857",
+          900: "#064E3B",
+          DEFAULT: "#00DC82",
+          ink: "#04140D", // near-black text for use on top of brand fills
+        },
         // ------ Canvas: Ink-navy dark ------
         ink: {
           DEFAULT: "#0D1117",
@@ -78,6 +95,12 @@ const config: Config = {
       boxShadow: {
         "accent-glow": "0 0 40px 0 rgba(0,245,144,0.15)",
         "accent-glow-lg": "0 0 80px 0 rgba(0,245,144,0.20)",
+        // ------ Light/marketing elevation system ------
+        card: "0 1px 2px 0 rgba(16,24,40,0.04), 0 1px 3px 0 rgba(16,24,40,0.05)",
+        "card-hover": "0 18px 40px -16px rgba(16,24,40,0.20)",
+        elevated: "0 24px 64px -24px rgba(16,24,40,0.24)",
+        frame: "0 32px 80px -32px rgba(16,24,40,0.28)",
+        "brand-glow": "0 10px 34px -10px rgba(0,220,130,0.45)",
       },
       animation: {
         "pulse-ring": "pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Playfair_Display, Spectral, Crimson_Text, Cinzel } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { CookieBanner } from "@/components/legal/cookie-banner";
 import "./globals.css";
 
@@ -27,36 +27,6 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
   variable: "--font-jetbrains-mono",
   weight: ["400", "500", "600"],
-});
-
-// Wordmark-style serifs for the proof row
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-cinzel",
-  weight: ["600", "700"],
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-playfair",
-  weight: ["500", "600"],
-});
-
-const spectral = Spectral({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-spectral",
-  weight: ["400", "500"],
-});
-
-const crimson = Crimson_Text({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-crimson",
-  weight: ["400", "600"],
-  style: ["normal", "italic"],
 });
 
 // ==========================================
@@ -135,7 +105,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D1117",
+  themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -146,10 +116,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     inter.variable,
     interDisplay.variable,
     jetbrainsMono.variable,
-    cinzel.variable,
-    playfair.variable,
-    spectral.variable,
-    crimson.variable,
   ].join(" ");
 
   return (

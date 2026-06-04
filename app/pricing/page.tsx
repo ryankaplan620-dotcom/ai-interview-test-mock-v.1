@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
-import Link from "next/link";
-import { FolioMark } from "@/components/FolioMark";
+import { Nav } from "@/components/landing/Nav";
+import { Footer } from "@/components/landing/Footer";
+import { Section, Eyebrow, SectionHeading, Lede } from "@/components/marketing/ui";
 import { PricingClient } from "./pricing-client";
 import { getUser, getUserTier } from "@/lib/auth/server";
 
@@ -17,57 +18,27 @@ export default async function PricingPage() {
   const isVerifiedStudent = tier?.is_verified_student ?? false;
 
   return (
-    <main className="relative min-h-screen bg-ink">
-      <div className="pointer-events-none fixed inset-0 grid-overlay opacity-[0.25]" aria-hidden />
-      <div className="pointer-events-none fixed inset-0 bg-depth-glow opacity-60" aria-hidden />
-      <div className="pointer-events-none fixed inset-0 bg-ambient-glow opacity-50" aria-hidden />
-
-      {/* Minimal nav */}
-      <nav className="relative border-b border-ink-border/35 bg-ink/80 backdrop-blur-md">
-        <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 sm:px-10">
-          <Link href="/" className="inline-flex items-center gap-2.5">
-            <FolioMark className="h-6 w-6" color="#00F590" />
-            <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">
-              folio
-            </span>
-          </Link>
-          {!user && (
-            <div className="flex items-center gap-4">
-              <Link
-                href="/login"
-                className="font-sans text-[13.5px] font-medium text-text-secondary hover:text-text-primary"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/signup"
-                className="inline-flex h-9 items-center rounded-full bg-accent px-4 font-sans text-[13.5px] font-semibold text-text-onAccent hover:bg-accent-highlight"
-              >
-                Start free →
-              </Link>
-            </div>
-          )}
-        </div>
-      </nav>
+    <main className="min-h-screen bg-white">
+      <Nav />
 
       {/* Hero */}
-      <section className="relative px-6 py-20 sm:px-10 sm:py-28">
+      <Section tone="white" className="pt-20 pb-10 sm:pt-28 sm:pb-12 lg:pt-32">
         <div className="mx-auto max-w-[840px] text-center">
-          <span className="font-mono text-[11px] font-medium tracking-label text-accent">PRICING</span>
-          <h1 className="mt-6 font-display text-[44px] font-semibold leading-[1.1] tracking-display text-text-primary sm:text-[56px]">
-            Built for the cycle.
-            <br />
-            <em className="font-serif font-normal italic text-accent">Not the month.</em>
-          </h1>
-          <p className="mx-auto mt-6 max-w-[580px] font-sans text-[17px] leading-relaxed text-text-secondary">
-            Recruiting happens in quarters, not billing cycles. Pay once for a full prep season with a
-            generous session allowance, unlimited drill practice, and every persona from day one.
-          </p>
-          <p className="mt-4 font-sans text-[14px] text-text-tertiary">
+          <Eyebrow>Pricing</Eyebrow>
+          <SectionHeading as="h1" className="mt-5">
+            Built for the cycle.{" "}
+            <span className="font-serif font-normal italic text-brand-600">Not the month.</span>
+          </SectionHeading>
+          <Lede className="mx-auto mt-6 max-w-[600px]">
+            Recruiting happens in quarters, not billing cycles. Pay once for a full prep season
+            with a generous session allowance, unlimited drill practice, and every persona from
+            day one.
+          </Lede>
+          <p className="mt-4 text-[14px] text-gray-400">
             15-day free trial on your first purchase. Cancel anytime before renewal.
           </p>
         </div>
-      </section>
+      </Section>
 
       {/* Tier grid */}
       <PricingClient
@@ -77,28 +48,24 @@ export default async function PricingPage() {
       />
 
       {/* Overage explainer */}
-      <section className="relative px-6 pb-20 sm:px-10">
-        <div className="mx-auto max-w-[840px]">
-          <div className="rounded-2xl border border-ink-border bg-ink-surface p-8 sm:p-10">
-            <span className="font-mono text-[10px] font-medium tracking-label text-accent">
-              WHEN YOU NEED MORE
-            </span>
-            <h3 className="mt-2 font-display text-[22px] font-semibold text-text-primary">
-              Overage sessions
-            </h3>
-            <p className="mt-2 max-w-2xl font-sans text-[14px] leading-relaxed text-text-secondary">
-              Hit your included-session limit before your cycle ends? Pay per session to keep going:
-              $8 each on Cycle and Pro, $6 each on Max. No forced upgrade, no subscription surprises.
-              You decide when to push on with another interview.
+      <section className="px-6 pb-16 sm:px-8">
+        <div className="mx-auto max-w-[860px]">
+          <div className="rounded-2xl border border-gray-200/70 bg-gray-50 p-8 shadow-card sm:p-10">
+            <Eyebrow>When you need more</Eyebrow>
+            <h3 className="mt-3 text-[22px] font-semibold text-gray-900">Overage sessions</h3>
+            <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-gray-600">
+              Hit your included-session limit before your cycle ends? Pay per session to keep
+              going: $8 each on Cycle and Pro, $6 each on Max. No forced upgrade, no subscription
+              surprises. You decide when to push on with another interview.
             </p>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="relative px-6 pb-24 sm:px-10">
-        <div className="mx-auto max-w-[720px]">
-          <h2 className="text-center font-display text-[32px] font-semibold tracking-heading text-text-primary">
+      <Section tone="white" className="py-16 sm:py-20 lg:py-24">
+        <div className="mx-auto max-w-[760px]">
+          <h2 className="text-center font-display text-[30px] font-semibold tracking-[-0.03em] text-gray-900">
             Common questions
           </h2>
           <div className="mt-12 space-y-8">
@@ -128,15 +95,9 @@ export default async function PricingPage() {
             />
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Footer signature */}
-      <footer className="relative border-t border-ink-border/40 px-6 py-8 sm:px-10">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between">
-          <p className="font-serif text-[15px] italic text-accent">Built to get you hired.</p>
-          <p className="font-display text-[14px] font-medium text-accent">folio.io</p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }
@@ -144,8 +105,8 @@ export default async function PricingPage() {
 function Faq({ q, a }: { q: string; a: string }) {
   return (
     <div>
-      <h3 className="font-display text-[16px] font-semibold text-text-primary">{q}</h3>
-      <p className="mt-2 font-sans text-[14px] leading-relaxed text-text-secondary">{a}</p>
+      <h3 className="text-[16px] font-semibold text-gray-900">{q}</h3>
+      <p className="mt-2 text-[14.5px] leading-relaxed text-gray-600">{a}</p>
     </div>
   );
 }

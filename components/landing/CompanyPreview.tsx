@@ -1,4 +1,5 @@
 import { ScrollReveal } from "./ScrollReveal";
+import { Section, Eyebrow, SectionHeading, Lede, ArrowLink } from "@/components/marketing/ui";
 
 const companies = [
   { name: "Google", count: 67 },
@@ -14,66 +15,47 @@ const companies = [
 
 export function CompanyPreview() {
   return (
-    <section
-      className="bg-white px-6 py-24 sm:px-8 md:py-32"
-      aria-label="Company intelligence"
-    >
-      <div className="mx-auto max-w-[1200px]">
-        <ScrollReveal>
-          <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
-            COMPANY INTELLIGENCE
-          </span>
+    <Section tone="white">
+      <ScrollReveal>
+        <Eyebrow>Company intelligence</Eyebrow>
+        <SectionHeading className="mt-4">Prepared for any room.</SectionHeading>
+        <Lede className="mt-5 max-w-[600px]">
+          200+ companies across every industry. Behavioral, technical, case, and general
+          interviews — calibrated to how each organization actually hires.
+        </Lede>
+      </ScrollReveal>
 
-          <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
-            Prepared for any room.
-          </h2>
-
-          <p className="mt-4 max-w-[600px] text-[16px] text-gray-500">
-            200+ companies across every industry. Behavioral, technical, case, and general interviews — calibrated to how each organization actually hires.
-          </p>
-        </ScrollReveal>
-
-        {/* Company grid */}
-        <div className="mt-16 grid gap-3 md:grid-cols-3">
-          {companies.map((company, i) => (
-            <ScrollReveal key={company.name} delay={i * 60}>
-              <div className="group flex items-center justify-between rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md hover:border-[#00DC82]/20 hover:shadow-[0_4px_20px_rgba(0,220,130,0.1)]">
-                <div>
-                  <span className="text-[14px] font-medium text-gray-900">
-                    {company.name}
-                  </span>
-                  <p className="mt-1 font-mono text-[11px] text-gray-400">
-                    {company.count} questions
-                  </p>
-                </div>
-                {/* Arrow that appears on hover */}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="shrink-0 text-gray-300 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-[#00DC82] group-hover:translate-x-0.5"
-                  aria-hidden
-                >
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {companies.map((company, i) => (
+          <ScrollReveal key={company.name} delay={i * 50}>
+            <div className="group flex items-center gap-4 rounded-2xl border border-gray-200/70 bg-white p-5 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gray-50 font-display text-[16px] font-semibold text-gray-500 ring-1 ring-inset ring-gray-100 transition-colors group-hover:bg-brand-50 group-hover:text-brand-700 group-hover:ring-brand-100">
+                {company.name.charAt(0)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block truncate text-[14.5px] font-semibold text-gray-900">
+                  {company.name}
+                </span>
+                <p className="mt-0.5 font-mono text-[11px] text-gray-400">{company.count} questions</p>
               </div>
-            </ScrollReveal>
-          ))}
-        </div>
-
-        <ScrollReveal className="mt-8">
-          <a
-            href="/signup"
-            className="inline-flex items-center text-[15px] font-medium text-[#00DC82] transition-opacity hover:opacity-80"
-          >
-            Explore all companies
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-1" aria-hidden>
-              <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
-        </ScrollReveal>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                className="shrink-0 text-gray-300 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-brand-600"
+                aria-hidden
+              >
+                <path d="M3.5 8h9M9 4.5 12.5 8 9 11.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </ScrollReveal>
+        ))}
       </div>
-    </section>
+
+      <ScrollReveal className="mt-10">
+        <ArrowLink href="/signup">Explore all companies</ArrowLink>
+      </ScrollReveal>
+    </Section>
   );
 }

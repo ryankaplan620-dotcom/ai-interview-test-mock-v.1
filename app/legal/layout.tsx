@@ -1,54 +1,39 @@
 import Link from "next/link";
-import { FolioMark } from "@/components/FolioMark";
+import { Nav } from "@/components/landing/Nav";
+import { Footer } from "@/components/landing/Footer";
+
+const legalLinks = [
+  { label: "Terms", href: "/legal/terms" },
+  { label: "Privacy", href: "/legal/privacy" },
+  { label: "Cookies", href: "/legal/cookies" },
+];
 
 /**
- * Shared chrome for legal pages — matches the pricing page shell.
- * Legal pages should feel like part of the product.
+ * Shared chrome for legal pages — now part of the unified light marketing site.
  */
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="relative min-h-screen bg-ink">
-      <div className="pointer-events-none fixed inset-0 grid-overlay opacity-[0.15]" aria-hidden />
+    <main className="min-h-screen bg-white">
+      <Nav />
 
-      <nav className="relative border-b border-ink-border/35 bg-ink/80 backdrop-blur-md">
-        <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 sm:px-10">
-          <Link href="/" className="inline-flex items-center gap-2.5">
-            <FolioMark className="h-6 w-6" color="#00F590" />
-            <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">
-              folio
-            </span>
-          </Link>
-          <div className="flex items-center gap-6">
+      {/* Legal sub-navigation */}
+      <div className="border-b border-gray-200/70 bg-gray-50/60">
+        <div className="mx-auto flex h-12 max-w-[720px] items-center gap-6 px-6 sm:px-10">
+          {legalLinks.map((link) => (
             <Link
-              href="/legal/terms"
-              className="font-sans text-[13px] font-medium text-text-secondary hover:text-text-primary"
+              key={link.href}
+              href={link.href}
+              className="text-[13px] font-medium text-gray-500 transition-colors hover:text-gray-900"
             >
-              Terms
+              {link.label}
             </Link>
-            <Link
-              href="/legal/privacy"
-              className="font-sans text-[13px] font-medium text-text-secondary hover:text-text-primary"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/legal/cookies"
-              className="font-sans text-[13px] font-medium text-text-secondary hover:text-text-primary"
-            >
-              Cookies
-            </Link>
-          </div>
+          ))}
         </div>
-      </nav>
+      </div>
 
       {children}
 
-      <footer className="relative border-t border-ink-border/40 px-6 py-8 sm:px-10">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between">
-          <p className="font-serif text-[15px] italic text-accent">Built to get you hired.</p>
-          <p className="font-display text-[14px] font-medium text-accent">folio.io</p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

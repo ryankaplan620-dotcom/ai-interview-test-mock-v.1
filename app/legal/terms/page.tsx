@@ -11,29 +11,29 @@ export default function TermsPage() {
   return (
     <article className="relative mx-auto max-w-[720px] px-6 py-16 sm:px-10 sm:py-20">
       <header className="mb-12">
-        <p className="font-mono text-[11px] font-medium tracking-label text-accent">TERMS OF SERVICE</p>
-        <h1 className="mt-3 font-display text-[40px] font-semibold leading-[1.1] tracking-heading text-text-primary sm:text-[48px]">
+        <p className="font-mono text-[11px] font-medium tracking-label text-brand-700">TERMS OF SERVICE</p>
+        <h1 className="mt-3 font-display text-[40px] font-semibold leading-[1.1] tracking-heading text-gray-900 sm:text-[48px]">
           Terms of Service
         </h1>
-        <p className="mt-4 font-sans text-[13px] text-text-tertiary">
+        <p className="mt-4 font-sans text-[13px] text-gray-400">
           Version {LEGAL_VERSIONS.terms} · Effective {effective}
         </p>
-        <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-text-secondary">
+        <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-gray-600">
           This is the agreement between you and {COMPANY.short_name} when you use the product.
           Read it carefully. If you don't agree with any part, don't use {COMPANY.short_name}.
         </p>
       </header>
 
-      <div className="legal-prose text-text-secondary">
+      <div className="legal-prose text-gray-600">
         <Section n="1" title="Who we are">
           <p>
             {COMPANY.short_name} is operated by {COMPANY.legal_name} ("{COMPANY.short_name}," "we," "our," or "us").
             We operate the website at{" "}
-            <a href={`https://${COMPANY.product_domain}`} className="text-accent hover:underline">
+            <a href={`https://${COMPANY.product_domain}`} className="text-brand-700 hover:underline">
               {COMPANY.product_domain}
             </a>
             . For legal contact, write to{" "}
-            <a href={`mailto:${COMPANY.legal_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.legal_email}`} className="text-brand-700 hover:underline">
               {COMPANY.legal_email}
             </a>
             .
@@ -61,7 +61,7 @@ export default function TermsPage() {
             18, you may use {COMPANY.short_name} only with the consent and supervision of a parent or
             legal guardian who agrees to be bound by these Terms on your behalf. If you are under 13,
             do not use the service — close your account and contact us at{" "}
-            <a href={`mailto:${COMPANY.privacy_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.privacy_email}`} className="text-brand-700 hover:underline">
               {COMPANY.privacy_email}
             </a>
             .
@@ -77,7 +77,7 @@ export default function TermsPage() {
           <p>
             You are responsible for keeping your account credentials secure and for every action
             taken through your account. Notify us immediately at{" "}
-            <a href={`mailto:${COMPANY.support_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.support_email}`} className="text-brand-700 hover:underline">
               {COMPANY.support_email}
             </a>{" "}
             if you suspect unauthorized access.
@@ -95,7 +95,7 @@ export default function TermsPage() {
             page at{" "}
             <a
               href={`https://${COMPANY.product_domain}/pricing`}
-              className="text-accent hover:underline"
+              className="text-brand-700 hover:underline"
             >
               {COMPANY.product_domain}/pricing
             </a>{" "}
@@ -187,7 +187,7 @@ export default function TermsPage() {
             interview styles. They are not real employees of the firms referenced. Any resemblance
             between our personas and a specific real person is unintentional. If you believe a
             persona misrepresents a real person, contact us at{" "}
-            <a href={`mailto:${COMPANY.legal_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.legal_email}`} className="text-brand-700 hover:underline">
               {COMPANY.legal_email}
             </a>
             .
@@ -311,11 +311,11 @@ export default function TermsPage() {
         <Section n="17" title="Contact">
           <p>
             For questions about these Terms, write to{" "}
-            <a href={`mailto:${COMPANY.legal_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.legal_email}`} className="text-brand-700 hover:underline">
               {COMPANY.legal_email}
             </a>
             . For product support, write to{" "}
-            <a href={`mailto:${COMPANY.support_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.support_email}`} className="text-brand-700 hover:underline">
               {COMPANY.support_email}
             </a>
             .
@@ -329,11 +329,11 @@ export default function TermsPage() {
 function Section({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="mb-4 font-display text-[22px] font-semibold leading-[1.2] text-text-primary">
-        <span className="mr-3 font-mono text-[14px] font-normal text-text-tertiary">{n}.</span>
+      <h2 className="mb-4 font-display text-[22px] font-semibold leading-[1.2] text-gray-900">
+        <span className="mr-3 font-mono text-[14px] font-normal text-gray-400">{n}.</span>
         {title}
       </h2>
-      <div className="legal-section-body font-sans text-[15px] leading-[1.7] [&>p]:mb-4 [&_strong]:font-semibold [&_strong]:text-text-primary [&_ul]:my-4 [&_ul]:space-y-3 [&_li]:pl-5 [&_li]:relative [&_li]:before:content-['—'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-accent">
+      <div className="legal-section-body font-sans text-[15px] leading-[1.7] [&>p]:mb-4 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:my-4 [&_ul]:space-y-3 [&_li]:pl-5 [&_li]:relative [&_li]:before:content-['—'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-brand-700">
         {children}
       </div>
     </section>

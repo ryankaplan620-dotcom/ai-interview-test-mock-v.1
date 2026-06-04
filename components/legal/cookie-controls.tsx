@@ -40,12 +40,12 @@ export function CookieControls() {
   };
 
   return (
-    <div className="rounded-xl border border-ink-border bg-ink-surface p-5">
+    <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <p className="font-mono text-[11px] font-medium tracking-label text-accent">
+        <p className="font-mono text-[11px] font-semibold tracking-label text-brand-700">
           YOUR CURRENT CHOICE
         </p>
-        <p className="font-mono text-[11px] tracking-label text-text-tertiary">
+        <p className="font-mono text-[11px] tracking-label text-gray-400">
           {state === "unset"
             ? "NOT YET SET"
             : state === "accepted"
@@ -57,10 +57,10 @@ export function CookieControls() {
         <button
           onClick={() => apply("accepted")}
           disabled={state === "accepted"}
-          className={`rounded-full border px-4 py-2 font-sans text-[13px] font-medium transition-colors ${
+          className={`rounded-xl border px-4 py-2 font-sans text-[13px] font-medium transition-colors ${
             state === "accepted"
-              ? "border-accent bg-accent/10 text-accent cursor-default"
-              : "border-ink-border bg-ink-raised text-text-primary hover:border-accent hover:text-accent"
+              ? "cursor-default border-brand-200 bg-brand-50 text-brand-700"
+              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900"
           }`}
         >
           Accept analytics
@@ -68,10 +68,10 @@ export function CookieControls() {
         <button
           onClick={() => apply("dismissed")}
           disabled={state === "dismissed"}
-          className={`rounded-full border px-4 py-2 font-sans text-[13px] font-medium transition-colors ${
+          className={`rounded-xl border px-4 py-2 font-sans text-[13px] font-medium transition-colors ${
             state === "dismissed"
-              ? "border-ink-border bg-ink-raised text-text-secondary cursor-default"
-              : "border-ink-border bg-ink-raised text-text-primary hover:border-accent hover:text-accent"
+              ? "cursor-default border-gray-200 bg-gray-100 text-gray-500"
+              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900"
           }`}
         >
           Only necessary

@@ -17,20 +17,20 @@ export default function CookiesPage() {
   return (
     <article className="relative mx-auto max-w-[720px] px-6 py-16 sm:px-10 sm:py-20">
       <header className="mb-12">
-        <p className="font-mono text-[11px] font-medium tracking-label text-accent">COOKIE POLICY</p>
-        <h1 className="mt-3 font-display text-[40px] font-semibold leading-[1.1] tracking-heading text-text-primary sm:text-[48px]">
+        <p className="font-mono text-[11px] font-medium tracking-label text-brand-700">COOKIE POLICY</p>
+        <h1 className="mt-3 font-display text-[40px] font-semibold leading-[1.1] tracking-heading text-gray-900 sm:text-[48px]">
           Cookie Policy
         </h1>
-        <p className="mt-4 font-sans text-[13px] text-text-tertiary">
+        <p className="mt-4 font-sans text-[13px] text-gray-400">
           Version {LEGAL_VERSIONS.cookies} · Effective {effective}
         </p>
-        <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-text-secondary">
+        <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-gray-600">
           Every cookie {COMPANY.short_name} sets, why it exists, and how to turn off the optional
           ones. We keep this list short on purpose.
         </p>
       </header>
 
-      <div className="legal-prose text-text-secondary">
+      <div className="legal-prose text-gray-600">
         <Section n="1" title="Strictly necessary cookies — always on">
           <p>
             These cookies are required for the product to work. They cannot be turned off. No
@@ -101,7 +101,7 @@ export default function CookiesPage() {
         <Section n="5" title="Questions">
           <p>
             For anything cookie- or tracking-related, email{" "}
-            <a href={`mailto:${COMPANY.privacy_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.privacy_email}`} className="text-brand-700 hover:underline">
               {COMPANY.privacy_email}
             </a>
             .
@@ -115,11 +115,11 @@ export default function CookiesPage() {
 function Section({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="mb-4 font-display text-[22px] font-semibold leading-[1.2] text-text-primary">
-        <span className="mr-3 font-mono text-[14px] font-normal text-text-tertiary">{n}.</span>
+      <h2 className="mb-4 font-display text-[22px] font-semibold leading-[1.2] text-gray-900">
+        <span className="mr-3 font-mono text-[14px] font-normal text-gray-400">{n}.</span>
         {title}
       </h2>
-      <div className="font-sans text-[15px] leading-[1.7] [&>p]:mb-4 [&_strong]:font-semibold [&_strong]:text-text-primary">
+      <div className="font-sans text-[15px] leading-[1.7] [&>p]:mb-4 [&_strong]:font-semibold [&_strong]:text-gray-900">
         {children}
       </div>
     </section>
@@ -140,22 +140,22 @@ function CookieRow({
   optional?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-ink-border bg-ink-surface p-4">
+    <div className="rounded-lg border border-gray-200 bg-white p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <code className="font-mono text-[13px] text-text-primary">{name}</code>
+        <code className="font-mono text-[13px] text-gray-900">{name}</code>
         <span
           className={[
             "rounded-full border px-2 py-0.5 font-mono text-[9px] tracking-label",
             optional
-              ? "border-amber-300/30 bg-amber-300/5 text-amber-300/80"
-              : "border-accent/30 bg-accent/5 text-accent",
+              ? "border-amber-200 bg-amber-50 text-amber-700"
+              : "border-brand-200 bg-brand-50 text-brand-700",
           ].join(" ")}
         >
           {optional ? "OPTIONAL" : "REQUIRED"}
         </span>
       </div>
-      <p className="mt-2 font-sans text-[13px] leading-[1.55] text-text-secondary">{purpose}</p>
-      <p className="mt-2 font-mono text-[11px] tracking-label text-text-tertiary">
+      <p className="mt-2 font-sans text-[13px] leading-[1.55] text-gray-600">{purpose}</p>
+      <p className="mt-2 font-mono text-[11px] tracking-label text-gray-400">
         {provider.toUpperCase()} · EXPIRES {expires.toUpperCase()}
       </p>
     </div>
