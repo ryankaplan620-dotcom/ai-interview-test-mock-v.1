@@ -5,9 +5,10 @@ const columns: { heading: string; links: { label: string; href: string }[] }[] =
   {
     heading: "Product",
     links: [
-      { label: "How it works", href: "/#how-it-works" },
+      { label: "How it works", href: "/how-it-works" },
       { label: "Interviewers", href: "/#interviewers" },
       { label: "Pricing", href: "/pricing" },
+      { label: "FAQ", href: "/faq" },
       { label: "Security", href: "/security" },
     ],
   },
@@ -16,7 +17,7 @@ const columns: { heading: string; links: { label: string; href: string }[] }[] =
     links: [
       { label: "About", href: "/about" },
       { label: "Careers", href: "/careers" },
-      { label: "Contact", href: "mailto:hello@folio.io" },
+      { label: "Contact", href: "/contact" },
     ],
   },
   {
