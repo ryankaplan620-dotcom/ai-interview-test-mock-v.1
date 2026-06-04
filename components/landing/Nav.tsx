@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { FolioMark } from "../FolioMark";
+import { Button } from "@/components/marketing/ui";
 
 const navLinks = [
-  { label: "Product", href: "#product" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Product", href: "/#product" },
+  { label: "Pricing", href: "/pricing" },
   { label: "About", href: "/about" },
   { label: "Security", href: "/security" },
 ];
@@ -18,8 +19,9 @@ export function Nav() {
 
   useEffect(() => {
     function onScroll() {
-      setScrolled(window.scrollY > 10);
+      setScrolled(window.scrollY > 8);
     }
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -29,8 +31,8 @@ export function Nav() {
       className={clsx(
         "sticky top-0 z-50 border-b transition-all duration-300",
         scrolled
-          ? "border-gray-100/50 bg-white/70 backdrop-blur-xl shadow-sm"
-          : "border-transparent bg-white"
+          ? "border-gray-200/70 bg-white/80 shadow-[0_1px_0_rgba(16,24,40,0.04)] backdrop-blur-xl"
+          : "border-transparent bg-white",
       )}
       aria-label="Primary navigation"
     >
@@ -38,22 +40,22 @@ export function Nav() {
         {/* Logo + wordmark */}
         <Link
           href="/"
-          className="flex items-center gap-2 transition-opacity duration-200 hover:opacity-70"
+          className="flex items-center gap-2.5 transition-opacity duration-200 hover:opacity-70"
           aria-label="Folio home"
         >
-          <FolioMark className="h-6 w-6" color="#00DC82" />
-          <span className="text-[17px] font-semibold tracking-[-0.02em] text-gray-900">
+          <FolioMark className="h-7 w-7" color="#00DC82" />
+          <span className="font-display text-[18px] font-semibold tracking-[-0.025em] text-gray-900">
             Folio
           </span>
         </Link>
 
         {/* Desktop nav links */}
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-9 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-[15px] font-medium text-gray-600 transition-colors duration-200 hover:text-gray-900"
+              className="text-[14.5px] font-medium text-gray-600 transition-colors duration-200 hover:text-gray-950"
             >
               {link.label}
             </Link>
@@ -61,34 +63,31 @@ export function Nav() {
         </div>
 
         {/* Right side: Sign in + CTA + hamburger */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-5">
           <Link
             href="/login"
-            className="hidden text-[14px] font-medium text-gray-600 transition-colors duration-200 hover:text-gray-900 sm:inline-flex"
+            className="hidden text-[14.5px] font-medium text-gray-600 transition-colors duration-200 hover:text-gray-950 sm:inline-flex"
           >
             Sign in
           </Link>
-          <Link
-            href="/signup"
-            className="inline-flex h-9 items-center rounded-lg bg-[#00DC82] px-4 text-[14px] font-medium text-white transition-all duration-200 hover:bg-[#00C574]"
-          >
+          <Button href="/signup" size="sm" className="hidden sm:inline-flex" withArrow>
             Get started
-          </Link>
+          </Button>
 
           {/* Mobile hamburger */}
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white transition-colors hover:bg-gray-50 md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-gray-50 md:hidden"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
                 <path d="M4 4l8 8M12 4l-8 8" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
                 <path d="M2 4h12M2 8h12M2 12h12" />
               </svg>
             )}
@@ -99,32 +98,28 @@ export function Nav() {
       {/* Mobile dropdown */}
       {mobileOpen && (
         <div className="border-t border-gray-100 bg-white md:hidden">
-          <div className="mx-auto max-w-[1200px] px-6 py-4 sm:px-8">
+          <div className="mx-auto max-w-[1200px] px-6 py-3 sm:px-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="flex min-h-[44px] items-center text-[15px] font-medium text-gray-600 transition-colors hover:text-gray-900"
+                className="flex min-h-[48px] items-center text-[15px] font-medium text-gray-700 transition-colors hover:text-gray-950"
               >
                 {link.label}
               </Link>
             ))}
-            <div className="mt-2 flex flex-col gap-2 border-t border-gray-100 pt-4">
+            <div className="mt-2 flex flex-col gap-2.5 border-t border-gray-100 pt-4">
               <Link
                 href="/login"
                 onClick={() => setMobileOpen(false)}
-                className="flex min-h-[44px] items-center text-[15px] font-medium text-gray-600 transition-colors hover:text-gray-900"
+                className="flex min-h-[44px] items-center text-[15px] font-medium text-gray-700 transition-colors hover:text-gray-950"
               >
                 Sign in
               </Link>
-              <Link
-                href="/signup"
-                onClick={() => setMobileOpen(false)}
-                className="flex min-h-[44px] items-center justify-center rounded-lg bg-[#00DC82] text-[15px] font-medium text-white"
-              >
+              <Button href="/signup" onClick={() => setMobileOpen(false)} className="w-full" withArrow>
                 Get started
-              </Link>
+              </Button>
             </div>
           </div>
         </div>

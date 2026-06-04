@@ -1,28 +1,33 @@
 import { ScrollReveal } from "./ScrollReveal";
+import { Section } from "@/components/marketing/ui";
 
 const stats = [
-  { value: "200+", label: "Companies" },
+  { value: "200+", label: "Companies covered" },
   { value: "5", label: "Interviewer personas" },
   { value: "6", label: "Score dimensions" },
-  { value: "90s", label: "To your first Folio Score" },
+  { value: "90s", label: "To your first score" },
 ];
 
 export function Stats() {
   return (
-    <section className="bg-gradient-section px-6 py-16 sm:px-8" aria-label="Key stats">
-      <div className="mx-auto max-w-[1200px]">
-        <div className="grid gap-8 text-center md:grid-cols-4">
-          {stats.map((stat, i) => (
-            <ScrollReveal key={stat.label} delay={i * 100}>
-              <div className="py-8">
-                <p className="text-[56px] font-bold tracking-tight text-gray-900">{stat.value}</p>
-                <div className="mx-auto mt-3 h-[2px] w-12 bg-[#00DC82]" aria-hidden />
-                <p className="mt-3 text-[14px] text-gray-500">{stat.label}</p>
+    <Section tone="white" className="py-16 sm:py-20 lg:py-24">
+      <ScrollReveal>
+        <div className="overflow-hidden rounded-3xl border border-gray-200/70 bg-gradient-to-b from-white to-gray-50 shadow-card">
+          <div className="grid grid-cols-2 divide-gray-200/70 md:grid-cols-4 md:divide-x">
+            {stats.map((stat, i) => (
+              <div
+                key={stat.label}
+                className={`px-6 py-9 text-center sm:py-11 ${i < 2 ? "border-b border-gray-200/70 md:border-b-0" : ""}`}
+              >
+                <p className="font-display text-[44px] font-semibold leading-none tracking-[-0.03em] text-gray-900 sm:text-[52px]">
+                  {stat.value}
+                </p>
+                <p className="mt-3 text-[13.5px] font-medium text-gray-500">{stat.label}</p>
               </div>
-            </ScrollReveal>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </ScrollReveal>
+    </Section>
   );
 }

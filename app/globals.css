@@ -179,3 +179,92 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ===========================================
+   Marketing system — light, elevated
+   =========================================== */
+
+/* Balance multi-line headings for a typeset feel */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Faint blueprint grid for light sections (replaces inline styles) */
+.bg-grid-faint {
+  background-image:
+    linear-gradient(rgba(16, 24, 40, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 24, 40, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Soft radial wash used behind hero / CTA areas on light pages */
+.bg-brand-wash {
+  background:
+    radial-gradient(60rem 30rem at 8% -10%, rgba(0, 220, 130, 0.10), transparent 60%),
+    radial-gradient(50rem 28rem at 100% 0%, rgba(0, 180, 255, 0.06), transparent 55%);
+}
+
+/* Thin top hairline used to crown cards on hover */
+.card-crown::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, #00DC82, transparent);
+  opacity: 0;
+  transition: opacity 0.3s var(--folio-ease-brand);
+}
+.group:hover .card-crown::before {
+  opacity: 1;
+}
+
+/* Long-form legal / policy typography on light canvas */
+.prose-folio {
+  color: #4b5563;
+  font-size: 15.5px;
+  line-height: 1.75;
+}
+.prose-folio h2 {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin-top: 2.75rem;
+  margin-bottom: 0.75rem;
+}
+.prose-folio h3 {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+.prose-folio p {
+  margin-bottom: 1.1rem;
+}
+.prose-folio ul {
+  margin: 0 0 1.1rem 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+.prose-folio li {
+  margin-bottom: 0.4rem;
+}
+.prose-folio a {
+  color: #00a862;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-folio a:hover {
+  color: #00875a;
+}
+.prose-folio strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Legal pages keep their inline em-dash list styling; `.legal-prose` is an
+   intentional no-op hook left for future use. */

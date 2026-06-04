@@ -16,25 +16,25 @@ export default function PrivacyPage() {
   return (
     <article className="relative mx-auto max-w-[720px] px-6 py-16 sm:px-10 sm:py-20">
       <header className="mb-12">
-        <p className="font-mono text-[11px] font-medium tracking-label text-accent">PRIVACY POLICY</p>
-        <h1 className="mt-3 font-display text-[40px] font-semibold leading-[1.1] tracking-heading text-text-primary sm:text-[48px]">
+        <p className="font-mono text-[11px] font-medium tracking-label text-brand-700">PRIVACY POLICY</p>
+        <h1 className="mt-3 font-display text-[40px] font-semibold leading-[1.1] tracking-heading text-gray-900 sm:text-[48px]">
           Privacy Policy
         </h1>
-        <p className="mt-4 font-sans text-[13px] text-text-tertiary">
+        <p className="mt-4 font-sans text-[13px] text-gray-400">
           Version {LEGAL_VERSIONS.privacy} · Effective {effective}
         </p>
-        <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-text-secondary">
+        <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-gray-600">
           This policy explains what data {COMPANY.short_name} collects, how we use it, who we share
           it with, how long we keep it, and how you control it. We wrote it to be readable. If
           anything is unclear, email us at{" "}
-          <a href={`mailto:${COMPANY.privacy_email}`} className="text-accent hover:underline">
+          <a href={`mailto:${COMPANY.privacy_email}`} className="text-brand-700 hover:underline">
             {COMPANY.privacy_email}
           </a>
           .
         </p>
       </header>
 
-      <div className="legal-prose text-text-secondary">
+      <div className="legal-prose text-gray-600">
         <Section n="1" title="What we collect">
           <p>We collect the following categories of information:</p>
           <ul>
@@ -150,7 +150,7 @@ export default function PrivacyPage() {
           <p>
             You have the following rights with respect to your personal data. To exercise any of
             these, email{" "}
-            <a href={`mailto:${COMPANY.privacy_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.privacy_email}`} className="text-brand-700 hover:underline">
               {COMPANY.privacy_email}
             </a>{" "}
             from the address associated with your account.
@@ -210,7 +210,7 @@ export default function PrivacyPage() {
             you must use {COMPANY.short_name} only with the consent and supervision of a parent or
             legal guardian as described in our Terms. We do not knowingly collect data from
             children under 13. If you believe we have, contact us immediately at{" "}
-            <a href={`mailto:${COMPANY.privacy_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.privacy_email}`} className="text-brand-700 hover:underline">
               {COMPANY.privacy_email}
             </a>
             .
@@ -246,7 +246,7 @@ export default function PrivacyPage() {
             interviewer references in future sessions. They do not have legal or similarly
             significant effects outside the product. If you want a human review of a specific
             feedback result, email{" "}
-            <a href={`mailto:${COMPANY.privacy_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.privacy_email}`} className="text-brand-700 hover:underline">
               {COMPANY.privacy_email}
             </a>
             .
@@ -258,7 +258,7 @@ export default function PrivacyPage() {
             We use a minimum set of cookies required to operate the product (authentication session,
             rate-limit counters). We do not place analytics or advertising cookies without your
             explicit consent. See our{" "}
-            <a href="/legal/cookies" className="text-accent hover:underline">
+            <a href="/legal/cookies" className="text-brand-700 hover:underline">
               Cookie Policy
             </a>{" "}
             for details.
@@ -277,15 +277,15 @@ export default function PrivacyPage() {
         <Section n="12" title="Contact">
           <p>
             For any privacy-related question or to exercise any of the rights above, write to{" "}
-            <a href={`mailto:${COMPANY.privacy_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.privacy_email}`} className="text-brand-700 hover:underline">
               {COMPANY.privacy_email}
             </a>
             . For general product support, write to{" "}
-            <a href={`mailto:${COMPANY.support_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.support_email}`} className="text-brand-700 hover:underline">
               {COMPANY.support_email}
             </a>
             . For legal notices, write to{" "}
-            <a href={`mailto:${COMPANY.legal_email}`} className="text-accent hover:underline">
+            <a href={`mailto:${COMPANY.legal_email}`} className="text-brand-700 hover:underline">
               {COMPANY.legal_email}
             </a>
             .
@@ -299,11 +299,11 @@ export default function PrivacyPage() {
 function Section({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="mb-4 font-display text-[22px] font-semibold leading-[1.2] text-text-primary">
-        <span className="mr-3 font-mono text-[14px] font-normal text-text-tertiary">{n}.</span>
+      <h2 className="mb-4 font-display text-[22px] font-semibold leading-[1.2] text-gray-900">
+        <span className="mr-3 font-mono text-[14px] font-normal text-gray-400">{n}.</span>
         {title}
       </h2>
-      <div className="font-sans text-[15px] leading-[1.7] [&>p]:mb-4 [&_strong]:font-semibold [&_strong]:text-text-primary [&_ul]:my-4 [&_ul]:space-y-3 [&_li]:pl-5 [&_li]:relative [&_li]:before:content-['—'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-accent">
+      <div className="font-sans text-[15px] leading-[1.7] [&>p]:mb-4 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ul]:my-4 [&_ul]:space-y-3 [&_li]:pl-5 [&_li]:relative [&_li]:before:content-['—'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-brand-700">
         {children}
       </div>
     </section>
@@ -316,29 +316,29 @@ function ProcessorCard({
   processor: (typeof PROCESSORS)[number];
 }) {
   return (
-    <div className="rounded-xl border border-ink-border bg-ink-surface p-5">
+    <div className="rounded-xl border border-gray-200 bg-white p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="font-display text-[16px] font-semibold text-text-primary">{processor.name}</h3>
-        <span className="font-mono text-[10px] tracking-label text-text-tertiary">
+        <h3 className="font-display text-[16px] font-semibold text-gray-900">{processor.name}</h3>
+        <span className="font-mono text-[10px] tracking-label text-gray-400">
           {processor.jurisdiction.toUpperCase()}
         </span>
       </div>
-      <p className="mt-2 font-sans text-[13.5px] leading-[1.55] text-text-secondary">
+      <p className="mt-2 font-sans text-[13.5px] leading-[1.55] text-gray-600">
         {processor.role}.
       </p>
-      <p className="mt-3 font-sans text-[12.5px] leading-[1.55] text-text-tertiary">
-        <span className="font-medium text-text-secondary">Data categories: </span>
+      <p className="mt-3 font-sans text-[12.5px] leading-[1.55] text-gray-400">
+        <span className="font-medium text-gray-600">Data categories: </span>
         {processor.data_categories.join(", ")}.
       </p>
-      <p className="mt-2 font-sans text-[12.5px] leading-[1.55] text-text-tertiary">
-        <span className="font-medium text-text-secondary">Retention: </span>
+      <p className="mt-2 font-sans text-[12.5px] leading-[1.55] text-gray-400">
+        <span className="font-medium text-gray-600">Retention: </span>
         {processor.retention_note}
       </p>
       <a
         href={processor.privacy_policy_url}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-block font-mono text-[11px] tracking-label text-accent hover:underline"
+        className="mt-3 inline-block font-mono text-[11px] tracking-label text-brand-700 hover:underline"
       >
         {processor.name.toUpperCase()} PRIVACY POLICY →
       </a>

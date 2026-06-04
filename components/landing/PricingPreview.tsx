@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ScrollReveal } from "./ScrollReveal";
+import { Section, Eyebrow, SectionHeading, Lede, Button, ArrowLink, CheckIcon } from "@/components/marketing/ui";
 
 const tiers = [
   {
@@ -7,10 +7,9 @@ const tiers = [
     tagline: "See what Folio feels like.",
     price: "$0",
     period: "",
-    periodLabel: "",
     cta: "Start free",
     highlighted: false,
-    preamble: null,
+    preamble: null as string | null,
     features: [
       "1 interview session (10 min)",
       "Single persona (Priya)",
@@ -23,7 +22,6 @@ const tiers = [
     tagline: "A full recruiting cycle of practice.",
     price: "$49",
     period: "/90 days",
-    periodLabel: "per cycle",
     cta: "Get Basic",
     highlighted: false,
     preamble: "Everything in Free, and:",
@@ -32,7 +30,6 @@ const tiers = [
       "All 5 interviewer personas",
       "4 comms training sessions",
       "5 outreach sends",
-      "Full Folio Score + detailed feedback",
       "Quote-based coaching",
     ],
   },
@@ -41,7 +38,6 @@ const tiers = [
     tagline: "Serious prep for serious interviews.",
     price: "$149",
     period: "/year",
-    periodLabel: "per year",
     cta: "Get Pro",
     highlighted: true,
     preamble: "Everything in Basic, and:",
@@ -52,8 +48,6 @@ const tiers = [
       "Firm-specific calibration",
       "Cross-session memory",
       "Panel simulation",
-      "Session memory across personas",
-      "Priority feedback",
     ],
   },
   {
@@ -61,7 +55,6 @@ const tiers = [
     tagline: "Every feature. Maximum volume.",
     price: "$249",
     period: "/year",
-    periodLabel: "per year",
     cta: "Get Max",
     highlighted: false,
     preamble: "Everything in Pro, and:",
@@ -70,121 +63,85 @@ const tiers = [
       "50 outreach sends",
       "Superday mode",
       "Hard mode",
-      "Non-verbal feedback",
       "Question intelligence engine",
       "Voice acoustic analysis",
-      "$15 overage sessions (vs $20)",
     ],
   },
 ];
 
-function CheckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
-      <circle cx="8" cy="8" r="7" stroke="#00DC82" strokeWidth="1" fill="none" opacity="0.2" />
-      <path d="M5 8.5L7 10.5L11 5.5" stroke="#00DC82" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 export function PricingPreview() {
   return (
-    <section id="pricing" className="bg-white px-6 py-24 sm:px-8 md:py-32" aria-label="Pricing">
-      <div className="mx-auto max-w-[1200px]">
-        <ScrollReveal>
-          <div className="text-center">
-            <span className="font-mono text-[13px] font-medium tracking-[0.1em] uppercase text-[#00DC82]">
-              PRICING
-            </span>
-            <h2 className="mt-4 text-[36px] font-bold tracking-[-0.03em] text-gray-900 sm:text-[44px]">
-              Start free. Scale when it&apos;s real.
-            </h2>
-            <p className="mt-4 text-gray-500">
-              Try your first interview free. No credit card required.
-            </p>
-          </div>
-        </ScrollReveal>
-
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-start">
-          {tiers.map((tier, i) => (
-            <ScrollReveal key={tier.name} delay={i * 100}>
-              <div
-                className={`relative flex flex-col rounded-xl border p-6 transition-all duration-300 ${
-                  tier.highlighted
-                    ? "scale-[1.02] bg-gradient-to-b from-white to-emerald-50 border-[#00DC82]/30 shadow-lg shadow-[#00DC82]/10 order-first sm:order-none"
-                    : "border-gray-100 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1"
-                }`}
-              >
-                {tier.highlighted && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#00DC82] px-4 py-1 font-mono text-[9px] font-semibold tracking-[0.15em] text-white">
-                    MOST POPULAR
-                  </span>
-                )}
-
-                {/* Tier name + tagline */}
-                <h3 className="text-[22px] font-semibold text-gray-900">
-                  {tier.name}
-                </h3>
-                <p className="mt-1 text-[13px] text-gray-500">
-                  {tier.tagline}
-                </p>
-
-                {/* Price */}
-                <div className="mt-5">
-                  <span className="text-[40px] font-bold tracking-tight text-gray-900">
-                    {tier.price}
-                  </span>
-                  {tier.period && (
-                    <span className="text-[14px] text-gray-400">{tier.period}</span>
-                  )}
-                  {tier.periodLabel && (
-                    <p className="mt-0.5 text-[12px] text-gray-400">{tier.periodLabel}</p>
-                  )}
-                </div>
-
-                {/* CTA */}
-                <Link
-                  href="/signup"
-                  className={`mt-5 flex h-10 items-center justify-center rounded-lg text-[14px] font-medium transition-all duration-200 ${
-                    tier.highlighted
-                      ? "bg-[#00DC82] text-white hover:bg-[#00C574]"
-                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                  }`}
-                >
-                  {tier.cta}
-                </Link>
-
-                {/* Feature list */}
-                <div className="mt-6 border-t border-gray-100 pt-5">
-                  {tier.preamble && (
-                    <p className="mb-3 text-[13px] font-medium text-gray-900">
-                      {tier.preamble}
-                    </p>
-                  )}
-                  <ul className="flex flex-col gap-2.5">
-                    {tier.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-[13px] text-gray-500">
-                        <CheckIcon />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </ScrollReveal>
-          ))}
+    <Section id="pricing" tone="white">
+      <ScrollReveal>
+        <div className="text-center">
+          <Eyebrow>Pricing</Eyebrow>
+          <SectionHeading className="mt-4">Start free. Scale when it&apos;s real.</SectionHeading>
+          <Lede className="mx-auto mt-5 max-w-[480px]">
+            Try your first interview free. No credit card required.
+          </Lede>
         </div>
+      </ScrollReveal>
 
-        <ScrollReveal>
-          <p className="mt-10 text-center text-[13px] text-gray-400">
-            First interview is free. Paid plans include a 15-day trial.{" "}
-            <Link href="/pricing" className="text-[#00DC82] transition-opacity hover:opacity-80">
-              See full comparison
-              <span aria-hidden> &rarr;</span>
-            </Link>
-          </p>
-        </ScrollReveal>
+      <div className="mt-14 grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {tiers.map((tier, i) => (
+          <ScrollReveal key={tier.name} delay={i * 80}>
+            <div
+              className={`relative flex h-full flex-col rounded-2xl p-6 ${
+                tier.highlighted
+                  ? "border-2 border-brand bg-white shadow-card-hover lg:-mt-3 lg:pb-9"
+                  : "border border-gray-200/70 bg-white shadow-card"
+              }`}
+            >
+              {tier.highlighted && (
+                <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-brand-ink">
+                  MOST POPULAR
+                </span>
+              )}
+
+              <h3 className="text-[20px] font-semibold text-gray-900">{tier.name}</h3>
+              <p className="mt-1 text-[13px] text-gray-500">{tier.tagline}</p>
+
+              <div className="mt-5 flex items-baseline gap-1">
+                <span className="font-display text-[38px] font-semibold tracking-[-0.03em] text-gray-900">
+                  {tier.price}
+                </span>
+                {tier.period && <span className="text-[14px] text-gray-400">{tier.period}</span>}
+              </div>
+
+              <Button
+                href="/signup"
+                variant={tier.highlighted ? "primary" : "secondary"}
+                className="mt-5 w-full"
+              >
+                {tier.cta}
+              </Button>
+
+              <div className="mt-6 border-t border-gray-100 pt-5">
+                {tier.preamble && (
+                  <p className="mb-3 text-[13px] font-medium text-gray-900">{tier.preamble}</p>
+                )}
+                <ul className="flex flex-col gap-2.5">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-[13px] leading-snug text-gray-600">
+                      <CheckIcon className="mt-0.5 h-4 w-4 text-brand-600" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </ScrollReveal>
+        ))}
       </div>
-    </section>
+
+      <ScrollReveal className="mt-10 text-center">
+        <p className="text-[13px] text-gray-400">
+          First interview is free. Paid plans include a 15-day trial.
+        </p>
+        <ArrowLink href="/pricing" className="mt-3 justify-center">
+          See full comparison
+        </ArrowLink>
+      </ScrollReveal>
+    </Section>
   );
 }

@@ -52,14 +52,14 @@ export function CookieBanner() {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-ink-border bg-ink/95 backdrop-blur-md shadow-[0_-10px_30px_rgba(0,0,0,0.5)]"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 shadow-[0_-12px_40px_-12px_rgba(16,24,40,0.18)] backdrop-blur-md"
     >
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-10">
-        <p className="font-sans text-[13px] leading-relaxed text-text-secondary">
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <p className="font-sans text-[13px] leading-relaxed text-gray-600">
           We use cookies strictly required to keep you signed in. If you accept, we also use
-          analytics cookies to understand which features people use. We don't run ads, and we
-          don't share analytics data with anyone.{" "}
-          <Link href="/legal/cookies" className="text-accent hover:underline">
+          analytics cookies to understand which features people use. We don&apos;t run ads, and we
+          don&apos;t share analytics data with anyone.{" "}
+          <Link href="/legal/cookies" className="font-medium text-brand-700 hover:underline">
             Details
           </Link>
           .
@@ -67,13 +67,13 @@ export function CookieBanner() {
         <div className="flex flex-shrink-0 gap-2">
           <button
             onClick={() => choose("dismissed")}
-            className="rounded-full border border-ink-border bg-ink-surface px-4 py-2 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+            className="rounded-xl border border-gray-200 bg-white px-4 py-2 font-sans text-[13px] font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900"
           >
             Only necessary
           </button>
           <button
             onClick={() => choose("accepted")}
-            className="rounded-full bg-accent px-4 py-2 font-sans text-[13px] font-semibold text-ink transition-colors hover:bg-accent-light"
+            className="rounded-xl bg-brand px-4 py-2 font-sans text-[13px] font-semibold text-brand-ink transition-colors hover:bg-brand-600"
           >
             Accept all
           </button>

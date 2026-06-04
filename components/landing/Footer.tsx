@@ -1,90 +1,87 @@
 import Link from "next/link";
 import { FolioMark } from "../FolioMark";
 
+const columns: { heading: string; links: { label: string; href: string }[] }[] = [
+  {
+    heading: "Product",
+    links: [
+      { label: "How it works", href: "/#how-it-works" },
+      { label: "Interviewers", href: "/#interviewers" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Security", href: "/security" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Careers", href: "/careers" },
+      { label: "Contact", href: "mailto:hello@folio.io" },
+    ],
+  },
+  {
+    heading: "Legal",
+    links: [
+      { label: "Privacy", href: "/legal/privacy" },
+      { label: "Terms", href: "/legal/terms" },
+      { label: "Cookies", href: "/legal/cookies" },
+    ],
+  },
+];
+
+const socials: { label: string; href: string }[] = [
+  { label: "X", href: "https://x.com" },
+  { label: "LinkedIn", href: "https://linkedin.com" },
+  { label: "Instagram", href: "https://instagram.com" },
+];
+
 export function Footer() {
   return (
-    <footer
-      className="border-t border-gray-100 bg-gray-50 px-6 py-12 sm:px-8 lg:px-20"
-      aria-label="Site footer"
-    >
-      {/* Subtle gradient separator */}
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-[#00DC82]/20 to-transparent -mt-12 mb-12" aria-hidden />
-
-      <div className="mx-auto max-w-[1200px]">
-        {/* Top row — signature + domain */}
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <p className="font-serif text-[20px] italic text-[#00DC82]">
-            Built to get you hired.
-          </p>
-          <p className="text-[15px] font-medium text-gray-900">folio.io</p>
-        </div>
-
-        {/* Divider */}
-        <div className="my-10 h-px w-full bg-gray-200" />
-
-        {/* Link columns */}
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <Link href="/" className="inline-flex items-center gap-2">
-              <FolioMark className="h-5 w-5" color="#00DC82" />
-              <span className="text-[14px] font-semibold tracking-[-0.02em] text-gray-900">
+    <footer className="border-t border-gray-200/70 bg-gray-50" aria-label="Site footer">
+      <div className="mx-auto max-w-[1200px] px-6 py-16 sm:px-8 sm:py-20">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          {/* Brand block */}
+          <div className="max-w-[280px]">
+            <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Folio home">
+              <FolioMark className="h-6 w-6" color="#00DC82" />
+              <span className="font-display text-[17px] font-semibold tracking-[-0.025em] text-gray-900">
                 Folio
               </span>
             </Link>
-            <p className="mt-3 max-w-[240px] text-[13px] leading-relaxed text-gray-500">
+            <p className="mt-4 text-[14px] leading-relaxed text-gray-500">
               Live voice interview practice, indistinguishable from the real thing.
+            </p>
+            <p className="mt-5 font-serif text-[18px] italic text-brand-700">
+              Built to get you hired.
             </p>
           </div>
 
-          <FooterColumn
-            heading="Product"
-            links={[
-              { label: "How it works", href: "#how-it-works" },
-              { label: "Interviewers", href: "#interviewers" },
-              { label: "Pricing", href: "#pricing" },
-              { label: "Journal", href: "#journal" },
-            ]}
-          />
-
-          <FooterColumn
-            heading="Company"
-            links={[
-              { label: "About", href: "/about" },
-              { label: "Careers", href: "/careers" },
-              { label: "Press", href: "/press" },
-              { label: "Contact", href: "mailto:hello@folio.io" },
-            ]}
-          />
-
-          <FooterColumn
-            heading="Legal"
-            links={[
-              { label: "Privacy", href: "/legal/privacy" },
-              { label: "Terms", href: "/legal/terms" },
-              { label: "Cookies", href: "/legal/cookies" },
-            ]}
-          />
+          {columns.map((col) => (
+            <FooterColumn key={col.heading} heading={col.heading} links={col.links} />
+          ))}
         </div>
 
-        {/* Social links + copyright */}
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-3">
+        {/* Bottom bar */}
+        <div className="mt-16 flex flex-col items-start justify-between gap-5 border-t border-gray-200/70 pt-8 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2.5">
             <FolioMark className="h-4 w-4" color="#9CA3AF" />
-            <p className="font-mono text-[11px] tracking-[0.1em] text-gray-400">
-              &copy; {new Date().getFullYear()} FOLIO, INC.
+            <p className="font-mono text-[11px] tracking-[0.12em] text-gray-400">
+              © {new Date().getFullYear()} FOLIO, INC.
             </p>
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="https://x.com" className="text-[13px] text-gray-400 transition-colors hover:text-gray-600" target="_blank" rel="noopener noreferrer">
-              X / Twitter
-            </a>
-            <a href="https://linkedin.com" className="text-[13px] text-gray-400 transition-colors hover:text-gray-600" target="_blank" rel="noopener noreferrer">
-              LinkedIn
-            </a>
-            <a href="https://instagram.com" className="text-[13px] text-gray-400 transition-colors hover:text-gray-600" target="_blank" rel="noopener noreferrer">
-              Instagram
-            </a>
+            {socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                className="text-[13px] font-medium text-gray-500 transition-colors hover:text-gray-900"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {s.label}
+              </a>
+            ))}
           </div>
         </div>
       </div>
@@ -101,15 +98,15 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-gray-900">
+      <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">
         {heading}
       </h3>
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-5 space-y-3.5">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="inline-block text-[14px] text-gray-500 transition-colors duration-200 hover:text-gray-900"
+              className="inline-block text-[14.5px] text-gray-600 transition-colors duration-200 hover:text-gray-950"
             >
               {link.label}
             </Link>
