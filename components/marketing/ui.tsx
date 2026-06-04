@@ -1,6 +1,6 @@
 import Link from "next/link";
 import clsx from "clsx";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 
 /* ============================================================
    Folio marketing UI primitives
@@ -162,7 +162,9 @@ export function Button({
   children,
   target,
   rel,
-  ...rest
+  onClick,
+  type = "button",
+  disabled,
 }: {
   href?: string;
   variant?: ButtonVariant;
@@ -172,7 +174,10 @@ export function Button({
   children: ReactNode;
   target?: string;
   rel?: string;
-} & ComponentProps<"button">) {
+  onClick?: MouseEventHandler<HTMLElement>;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+}) {
   const cls = buttonClasses(variant, size, className);
   const content = (
     <>
@@ -185,20 +190,20 @@ export function Button({
     const isInternal = href.startsWith("/") || href.startsWith("#");
     if (isInternal) {
       return (
-        <Link href={href} className={cls}>
+        <Link href={href} className={cls} onClick={onClick}>
           {content}
         </Link>
       );
     }
     return (
-      <a href={href} className={cls} target={target} rel={rel}>
+      <a href={href} className={cls} target={target} rel={rel} onClick={onClick}>
         {content}
       </a>
     );
   }
 
   return (
-    <button className={cls} {...rest}>
+    <button className={cls} type={type} disabled={disabled} onClick={onClick}>
       {content}
     </button>
   );
