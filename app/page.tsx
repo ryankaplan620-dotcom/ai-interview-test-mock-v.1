@@ -17,7 +17,7 @@ import { Footer } from "@/components/landing/Footer";
 export default function LandingPage() {
   return (
     <main id="main-content" className="relative min-h-screen bg-canvas">
-      <Nav />
+      <Nav onDark />
       <Hero />
       <LogoBar />
       <HowItWorks />
