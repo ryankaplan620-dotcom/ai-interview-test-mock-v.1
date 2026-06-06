@@ -5,6 +5,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { PERSONAS } from "@/lib/personas";
+import { scoreColorClass } from "@/lib/utils/score-color";
 import type {
   PersonaId,
   InterviewType,
@@ -422,13 +423,6 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 // ==========================================================================
 // Formatting helpers
 // ==========================================================================
-
-function scoreColorClass(v: number): string {
-  if (v >= 85) return "text-accent";
-  if (v >= 70) return "text-text-primary";
-  if (v >= 55) return "text-amber-300/90";
-  return "text-rose-300/90";
-}
 
 function humanInterviewType(t: InterviewType): string {
   const map: Record<InterviewType, string> = {

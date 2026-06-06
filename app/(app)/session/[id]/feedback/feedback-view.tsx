@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { FeedbackPayload, FeedbackQuote } from "@/lib/pipeline/feedback-types";
 import type { InterviewType, SessionMode } from "@/types/supabase";
 import { QaFeedbackPanel } from "./qa-panel";
+import { scoreColorClass } from "@/lib/utils/score-color";
 
 export interface SessionMeta {
   id: string;
@@ -256,13 +257,6 @@ function QuoteCard({ quote }: { quote: FeedbackQuote }) {
 // ==========================================================================
 // Formatting helpers
 // ==========================================================================
-
-function scoreColorClass(v: number): string {
-  if (v >= 85) return "text-accent";
-  if (v >= 70) return "text-text-primary";
-  if (v >= 55) return "text-amber-300/90";
-  return "text-rose-300/90";
-}
 
 function scoreLabel(v: number): string {
   if (v >= 90) return "Exceptional";

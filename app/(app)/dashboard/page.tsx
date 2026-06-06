@@ -5,6 +5,7 @@ import { requireUser, getUserTier, getProfile } from "@/lib/auth/server";
 import { TIERS } from "@/lib/tiers";
 import { LinkButton } from "@/components/Button";
 import { SessionRow, type SessionRowData } from "@/components/SessionRow";
+import { scoreColorClass } from "@/lib/utils/score-color";
 import type { SessionStatus, PersonaId, InterviewType } from "@/types/supabase";
 
 // Supabase nested selects return joined rows as an array regardless of cardinality.
@@ -171,7 +172,7 @@ export default async function DashboardPage() {
                 <p
                   className={[
                     "font-display text-[40px] font-semibold leading-none tabular-nums",
-                    averageScoreColor(averageScore),
+                    scoreColorClass(averageScore),
                   ].join(" ")}
                 >
                   {averageScore}
@@ -259,13 +260,6 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
-}
-
-function averageScoreColor(v: number): string {
-  if (v >= 85) return "text-accent";
-  if (v >= 70) return "text-text-primary";
-  if (v >= 55) return "text-amber-300/90";
-  return "text-rose-300/90";
 }
 
 function PersonaRow({ name, role }: { name: string; role: string }) {

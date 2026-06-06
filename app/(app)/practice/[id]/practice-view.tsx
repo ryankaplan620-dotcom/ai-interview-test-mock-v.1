@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { DrillType, DrillStatus } from "@/types/supabase";
 import { abandonDrill } from "../actions";
+import { scoreColorClass } from "@/lib/utils/score-color";
 
 // ==========================================================================
 // Props
@@ -753,16 +754,6 @@ function ListCard({
   );
 }
 
-// ==========================================================================
-// Utility
-// ==========================================================================
-
-function scoreColorClass(v: number): string {
-  if (v >= 85) return "text-accent";
-  if (v >= 70) return "text-text-primary";
-  if (v >= 55) return "text-amber-300/90";
-  return "text-rose-300/90";
-}
 
 function scoreColorBg(v: number): string {
   if (v >= 85) return "bg-accent";

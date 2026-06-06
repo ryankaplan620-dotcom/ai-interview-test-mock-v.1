@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { scoreColorClass } from "@/lib/utils/score-color";
 
 interface QaBoundary {
   method: "transition_detected" | "fallback_timestamp" | "absent";
@@ -263,9 +264,3 @@ function SubScoreCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function scoreColorClass(score: number): string {
-  if (score >= 85) return "text-accent";
-  if (score >= 70) return "text-emerald-300";
-  if (score >= 55) return "text-amber-300";
-  return "text-rose-400";
-}

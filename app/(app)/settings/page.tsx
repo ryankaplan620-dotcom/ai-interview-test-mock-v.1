@@ -62,7 +62,7 @@ export default async function SettingsPage() {
           )}
 
           <div className="mt-5 border-t border-ink-border/40 pt-5">
-            <BillingActions tier={tier?.effective_tier ?? "basic"} hasSubscription={!!tier} />
+            <BillingActions tier={tier?.effective_tier ?? "free"} hasSubscription={!!tier} />
           </div>
         </Panel>
 

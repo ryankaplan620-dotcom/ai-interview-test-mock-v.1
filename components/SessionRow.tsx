@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SessionStatus, PersonaId, InterviewType } from "@/types/supabase";
+import { scoreColorClass } from "@/lib/utils/score-color";
 
 // ==========================================================================
 // Types
@@ -155,13 +156,6 @@ function hrefForSession(status: SessionStatus, id: string): string {
   // Live sessions resume in the call room; everything terminal goes to feedback
   if (status === "in_progress" || status === "scheduled") return `/session/${id}`;
   return `/session/${id}/feedback`;
-}
-
-function scoreColorClass(v: number): string {
-  if (v >= 85) return "text-accent";
-  if (v >= 70) return "text-text-primary";
-  if (v >= 55) return "text-amber-300/90";
-  return "text-rose-300/90";
 }
 
 function personaLabel(p: PersonaId): string {

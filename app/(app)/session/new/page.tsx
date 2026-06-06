@@ -23,7 +23,7 @@ export default async function NewSessionPage() {
     defaultDurationMinutes: p.defaultDurationMinutes,
   }));
 
-  const effectiveTier = tier?.effective_tier ?? "basic";
+  const effectiveTier = tier?.effective_tier ?? "free";
   const runtime = resolveRuntimeFeatures(effectiveTier);
 
   return (
