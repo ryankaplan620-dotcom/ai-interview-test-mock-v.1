@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { PERSONAS } from "@/lib/personas";
@@ -34,7 +33,6 @@ interface MemoryRow {
 
 export default async function MemorySettingsPage() {
   const user = await requireUser();
-  if (!user) redirect("/login");
 
   const supabase = createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

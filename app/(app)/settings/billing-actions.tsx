@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { SubscriptionTier } from "@/types/supabase";
 
 export function BillingActions({
-  tier,
+  tier: _tier,
   hasSubscription,
 }: {
   tier: SubscriptionTier;
@@ -43,7 +43,6 @@ export function BillingActions({
   }
 
   // Active subscription — portal + change plan
-  void tier;
   return (
     <div className="flex flex-wrap gap-3">
       <button

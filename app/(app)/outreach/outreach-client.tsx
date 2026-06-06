@@ -62,6 +62,9 @@ export function OutreachClient({
   const [editSubject, setEditSubject] = useState("");
   const [editBody, setEditBody] = useState("");
 
+  // Action error (send / delete / edit failures)
+  const [actionError, setActionError] = useState<string | null>(null);
+
   // -------------------------------------------------------------------------
   // Scout handler
   // -------------------------------------------------------------------------
@@ -90,6 +93,7 @@ export function OutreachClient({
   // -------------------------------------------------------------------------
   async function handleDraftEmail(contactId: string) {
     setDraftingContactId(contactId);
+    setActionError(null);
     try {
       const res = await fetch("/api/outreach/draft", {
         method: "POST",
@@ -102,6 +106,7 @@ export function OutreachClient({
       setTab("drafts");
     } catch (err) {
       console.error("[outreach] draft failed:", err);
+      setActionError("Failed to generate draft. Please try again.");
     } finally {
       setDraftingContactId(null);
     }
@@ -111,6 +116,7 @@ export function OutreachClient({
   // Send handler
   // -------------------------------------------------------------------------
   async function handleSend(draftId: string) {
+    setActionError(null);
     try {
       const res = await fetch("/api/outreach/send", {
         method: "POST",
@@ -124,14 +130,27 @@ export function OutreachClient({
       );
     } catch (err) {
       console.error("[outreach] send failed:", err);
+      setActionError("Failed to mark as sent. Please try again.");
     }
   }
 
   // -------------------------------------------------------------------------
-  // Delete handler (client-side only — removes from view)
+  // Delete handler — persists to backend
   // -------------------------------------------------------------------------
-  function handleDelete(draftId: string) {
-    setDrafts((prev) => prev.filter((d) => d.id !== draftId));
+  async function handleDelete(draftId: string) {
+    setActionError(null);
+    try {
+      const res = await fetch("/api/outreach/draft", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId }),
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      setDrafts((prev) => prev.filter((d) => d.id !== draftId));
+    } catch (err) {
+      console.error("[outreach] delete failed:", err);
+      setActionError("Failed to delete draft. Please try again.");
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -149,13 +168,25 @@ export function OutreachClient({
     setEditBody("");
   }
 
-  function saveEdit(draftId: string) {
-    setDrafts((prev) =>
-      prev.map((d) =>
-        d.id === draftId ? { ...d, subject: editSubject, body: editBody } : d,
-      ),
-    );
-    setEditingDraftId(null);
+  async function saveEdit(draftId: string) {
+    setActionError(null);
+    try {
+      const res = await fetch("/api/outreach/draft", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId, subject: editSubject, body: editBody }),
+      });
+      if (!res.ok) throw new Error("Save failed");
+      setDrafts((prev) =>
+        prev.map((d) =>
+          d.id === draftId ? { ...d, subject: editSubject, body: editBody } : d,
+        ),
+      );
+      setEditingDraftId(null);
+    } catch (err) {
+      console.error("[outreach] save failed:", err);
+      setActionError("Failed to save changes. Please try again.");
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -188,6 +219,19 @@ export function OutreachClient({
           Scout contacts, draft outreach, and track your pipeline.
         </p>
       </div>
+
+      {/* Action error banner */}
+      {actionError && (
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-red-400/20 bg-red-400/5 px-4 py-3">
+          <p className="font-sans text-[13px] text-red-400">{actionError}</p>
+          <button
+            onClick={() => setActionError(null)}
+            className="ml-4 font-sans text-[12px] text-red-400/60 hover:text-red-400"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="mb-8 flex gap-1 rounded-lg border border-ink-border bg-ink-surface p-1">
@@ -458,9 +502,9 @@ function DraftsTab({
   onEditBodyChange: (v: string) => void;
   onStartEditing: (d: OutreachDraft) => void;
   onCancelEditing: () => void;
-  onSaveEdit: (id: string) => void;
-  onSend: (id: string) => void;
-  onDelete: (id: string) => void;
+  onSaveEdit: (id: string) => Promise<void>;
+  onSend: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }) {
   if (drafts.length === 0) {
     return (

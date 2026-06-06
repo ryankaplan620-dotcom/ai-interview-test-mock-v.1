@@ -212,7 +212,8 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
         setPhase("reviewing");
       }
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed. Try again.");
+      console.error("[practice] upload failed:", err);
+      setUploadError("Upload failed. Try again.");
       setPhase("ready");
     }
   };
@@ -360,7 +361,7 @@ function IntroPhase({
       <div className="mt-8 rounded-2xl border border-accent/20 bg-gradient-to-br from-ink-surface to-ink-raised px-6 py-8">
         <p className="font-mono text-[10px] tracking-label text-accent">READY?</p>
         <p className="mt-2 font-display text-[20px] font-semibold text-text-primary">
-          You'll answer this question five times.
+          You'll answer this question {drill.targetAttempts} times.
         </p>
         <p className="mt-2 font-sans text-[14px] leading-[1.6] text-text-secondary">
           Between each rep, you'll get specific feedback. By attempt five, your answer should land cleanly without thinking.

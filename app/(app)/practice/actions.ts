@@ -60,7 +60,8 @@ export async function startDrill(input: z.infer<typeof StartDrillInput>): Promis
     .single();
 
   if (error || !inserted) {
-    return { ok: false, error: error?.message ?? "insert_failed" };
+    console.error("[startDrill] insert failed:", error);
+    return { ok: false, error: "Failed to create drill. Please try again." };
   }
 
   return { ok: true, drillId: (inserted as { id: string }).id };

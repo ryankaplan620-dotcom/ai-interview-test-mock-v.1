@@ -95,8 +95,9 @@ export async function POST(req: NextRequest) {
 
   if (!elevenLabsRes.ok) {
     const text = await elevenLabsRes.text().catch(() => "");
+    console.error(`[tts.stream] elevenlabs failed ${elevenLabsRes.status}: ${text.slice(0, 500)}`);
     return new Response(
-      JSON.stringify({ error: "elevenlabs_failed", status: elevenLabsRes.status, detail: text.slice(0, 200) }),
+      JSON.stringify({ error: "tts_failed" }),
       { status: 502, headers: { "Content-Type": "application/json" } },
     );
   }

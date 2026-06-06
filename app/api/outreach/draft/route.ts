@@ -11,6 +11,16 @@ const Input = z.object({
   contactId: z.string().uuid(),
 });
 
+const PatchInput = z.object({
+  draftId: z.string().uuid(),
+  subject: z.string().min(1).max(500),
+  body: z.string().min(1).max(10000),
+});
+
+const DeleteInput = z.object({
+  draftId: z.string().uuid(),
+});
+
 /**
  * POST /api/outreach/draft
  *
@@ -87,4 +97,55 @@ export async function POST(req: NextRequest) {
     console.error("[outreach.draft] error:", err);
     return NextResponse.json({ error: "draft_failed" }, { status: 500 });
   }
+}
+
+export async function PATCH(req: NextRequest) {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const parsed = PatchInput.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
+
+  const supabase = createServerClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.from("outreach_drafts") as any)
+    .update({ subject: parsed.data.subject, body: parsed.data.body })
+    .eq("id", parsed.data.draftId)
+    .eq("user_id", user.id)
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("[outreach.draft] update failed:", error);
+    return NextResponse.json({ error: "update_failed" }, { status: 500 });
+  }
+  if (!data) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ draft: data });
+}
+
+export async function DELETE(req: NextRequest) {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const parsed = DeleteInput.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
+
+  const supabase = createServerClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from("outreach_drafts") as any)
+    .delete()
+    .eq("id", parsed.data.draftId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("[outreach.draft] delete failed:", error);
+    return NextResponse.json({ error: "delete_failed" }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }
