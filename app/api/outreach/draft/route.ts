@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   // 2. Load user profile for personalization
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase.from("profiles") as any)
+  const { data: profile } = await (supabase.from("user_profiles") as any)
     .select("full_name, target_role, target_firms")
     .eq("id", user.id)
     .single();
