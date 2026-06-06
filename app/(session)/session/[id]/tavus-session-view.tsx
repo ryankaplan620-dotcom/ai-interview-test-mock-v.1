@@ -61,11 +61,11 @@ export function TavusSessionView({ session, persona }: Props) {
         body: JSON.stringify({ sessionId: session.id }),
       });
       const body = (await res.json().catch(() => null)) as
-        | { conversationUrl?: string; conversationId?: string; error?: string; detail?: string }
+        | { conversationUrl?: string; conversationId?: string; error?: string }
         | null;
 
       if (!res.ok || !body?.conversationUrl) {
-        setError(body?.detail ?? describeError(body?.error ?? `http_${res.status}`));
+        setError(describeError(body?.error ?? `http_${res.status}`));
         setPhase("intro");
         return;
       }
@@ -79,7 +79,8 @@ export function TavusSessionView({ session, persona }: Props) {
         setElapsedSeconds((Date.now() - startedAtRef.current) / 1000);
       }, 500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start session.");
+      console.error("[tavus-session] startCall failed:", err);
+      setError("Connection error. Check your network and try again.");
       setPhase("intro");
     }
   }, [session.id]);
