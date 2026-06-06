@@ -5,7 +5,7 @@ const steps = [
   {
     number: "01",
     title: "Practice under real conditions",
-    body: "Five distinct interviewer personalities, each calibrated to your target firm. Voice-only, real-time, adaptive — no scripts, no safety net.",
+    body: "Three distinct interviewer personalities, each calibrated to your target firm. Voice-only, real-time, adaptive — no scripts, no safety net.",
   },
   {
     number: "02",

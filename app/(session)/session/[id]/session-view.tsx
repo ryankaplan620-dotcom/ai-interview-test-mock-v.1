@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FolioMark } from "@/components/FolioMark";
 import { endSession, markSessionStarted } from "./actions";
@@ -112,6 +112,8 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       el.srcObject = streamRef.current;
     }
   }, []);
+
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const [, startEndTransition] = useTransition();
 
@@ -271,6 +273,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
             },
             onError: (err) => {
               console.error("[tavus]", err);
+              setAvatarError("Video connection lost. Audio is still active.");
             },
           })
         : new MockAvatarClient();
@@ -357,10 +360,13 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
     [callStartedAtMs, session.id, router],
   );
 
-  // Clean up orchestrator on unmount (if user navigates away without clicking End)
+  // Clean up orchestrator on unmount only if still running (user navigated away mid-call).
+  // The ref is nulled in endCall, so this is a no-op after a normal end.
   useEffect(() => {
     return () => {
-      void orchestratorRef.current?.end("abandoned");
+      if (orchestratorRef.current) {
+        void orchestratorRef.current.end("abandoned");
+      }
     };
   }, []);
 
@@ -407,6 +413,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       currentUserInterim={currentUserInterim}
       avatarSpeaking={avatarSpeaking}
       remoteAvatarStream={remoteAvatarStream}
+      avatarError={avatarError}
       orchestratorPhase={orchestratorState?.phase ?? "idle"}
       onMockSubmit={(text) => orchestratorRef.current?.mockSubmitUserTurn(text)}
       isMockMode={mockSttRef.current?.isMock ?? true}
@@ -558,6 +565,7 @@ function LiveCallScreen({
   currentUserInterim,
   avatarSpeaking,
   remoteAvatarStream,
+  avatarError,
   orchestratorPhase,
   onMockSubmit,
   isMockMode,
@@ -577,6 +585,7 @@ function LiveCallScreen({
   currentUserInterim: string | null;
   avatarSpeaking: boolean;
   remoteAvatarStream: MediaStream | null;
+  avatarError: string | null;
   orchestratorPhase: string;
   onMockSubmit: (text: string) => void;
   isMockMode: boolean;
@@ -609,6 +618,13 @@ function LiveCallScreen({
           </span>
         </div>
       </header>
+
+      {/* Avatar error banner */}
+      {avatarError && (
+        <div className="border-b border-amber-300/20 bg-amber-300/5 px-6 py-2 text-center font-sans text-[12px] text-amber-300/90">
+          {avatarError}
+        </div>
+      )}
 
       {/* Stage */}
       <div className="relative flex-1 overflow-hidden">
@@ -1067,5 +1083,3 @@ function interviewPitchLine(persona: SessionViewPersona, session: SessionViewSes
   return `${persona.firstName} is running a ${format} interview. Keep it real — that's where the value is.`;
 }
 
-// Suppress unused-var lint on the memoized dep placeholder
-void useMemo;

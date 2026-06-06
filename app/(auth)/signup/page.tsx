@@ -115,7 +115,7 @@ export default function SignupPage() {
               className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
             />
             <p className="mt-1.5 font-sans text-[11px] text-text-tertiary">
-              Use .edu email for $5.99 Student pricing.
+              Use .edu email to unlock the $49 Basic student plan.
             </p>
           </div>
 

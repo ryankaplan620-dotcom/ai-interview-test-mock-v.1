@@ -45,7 +45,7 @@ const bands: Band[] = [
     accentWord: "adapt.",
     body: "Every session is shaped by who you are, what you’ve said before, and where you’re interviewing. No two runs are the same.",
     features: [
-      "Five distinct personas",
+      "Three distinct personas",
       "Company-specific calibration",
       "Cross-session memory",
       "Adaptive follow-ups",

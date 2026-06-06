@@ -163,8 +163,9 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
     if (winner) {
       return NextResponse.json({ feedback: winner, cached: true });
     }
+    console.error("[Feedback] Insert error:", insertErr);
     return NextResponse.json(
-      { error: insertErr.message ?? "insert_failed" },
+      { error: "Failed to save feedback. Please try again." },
       { status: 500 },
     );
   }

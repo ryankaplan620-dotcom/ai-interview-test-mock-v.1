@@ -8,8 +8,7 @@ export async function POST() {
     const result = await createPortalSession({ userId: user.id });
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Portal session failed";
     console.error("[Portal] Error:", err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Could not open billing portal. Please try again." }, { status: 500 });
   }
 }

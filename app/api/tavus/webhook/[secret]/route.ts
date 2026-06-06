@@ -281,7 +281,6 @@ async function handleTranscription(
   // Tavus doesn't provide per-turn timestamps, so we synthesize approximate
   // ones by distributing turns evenly across the session duration. Good enough
   // for feedback generation; exact timing isn't used for scoring.
-  const sessionStartMs = session.started_at ? new Date(session.started_at).getTime() : Date.now();
   const approxGapMs = 15_000; // 15s avg per turn
 
   const rows = turns.map((t, i) => ({
@@ -326,7 +325,6 @@ async function handleTranscription(
       );
       const url = await uploadTranscript(session.id, jsonPayload);
       await supabase.from("sessions").update({ transcript_url: url }).eq("id", session.id);
-      void sessionStartMs; // silence lint
     } catch (err) {
       console.error("[tavus.webhook] R2 upload failed:", err);
     }
@@ -346,7 +344,7 @@ async function handlePerceptionAnalysis(
   const perception = payload.properties.perception_analysis;
   if (!perception) return;
 
-  await supabase.from("session_analytics").upsert(
+  const { error: perceptionErr } = await supabase.from("session_analytics").upsert(
     {
       session_id: session.id,
       emotional_states: perception.emotional_states ?? null,
@@ -371,6 +369,10 @@ async function handlePerceptionAnalysis(
     },
     { onConflict: "session_id" },
   );
+  if (perceptionErr) {
+    console.error("[tavus.webhook] perception analytics upsert failed:", perceptionErr);
+    return;
+  }
 
   console.log(`[tavus.webhook] persisted perception analytics for session ${session.id}`);
 }
@@ -387,7 +389,7 @@ async function handleRecordingReady(
   const recordingUrl = payload.properties.recording_url;
   if (!s3Key && !recordingUrl) return;
 
-  await supabase.from("session_analytics").upsert(
+  const { error: recordingErr } = await supabase.from("session_analytics").upsert(
     {
       session_id: session.id,
       recording_url: recordingUrl ?? null,
@@ -396,6 +398,9 @@ async function handleRecordingReady(
     },
     { onConflict: "session_id" },
   );
+  if (recordingErr) {
+    console.error("[tavus.webhook] recording upsert failed:", recordingErr);
+  }
 
   // Also update the sessions table recording_url for backward compat
   if (recordingUrl) {

@@ -15,8 +15,8 @@ const steps = [
   {
     n: "01",
     title: "Set the room",
-    body: "Pick your target role, seniority, and interview type, then choose one of five interviewer personas. Drop in a job description or résumé and the session calibrates to it.",
-    points: ["Role + seniority + format", "Five distinct personas", "Optional JD / résumé context"],
+    body: "Pick your target role, seniority, and interview type, then choose one of three interviewer personas. Drop in a job description or résumé and the session calibrates to it.",
+    points: ["Role + seniority + format", "Three distinct personas", "Optional JD / résumé context"],
   },
   {
     n: "02",
@@ -27,7 +27,7 @@ const steps = [
   {
     n: "03",
     title: "Get the verdict",
-    body: "The moment you finish, Folio scores you across six dimensions and pulls the exact sentences that cost you the round — each paired with a stronger version.",
+    body: "The moment you finish, Folio scores you across four dimensions and pulls the exact sentences that cost you the round — each paired with a stronger version.",
     points: ["A single Folio Score", "Quote-level feedback", "Strengths, gaps, next steps"],
   },
   {
