@@ -10,7 +10,9 @@ import { createServerClient } from "@/lib/db/server";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/dashboard";
+  const rawNext = url.searchParams.get("next") ?? "";
+  // Only allow local paths to prevent open redirect attacks
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard";
 
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=missing_code", url.origin));
@@ -21,7 +23,7 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error("[Auth Callback] Code exchange failed:", error);
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error.message)}`, url.origin));
+    return NextResponse.redirect(new URL("/login?error=auth_failed", url.origin));
   }
 
   return NextResponse.redirect(new URL(next, url.origin));
