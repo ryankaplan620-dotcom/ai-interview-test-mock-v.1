@@ -49,7 +49,10 @@ export async function markSessionStarted(sessionId: string) {
     .update({ status: "in_progress", started_at: new Date().toISOString() })
     .eq("id", sessionId);
 
-  if (error) return { ok: false as const, error: (error as { message: string }).message };
+  if (error) {
+    console.error("[markSessionStarted] update failed:", error);
+    return { ok: false as const, error: "Failed to start session" };
+  }
   return { ok: true as const, alreadyStarted: false };
 }
 
@@ -105,7 +108,10 @@ export async function endSession(input: z.infer<typeof EndSessionInput>) {
 
   const { error } = await sessions.update(updatePayload).eq("id", sessionId);
 
-  if (error) return { ok: false as const, error: (error as { message: string }).message };
+  if (error) {
+    console.error("[endSession] update failed:", error);
+    return { ok: false as const, error: "Failed to end session" };
+  }
   return { ok: true as const, alreadyEnded: false };
 }
 
