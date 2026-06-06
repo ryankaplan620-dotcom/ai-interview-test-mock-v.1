@@ -123,8 +123,8 @@ export async function POST(req: NextRequest) {
           });
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "stream_failed";
-        emit({ type: "error", error: message });
+        console.error("[interview.turn] stream error:", err);
+        emit({ type: "error", error: "stream_failed" });
       } finally {
         controller.close();
       }

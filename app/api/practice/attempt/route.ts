@@ -155,10 +155,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[practice.attempt] feedback generation failed:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "analysis_failed" },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "analysis_failed" }, { status: 502 });
   }
 
   // --------------------------------------------------------------------

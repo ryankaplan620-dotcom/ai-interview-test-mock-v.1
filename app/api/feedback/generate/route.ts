@@ -129,10 +129,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
     });
   } catch (err) {
     console.error("[feedback.generate] claude error:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "generation_failed" },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "generation_failed" }, { status: 502 });
   }
 
   // 5. Persist
