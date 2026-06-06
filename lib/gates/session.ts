@@ -188,13 +188,16 @@ function checkSessionQuota(
   // Over quota but user accepted overage — allow
   if (req.overageAccepted) return { allowed: true };
 
-  // Over quota, no overage yet — surface the option
+  // Over quota, no overage yet — surface the option only if overage is purchasable
+  const hasOverage = !!tierConfig.overage.stripeEnvKey && tierConfig.overage.sessionPriceUsd > 0;
   return {
     allowed: false,
     reason: "session_quota_exceeded",
-    message: `You've used all ${included} sessions in your current cycle. Start an overage session for $${tierConfig.overage.sessionPriceUsd}, or upgrade for more included sessions.`,
-    overageAvailable: true,
-    overagePrice: tierConfig.overage.sessionPriceUsd,
+    message: hasOverage
+      ? `You've used all ${included} sessions in your current cycle. Start an overage session for $${tierConfig.overage.sessionPriceUsd}, or upgrade for more included sessions.`
+      : `You've used your included session${included === 1 ? "" : "s"} for this cycle. Upgrade to get more.`,
+    overageAvailable: hasOverage,
+    overagePrice: hasOverage ? tierConfig.overage.sessionPriceUsd : undefined,
     minimumTier: nextTierAbove(tier),
   };
 }

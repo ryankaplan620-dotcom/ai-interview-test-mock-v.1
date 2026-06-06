@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual as cryptoTimingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/db/service";
 import { shouldMockR2, uploadTranscript } from "@/lib/pipeline/r2";
 
@@ -40,26 +41,11 @@ export const maxDuration = 30;
  * is the authorization proof.
  */
 
-/**
- * Constant-time string comparison. Returns false without early-return even if
- * the lengths differ, to prevent length-oracle timing attacks.
- */
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    // Still consume time even on length mismatch
-    let acc = 1;
-    const len = Math.max(a.length, b.length);
-    for (let i = 0; i < len; i++) {
-      acc |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
-    }
-    void acc;
-    return false;
-  }
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return diff === 0;
+  const aBuf = Buffer.from(a, "utf8");
+  const bBuf = Buffer.from(b, "utf8");
+  if (aBuf.length !== bBuf.length) return false;
+  return cryptoTimingSafeEqual(aBuf, bBuf);
 }
 
 interface TavusWebhookPayload {

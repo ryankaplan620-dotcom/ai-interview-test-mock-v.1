@@ -19,7 +19,7 @@ const stats = [
 
 const paragraphs = [
   "Most candidates prepare by reading lists of questions and rehearsing answers in their head. That is not practice. Real interviews are live, unpredictable, and conversational. The gap between reading about interviews and sitting in one is enormous, and that gap costs people offers.",
-  "Practice needs to feel real. That means a voice on the other end that listens, follows up, and pushes back. It means feedback that cites the exact words you said, not generic advice. And it means scoring that tracks your progress across the dimensions interviewers actually evaluate: structure, specificity, self-awareness, communication, and more.",
+  "Practice needs to feel real. That means a voice on the other end that listens, follows up, and pushes back. It means feedback that cites the exact words you said, not generic advice. And it means scoring that tracks your progress across the dimensions interviewers actually evaluate: structure, specificity, and delivery.",
   "Folio is voice-first because interviews are conversations, not text boxes. Our feedback is quote-based because you need to see what you actually said, not what a summary thinks you said. And our outreach pipeline is human-in-the-loop because automated spam does not land interviews. Every piece of the product exists to close the gap between practice and performance.",
 ];
 

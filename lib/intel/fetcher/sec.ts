@@ -206,14 +206,13 @@ function extractRecentFilings(
 
 async function extractLeadership(
   _cik: string,
-  submissions: z.infer<typeof SecSubmissionsSchema>,
+  _submissions: z.infer<typeof SecSubmissionsSchema>,
   _requestId: string
 ): Promise<SecLeadershipEntry[]> {
   // For now, extract from the company name context.
   // Full implementation would parse the DEF 14A or 10-K for officer listings.
   // That requires HTML parsing which is Phase 2b work.
   // Return empty for now — other sources (company pages) will fill this.
-  void submissions;
   return [];
 }
 
