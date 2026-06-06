@@ -12,8 +12,7 @@ export async function POST() {
     const result = await initiateVerification({ userId: user.id, email: user.email });
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Verification failed";
     console.error("[Verify Student] Error:", err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 500 });
   }
 }

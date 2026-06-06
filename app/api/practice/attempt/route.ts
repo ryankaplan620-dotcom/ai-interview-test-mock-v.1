@@ -116,10 +116,7 @@ export async function POST(req: NextRequest) {
     transcript = await transcribeAudio(audio);
   } catch (err) {
     console.error("[practice.attempt] transcription failed:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "transcription_failed" },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "transcription_failed" }, { status: 502 });
   }
 
   if (transcript.trim().length < 5) {
@@ -200,10 +197,8 @@ export async function POST(req: NextRequest) {
     if (existing) {
       return NextResponse.json({ attempt: existing, cached: true });
     }
-    return NextResponse.json(
-      { error: insertErr.message ?? "insert_failed" },
-      { status: 500 },
-    );
+    console.error("[practice.attempt] insert failed:", insertErr);
+    return NextResponse.json({ error: "save_failed" }, { status: 500 });
   }
 
   // --------------------------------------------------------------------

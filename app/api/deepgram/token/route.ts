@@ -75,8 +75,9 @@ export async function POST() {
 
     if (!keyRes.ok) {
       const text = await keyRes.text().catch(() => "");
+      console.error(`[deepgram.token] key mint failed (${keyRes.status}): ${text.slice(0, 500)}`);
       return NextResponse.json(
-        { error: "deepgram_key_mint_failed", detail: text.slice(0, 200) },
+        { error: "deepgram_key_mint_failed" },
         { status: 502 },
       );
     }
@@ -90,9 +91,7 @@ export async function POST() {
       model: process.env.DEEPGRAM_MODEL ?? "nova-3",
     });
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "unknown" },
-      { status: 502 },
-    );
+    console.error("[deepgram.token] error:", err);
+    return NextResponse.json({ error: "deepgram_unavailable" }, { status: 502 });
   }
 }
