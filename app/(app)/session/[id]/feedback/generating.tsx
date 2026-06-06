@@ -69,7 +69,8 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
         setPhase("ready");
       } catch (err) {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Something went wrong.");
+        console.error("[feedback.generating] fetch failed:", err);
+        setError("Connection error. Check your network and try again.");
         setPhase("error");
       }
     };

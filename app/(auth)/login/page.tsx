@@ -28,7 +28,9 @@ function LoginSkeleton() {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") ?? "/dashboard";
+  const rawRedirect = searchParams.get("redirect") ?? "";
+  // Only allow local paths (must start with /) to prevent open redirect
+  const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
