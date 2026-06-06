@@ -162,7 +162,7 @@ export async function startSession(
     company: req.targetFirm || null,
     role: req.targetRole || null,
     duration_seconds: durationSeconds,
-    status: "active",
+    status: "scheduled",
     is_overage: req.overageAccepted ?? false,
   };
 
@@ -177,7 +177,7 @@ export async function startSession(
     console.error("[startSession] payload was:", JSON.stringify(insertPayload, null, 2));
     return {
       ok: false,
-      error: insertError?.message ?? "Couldn't create the session. Try again.",
+      error: "Couldn't create the session. Try again.",
       code: "insert_failed",
     };
   }
