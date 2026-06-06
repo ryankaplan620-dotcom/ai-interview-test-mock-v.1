@@ -6,7 +6,7 @@ import type { Database } from "@/types/supabase";
  * Routes that require authentication.
  * Unauthenticated users are redirected to /login.
  */
-const PROTECTED_ROUTES = ["/dashboard", "/session", "/settings", "/account"];
+const PROTECTED_ROUTES = ["/dashboard", "/session", "/settings", "/account", "/outreach", "/practice"];
 
 /**
  * Routes that should only be shown to unauthenticated users.
