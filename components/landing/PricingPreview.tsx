@@ -27,9 +27,9 @@ const tiers = [
     preamble: "Everything in Free, and:",
     features: [
       "3 interview sessions (30 min each)",
-      "All 5 interviewer personas",
+      "All 3 interviewer personas",
       "4 comms training sessions",
-      "5 outreach sends",
+      "10 outreach sends/month",
       "Quote-based coaching",
     ],
   },
@@ -43,11 +43,11 @@ const tiers = [
     preamble: "Everything in Basic, and:",
     features: [
       "8 interview sessions",
-      "Unlimited comms training",
-      "20 outreach sends",
+      "10 comms training sessions",
+      "30 outreach sends/month",
       "Firm-specific calibration",
       "Cross-session memory",
-      "Panel simulation",
+      "End-of-interview Q&A",
     ],
   },
   {
@@ -60,11 +60,11 @@ const tiers = [
     preamble: "Everything in Pro, and:",
     features: [
       "Unlimited interviews",
-      "50 outreach sends",
-      "Superday mode",
-      "Hard mode",
-      "Question intelligence engine",
-      "Voice acoustic analysis",
+      "20 comms training sessions",
+      "100 outreach sends/month",
+      "Panel & superday simulations",
+      "True Hard Mode",
+      "Priority feedback queue",
     ],
   },
 ];

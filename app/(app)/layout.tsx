@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FolioMark } from "@/components/FolioMark";
 import { SignOutButton } from "@/components/SignOutButton";
+import { AppMobileNav } from "@/components/AppNav";
 import { getProfile, getUserTier, requireUser } from "@/lib/auth/server";
 import { TIERS } from "@/lib/tiers";
 
@@ -14,7 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <main className="relative flex min-h-screen flex-col bg-ink">
       {/* Atmospheric layers */}
-      <div className="pointer-events-none fixed inset-0 grid-overlay opacity-[0.25]" aria-hidden />
+      <div className="pointer-events-none fixed inset-0 bg-grid-dark opacity-[0.25]" aria-hidden />
       <div className="pointer-events-none fixed inset-0 bg-depth-glow opacity-60" aria-hidden />
 
       {/* Top nav */}
@@ -74,7 +75,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      <div className="relative z-0 flex-1">{children}</div>
+      <div className="relative z-0 flex-1 pb-[60px] md:pb-0">{children}</div>
+      <AppMobileNav />
     </main>
   );
 }

@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 const stats = [
   { value: "200+", label: "Companies" },
-  { value: "5", label: "Interviewer personas" },
-  { value: "6", label: "Score dimensions" },
+  { value: "3", label: "Interviewer personas" },
+  { value: "4", label: "Score dimensions" },
   { value: "90s", label: "To first score" },
 ];
 

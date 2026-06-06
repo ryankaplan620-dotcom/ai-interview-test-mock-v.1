@@ -8,7 +8,7 @@ import { getUser, getUserTier } from "@/lib/auth/server";
 export const metadata = {
   title: "Pricing",
   description:
-    "Folio pricing — Cycle $49 (90 days, students), Pro $149 (full year), Max $249 (full year with panels and superday).",
+    "Folio pricing — Basic $49 (90 days, students only), Pro $149 (full year), Max $249 (full year, unlimited sessions, panels and superday).",
 };
 
 export default async function PricingPage() {
@@ -55,7 +55,7 @@ export default async function PricingPage() {
             <h3 className="mt-3 text-[22px] font-semibold text-gray-900">Overage sessions</h3>
             <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-gray-600">
               Hit your included-session limit before your cycle ends? Pay per session to keep
-              going: $8 each on Cycle and Pro, $6 each on Max. No forced upgrade, no subscription
+              going: $20 each on Basic and Pro, $15 each on Max. No forced upgrade, no subscription
               surprises. You decide when to push on with another interview.
             </p>
           </div>
@@ -79,7 +79,7 @@ export default async function PricingPage() {
             />
             <Faq
               q="How do I verify as a student?"
-              a="Through SheerID during checkout. Takes about a minute for most schools. The Cycle tier is priced at near-cost — SheerID protects it from being used by non-students, which keeps it sustainable."
+              a="Through SheerID during checkout. Takes about a minute for most schools. The Basic tier is priced at near-cost — SheerID protects it from being used by non-students, which keeps it sustainable."
             />
             <Faq
               q="What happens when my cycle ends?"
@@ -90,8 +90,8 @@ export default async function PricingPage() {
               a="Max adds panel interviews (two or three interviewers at once), superday mode (a simulated full superday running multiple formats in sequence), true hard mode (the adversarial finals-round experience), and priority feedback (your feedback generates faster after each session)."
             />
             <Faq
-              q="What if I need more than 8 or 24 sessions?"
-              a="Pay $8 per extra session ($6 on Max). No upgrade prompt, no upsell pressure — we designed the included counts to cover a normal recruiting cycle with room to spare, and the overage option is there for the rare week when you have five interviews back-to-back."
+              q="What if I need more than my included sessions?"
+              a="Pay $20 per extra session on Basic or Pro ($15 on Max). No upgrade prompt, no upsell pressure — we designed the included counts to cover a normal recruiting cycle with room to spare, and the overage option is there for the rare week when you have five interviews back-to-back. Max includes unlimited sessions, so overage only applies to Basic and Pro."
             />
           </div>
         </div>

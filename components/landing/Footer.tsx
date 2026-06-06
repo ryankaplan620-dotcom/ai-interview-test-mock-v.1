@@ -31,9 +31,8 @@ const columns: { heading: string; links: { label: string; href: string }[] }[] =
 ];
 
 const socials: { label: string; href: string }[] = [
-  { label: "X", href: "https://x.com" },
-  { label: "LinkedIn", href: "https://linkedin.com" },
-  { label: "Instagram", href: "https://instagram.com" },
+  { label: "X", href: "https://x.com/tryfolio" },
+  { label: "LinkedIn", href: "https://linkedin.com/company/tryfolio" },
 ];
 
 export function Footer() {

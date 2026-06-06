@@ -14,7 +14,7 @@ interface PricingClientProps {
 const DISPLAY_ORDER: SubscriptionTier[] = ["free", "basic", "pro", "max"];
 
 const FEATURE_ROWS: { label: string; feature: LegacyFeatureKey }[] = [
-  { label: "All 5 recruiter personas", feature: "allPersonas" },
+  { label: "All 3 interviewer personas", feature: "allPersonas" },
   { label: "Unlimited drill practice", feature: "unlimitedDrills" },
   { label: "Quote-based feedback", feature: "quoteFeedback" },
   { label: "Firm-specific calibration", feature: "firmCalibration" },

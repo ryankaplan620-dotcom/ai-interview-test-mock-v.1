@@ -36,7 +36,7 @@ export function Interviewers() {
         <SectionHeading className="mt-4">Three personalities. One for every moment.</SectionHeading>
         <Lede className="mt-5 max-w-[540px]">
           Each interviewer brings a different energy and a different kind of pressure. Practice
-          with all three to build range.
+          with all three to build real range.
         </Lede>
       </ScrollReveal>
 

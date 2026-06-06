@@ -73,6 +73,8 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
   const chunksRef = useRef<Blob[]>([]);
   const recordingStartRef = useRef<number>(0);
   const timerRef = useRef<number | null>(null);
+  // Stable ref to stopRecording so the timer callback never closes over a stale version
+  const stopRecordingRef = useRef<(upload: boolean) => void>(() => {});
 
   const nextAttemptNumber = attempts.length + 1;
   const isLastAttempt = nextAttemptNumber === drill.targetAttempts;
@@ -80,11 +82,10 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
   // --- Cleanup on unmount ----------------------------------------------
   useEffect(() => {
     return () => {
-      stopRecording(false);
+      stopRecordingRef.current(false);
       streamRef.current?.getTracks().forEach((t) => t.stop());
       if (timerRef.current !== null) window.clearInterval(timerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- Mic permission --------------------------------------------------
@@ -131,7 +132,7 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
       setElapsedSeconds(e);
       // Auto-stop at max duration
       if (e >= drill.maxAttemptSeconds) {
-        stopRecording(true);
+        stopRecordingRef.current(true);
       }
     }, 100);
   }, [drill.maxAttemptSeconds]);
@@ -170,6 +171,7 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
+  stopRecordingRef.current = stopRecording;
 
   const uploadAttempt = async (audio: Blob, duration: number) => {
     setPhase("uploading");

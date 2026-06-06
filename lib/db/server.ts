@@ -38,6 +38,7 @@ export function createServerClient() {
   }) as unknown as SupabaseClient<Database>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createServiceRoleClient(): SupabaseClient<any, "public", any> {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -48,6 +49,7 @@ export function createServiceRoleClient(): SupabaseClient<any, "public", any> {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set.");
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return createServerClientSSR<any>(SUPABASE_URL, serviceRoleKey, {
     cookies: {
       get: () => undefined,

@@ -10,11 +10,8 @@ const RADAR_DURATION = 1200;
 
 const dimensions = [
   { label: "Structure", value: 82 },
-  { label: "Clarity", value: 78 },
-  { label: "Confidence", value: 61 },
   { label: "Specificity", value: 75 },
-  { label: "Conciseness", value: 72 },
-  { label: "Persuasion", value: 73 },
+  { label: "Delivery", value: 71 },
 ];
 
 const RADIUS = 120;
@@ -24,14 +21,16 @@ function easeOut(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
+const N_DIM = 3;
+
 function polarToCartesian(index: number, value: number, radius: number): [number, number] {
-  const angle = Math.PI / 2 + index * ((2 * Math.PI) / 6);
+  const angle = -Math.PI / 2 + index * ((2 * Math.PI) / N_DIM);
   const r = (value / 100) * radius;
-  return [CENTER - r * Math.cos(angle), CENTER - r * Math.sin(angle)];
+  return [CENTER + r * Math.cos(angle), CENTER + r * Math.sin(angle)];
 }
 
-function hexagonPath(fraction: number): string {
-  return Array.from({ length: 6 }, (_, i) => {
+function polygonPath(fraction: number): string {
+  return Array.from({ length: N_DIM }, (_, i) => {
     const [x, y] = polarToCartesian(i, fraction * 100, RADIUS);
     return `${x},${y}`;
   }).join(" ");
@@ -45,7 +44,7 @@ export function FolioScore() {
           <Eyebrow>The Folio Score</Eyebrow>
           <SectionHeading className="mt-4">One number. The one that matters.</SectionHeading>
           <Lede className="mx-auto mt-5 max-w-[560px]">
-            Every session resolves to a single score across six dimensions interviewers
+            Every session resolves to a single score across three dimensions interviewers
             actually weigh — so you always know exactly where you stand.
           </Lede>
         </div>
@@ -60,7 +59,7 @@ export function FolioScore() {
                 Dimension breakdown
               </p>
               <span className="rounded-md bg-brand-50 px-2 py-0.5 font-mono text-[11px] font-semibold text-brand-700">
-                6 axes
+                3 dimensions
               </span>
             </div>
             <RadarChart />
@@ -169,13 +168,13 @@ function RadarChart() {
   const dataPoints = dimensions.map((d, i) => polarToCartesian(i, d.value * progress, RADIUS));
   const dataPath = dataPoints.map(([x, y]) => `${x},${y}`).join(" ");
   const axisVertices = dimensions.map((_, i) => polarToCartesian(i, 100, RADIUS));
-  const labelPositions = dimensions.map((_, i) => polarToCartesian(i, 118, RADIUS));
+  const labelPositions = dimensions.map((_, i) => polarToCartesian(i, 125, RADIUS));
 
   return (
     <div className="mt-2 flex justify-center">
-      <svg ref={ref} viewBox="0 0 300 300" className="w-full max-w-[300px]" aria-label="Radar chart of six score dimensions">
+      <svg ref={ref} viewBox="0 0 300 300" className="w-full max-w-[300px]" aria-label="Radar chart of three score dimensions">
         {[0.4, 0.7, 1.0].map((frac) => (
-          <polygon key={frac} points={hexagonPath(frac)} fill="none" stroke="#E5E7EB" strokeWidth="0.75" />
+          <polygon key={frac} points={polygonPath(frac)} fill="none" stroke="#E5E7EB" strokeWidth="0.75" />
         ))}
         {axisVertices.map(([x, y], i) => (
           <line key={i} x1={CENTER} y1={CENTER} x2={x} y2={y} stroke="#E5E7EB" strokeWidth="0.75" />
