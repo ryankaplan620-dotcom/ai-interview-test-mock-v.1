@@ -95,13 +95,8 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
 
   const tavusPersonaId = getTavusPersonaId(session.persona);
   if (!tavusPersonaId) {
-    return NextResponse.json(
-      {
-        error: "persona_not_registered",
-        detail: `Run scripts/bootstrap-tavus-personas.ts and set TAVUS_PERSONA_ID_${session.persona.toUpperCase()}`,
-      },
-      { status: 503 },
-    );
+    console.error(`[tavus.conversation] persona not registered: ${session.persona}`);
+    return NextResponse.json({ error: "persona_not_configured" }, { status: 503 });
   }
   const replicaId = getTavusReplicaId(session.persona);
   const persona = PERSONAS[session.persona];
@@ -180,10 +175,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
     });
   } catch (err) {
     console.error("[tavus.conversation] create failed:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "tavus_create_failed" },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "tavus_create_failed" }, { status: 502 });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -207,14 +199,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   });
 }
 
-export async function POST(req: NextRequest) {
-  const { getUser } = await import("@/lib/auth/server");
-  const user = await getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  return handler(req, { user: { id: user.id } });
-}
+export const POST = withRateLimit(RATE_LIMITS.tavus_conversation, handler);
 
 // --------------------------------------------------------------------------
 // Context builder (unchanged from Phase I.2)

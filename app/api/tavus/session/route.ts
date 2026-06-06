@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
-import { PERSONAS, getPersonaAvatarId } from "@/lib/personas";
+import { getPersonaAvatarId } from "@/lib/personas";
 import type { PersonaId } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -56,9 +56,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "replica_not_configured" }, { status: 503 });
   }
 
-  // Log persona for debugging in dev — remove before prod
-  void PERSONAS[session.persona];
-
   try {
     // Create a Tavus conversation
     const res = await fetch("https://tavusapi.com/v2/conversations", {
@@ -86,9 +83,7 @@ export async function POST(req: NextRequest) {
       conversationId: tavusData.conversation_id,
     });
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "tavus_session_failed" },
-      { status: 502 },
-    );
+    console.error("[Tavus] Unexpected error:", err);
+    return NextResponse.json({ error: "tavus_session_failed" }, { status: 502 });
   }
 }
