@@ -68,7 +68,7 @@ export default function TermsPage() {
           </p>
           <p>
             You represent that the information you provide is accurate. If you claim to be a student
-            to qualify for the Cycle tier, you must complete verification through SheerID, and you
+            to qualify for the Basic tier, you must complete verification through SheerID, and you
             remain responsible for the truth of that claim.
           </p>
         </Section>
@@ -90,7 +90,7 @@ export default function TermsPage() {
 
         <Section n="5" title="Subscription tiers, trials, and billing">
           <p>
-            {COMPANY.short_name} offers tiered subscription plans currently labeled Cycle, Pro, and
+            {COMPANY.short_name} offers tiered subscription plans currently labeled Basic, Pro, and
             Max. Current prices, session allotments, and cycle durations are shown on the pricing
             page at{" "}
             <a
@@ -109,7 +109,7 @@ export default function TermsPage() {
             immediately.
           </p>
           <p>
-            <strong>Cycles and renewal.</strong> The Cycle tier runs for 90 days; Pro and Max run
+            <strong>Billing periods and renewal.</strong> The Basic tier runs for 90 days; Pro and Max run
             for 365 days. Your plan renews automatically at the end of each cycle unless you have
             toggled auto-renew off in your account settings before the cycle ends. We send a
             renewal reminder email approximately 10 days before your cycle ends.

@@ -38,7 +38,7 @@ export interface SessionStartContext {
   sessionsUsedThisCycle: number;
   /** Overages already used this cycle (for display + billing context). */
   overagesUsedThisCycle: number;
-  /** Has the user verified they are a student (if on the Cycle tier)? */
+  /** Has the user verified they are a student (if on the Basic tier)? */
   studentVerified?: boolean;
   /** Is the user currently within their active cycle? */
   cycleActive: boolean;
@@ -96,12 +96,12 @@ export function checkSessionStart(
     };
   }
 
-  // 3. Student verification required for Cycle tier
+  // 3. Student verification required for Basic tier
   if (tier === "basic" && TIERS.basic.requiresStudentVerification && !ctx.studentVerified) {
     return {
       allowed: false,
       reason: "student_not_verified",
-      message: "Verify your student status to activate your Cycle plan.",
+      message: "Verify your student status to activate your Basic plan.",
     };
   }
 

@@ -14,7 +14,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
  *     `subscription_data.trial_period_days`).
  *   - Subsequent purchases (renewal after cycle expiry): no trial.
  *
- * The Cycle tier requires SheerID-verified student status. This check
+ * The Basic tier requires SheerID-verified student status. This check
  * happens here rather than at the pricing page to prevent URL spoofing.
  */
 export async function createSubscriptionCheckout({
@@ -29,7 +29,7 @@ export async function createSubscriptionCheckout({
   const stripe = requireStripe();
   const tierConfig = TIERS[tier];
 
-  // Cycle tier requires verified-student status
+  // Basic tier requires verified-student status
   if (tierConfig.requiresStudentVerification) {
     const supabase = createServiceRoleClient();
     const { data: tierView } = await supabase

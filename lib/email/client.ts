@@ -189,12 +189,12 @@ export async function sendStudentVerifiedEmail({ to }: { to: string }) {
   const html = brandFrame({
     heading: "You're verified.",
     body: `
-      <p>Your student status is confirmed. The Cycle tier at $49 for 90 days is now available when you upgrade.</p>
+      <p>Your student status is confirmed. The Basic tier at $49 for 90 days is now available when you upgrade.</p>
       <p>Verification stays active for one year, then automatically re-verifies.</p>
     `,
     ctaText: "Pick your plan →",
     ctaUrl: `${APP_URL}/pricing`,
   });
-  const text = `You're verified as a student. The Cycle tier at $49 for 90 days is now available.\n\n${APP_URL}/pricing`;
+  const text = `You're verified as a student. The Basic tier at $49 for 90 days is now available.\n\n${APP_URL}/pricing`;
   return sendEmail({ to, subject: "Student status confirmed.", html, text });
 }

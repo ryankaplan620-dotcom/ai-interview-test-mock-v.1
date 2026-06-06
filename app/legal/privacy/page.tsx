@@ -66,7 +66,7 @@ export default function PrivacyPage() {
               usage.
             </li>
             <li>
-              <strong>Student verification.</strong> If you claim the discounted Cycle tier, you
+              <strong>Student verification.</strong> If you claim the discounted Basic tier, you
               complete verification through SheerID. We receive a verification outcome
               (verified/rejected) and your program ID; we do not receive scans of your documents.
             </li>
@@ -197,9 +197,9 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section n="6" title="Student data (SheerID and the Cycle tier)">
+        <Section n="6" title="Student data (SheerID and the Basic tier)">
           <p>
-            If you claim the Cycle tier, SheerID verifies your student status. SheerID may ask for
+            If you claim the Basic tier, SheerID verifies your student status. SheerID may ask for
             documentation (enrollment verification, transcript, .edu email, or similar). SheerID
             processes that documentation on its own infrastructure under its own privacy policy. We
             receive only the outcome — verified, rejected, or pending — plus a reference ID. We do

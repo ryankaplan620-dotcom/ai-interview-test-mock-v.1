@@ -99,7 +99,7 @@ export const PROCESSORS: Processor[] = [
   },
   {
     name: "SheerID",
-    role: "Student status verification for the discounted Cycle tier",
+    role: "Student status verification for the discounted Basic tier",
     data_categories: ["full name", "school name", "enrollment status"],
     jurisdiction: "United States",
     privacy_policy_url: "https://www.sheerid.com/privacy-policy/",

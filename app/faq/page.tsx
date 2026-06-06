@@ -56,7 +56,7 @@ const categories: FaqCategory[] = [
       },
       {
         q: "Why cycles instead of monthly billing?",
-        a: "Recruiting is seasonal. Cycle plans (90 days) match a real recruiting season; Pro and Max run annually. You pay for a prep season, not dead months.",
+        a: "Recruiting is seasonal. The Basic plan (90 days) matches a real recruiting season; Pro and Max run annually. You pay for a prep season, not dead months.",
       },
       {
         q: "Can I cancel anytime?",
