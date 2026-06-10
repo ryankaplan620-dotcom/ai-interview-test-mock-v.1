@@ -77,7 +77,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <p
-            className={`font-serif text-[15px] leading-[1.55] ${
+            className={`font-sans text-[15px] leading-[1.55] ${
               dismissed ? "line-through text-text-tertiary" : "text-text-primary"
             }`}
           >
@@ -86,7 +86,23 @@ export function MemoryCard({ memory }: MemoryCardProps) {
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] tracking-label text-text-tertiary">
             <span>{memory.category.toUpperCase().replace(/_/g, " ")}</span>
             <span>·</span>
-            <span>{confidenceLabel.toUpperCase()} CONFIDENCE</span>
+            <span className={`inline-flex items-center gap-1.5 ${dismissed ? "" : "text-accent"}`}>
+              <span className="inline-flex items-center gap-[3px]" aria-hidden>
+                {[1, 2, 3, 4, 5].map((step) => (
+                  <span
+                    key={step}
+                    className={`h-1 w-1 rounded-full ${
+                      step <= memory.confidence
+                        ? dismissed
+                          ? "bg-text-tertiary"
+                          : "bg-accent"
+                        : "bg-ink-border"
+                    }`}
+                  />
+                ))}
+              </span>
+              {confidenceLabel.toUpperCase()} CONFIDENCE
+            </span>
             <span>·</span>
             <span>{formattedDate}</span>
             {memory.surfaced_count > 0 && (
@@ -103,10 +119,10 @@ export function MemoryCard({ memory }: MemoryCardProps) {
         <button
           onClick={toggle}
           disabled={pending}
-          className={`flex-shrink-0 rounded-full px-3 py-1 font-mono text-[10px] font-medium tracking-label transition-colors ${
+          className={`flex-shrink-0 rounded-full px-3 py-1.5 font-mono text-[10px] font-medium tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
             dismissed
-              ? "border border-ink-border bg-ink-surface text-text-secondary hover:border-accent hover:text-accent"
-              : "border border-rose-900/50 bg-transparent text-rose-400 hover:bg-rose-950"
+              ? "border border-ink-border bg-ink-surface text-text-secondary hover:border-accent hover:text-accent focus-visible:ring-accent"
+              : "border border-rose-900/50 bg-transparent text-rose-400 hover:bg-rose-950 focus-visible:ring-rose-500"
           } ${pending ? "opacity-50" : ""}`}
         >
           {dismissed ? "RESTORE" : "DISMISS"}

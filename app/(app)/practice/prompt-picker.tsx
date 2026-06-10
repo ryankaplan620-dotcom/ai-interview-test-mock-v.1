@@ -53,18 +53,27 @@ export function DrillPicker() {
               onClick={() => setActiveDrill(type)}
               className={[
                 "rounded-2xl border p-5 text-left transition-all",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
                 isActive
-                  ? "border-accent bg-ink-raised ring-1 ring-accent/30"
+                  ? "border-accent/70 bg-ink-raised shadow-accent-glow"
                   : "border-ink-border bg-ink-surface hover:border-accent/50",
               ].join(" ")}
             >
-              <div className="flex items-center justify-between">
-                <p className="font-display text-[17px] font-semibold text-text-primary">
+              <p
+                className={[
+                  "font-mono text-[9px] tracking-label",
+                  isActive ? "text-accent" : "text-text-tertiary",
+                ].join(" ")}
+              >
+                {type.toUpperCase()}
+              </p>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <p className="font-display text-[17px] font-bold tracking-[-0.03em] text-text-primary">
                   {cfg.name}
                 </p>
                 <ConfigBadge cfg={cfg} />
               </div>
-              <p className="mt-1 font-serif text-[13px] italic text-text-secondary">
+              <p className="mt-1 font-sans text-[13px] text-text-secondary">
                 {cfg.tagline}
               </p>
             </button>
@@ -184,6 +193,7 @@ function PromptCard({ id, category, title, pushback, guidance, loading, disabled
       className={[
         "group w-full rounded-xl border border-ink-border bg-ink-surface p-5 text-left transition-all",
         "hover:border-accent/60 hover:bg-ink-raised",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         loading ? "border-accent/60" : "",
       ].join(" ")}
@@ -197,7 +207,7 @@ function PromptCard({ id, category, title, pushback, guidance, loading, disabled
             {title}
           </p>
           {pushback && (
-            <p className="mt-2 font-serif text-[13px] italic leading-[1.5] text-amber-300/90">
+            <p className="mt-2 font-sans text-[13px] italic leading-[1.5] text-amber-300/90">
               → &ldquo;{pushback}&rdquo;
             </p>
           )}

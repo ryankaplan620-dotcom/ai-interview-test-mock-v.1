@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
@@ -56,6 +57,7 @@ export default async function MemorySettingsPage() {
   }
 
   const personaOrder: PersonaId[] = ["sarah", "gemma"];
+  const personaVersions: Partial<Record<PersonaId, string>> = { sarah: "v.2", gemma: "v.3" };
 
   return (
     <div className="mx-auto max-w-[840px] px-6 py-12 sm:px-10">
@@ -69,10 +71,10 @@ export default async function MemorySettingsPage() {
       </div>
       <div className="mb-10">
         <span className="font-mono text-[11px] font-medium tracking-label text-accent">MEMORY</span>
-        <h1 className="mt-3 font-display text-[32px] font-semibold tracking-heading text-text-primary">
+        <h1 className="mt-3 font-display text-[32px] font-bold tracking-[-0.03em] text-text-primary">
           What your interviewers remember
         </h1>
-        <p className="mt-3 max-w-[600px] font-serif text-[15px] italic leading-[1.55] text-text-secondary">
+        <p className="mt-3 max-w-[600px] font-sans text-[15px] leading-[1.55] text-text-secondary">
           After each session, each interviewer takes a few private notes about your performance. These
           notes are pulled back in when you practice with the same interviewer again, so the next
           session builds on the last one instead of starting from zero.
@@ -98,6 +100,8 @@ export default async function MemorySettingsPage() {
             return (
               <PersonaSection
                 key={pid}
+                personaId={pid}
+                personaVersion={personaVersions[pid]}
                 personaName={persona.name}
                 personaFirm={persona.firm}
                 personaTitle={persona.title}
@@ -112,11 +116,15 @@ export default async function MemorySettingsPage() {
 }
 
 function PersonaSection({
+  personaId,
+  personaVersion,
   personaName,
   personaFirm,
   personaTitle,
   memories,
 }: {
+  personaId: PersonaId;
+  personaVersion?: string;
   personaName: string;
   personaFirm: string;
   personaTitle: string;
@@ -127,14 +135,32 @@ function PersonaSection({
 
   return (
     <div className="rounded-xl border border-ink-border bg-ink-surface p-6">
-      <div className="mb-5 flex items-baseline justify-between gap-4">
-        <div>
-          <h2 className="font-display text-[18px] font-semibold text-text-primary">{personaName}</h2>
-          <p className="mt-1 font-sans text-[12px] text-text-tertiary">
-            {personaTitle} · {personaFirm}
-          </p>
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border border-ink-border">
+            <Image
+              src={`/images/agents/${personaId}.png`}
+              alt={personaName}
+              fill
+              sizes="48px"
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <div className="flex items-baseline gap-2">
+              <h2 className="font-display text-[18px] font-bold tracking-[-0.01em] text-text-primary">
+                {personaName}
+              </h2>
+              {personaVersion && (
+                <span className="font-mono text-[10.5px] text-accent">{personaVersion}</span>
+              )}
+            </div>
+            <p className="mt-1 font-sans text-[12px] text-text-tertiary">
+              {personaTitle} · {personaFirm}
+            </p>
+          </div>
         </div>
-        <span className="font-mono text-[11px] tracking-label text-text-tertiary">
+        <span className="flex-shrink-0 font-mono text-[11px] tracking-label text-text-tertiary">
           {active.length} ACTIVE
         </span>
       </div>
@@ -169,19 +195,23 @@ function PersonaSection({
 
 function EmptyState() {
   return (
-    <div className="rounded-xl border border-ink-border bg-ink-surface p-10 text-center">
-      <p className="font-mono text-[11px] tracking-label text-accent">NOTHING YET</p>
-      <h2 className="mt-3 font-display text-[22px] font-semibold text-text-primary">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark p-10 text-center">
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[100px]"
+        aria-hidden
+      />
+      <p className="relative font-mono text-[11px] tracking-label text-accent">NOTHING YET</p>
+      <h2 className="relative mt-3 font-display text-[22px] font-bold tracking-[-0.02em] text-text-primary">
         No memories have been saved yet.
       </h2>
-      <p className="mx-auto mt-3 max-w-[480px] font-sans text-[14px] leading-relaxed text-text-secondary">
+      <p className="relative mx-auto mt-3 max-w-[480px] font-sans text-[14px] leading-relaxed text-text-secondary">
         After your next completed session, each interviewer will take 1 to 3 private notes. You'll see
         those notes here, and they'll be referenced naturally when you practice with the same
         interviewer again.
       </p>
       <Link
         href="/session/new"
-        className="mt-6 inline-block rounded-full bg-accent px-6 py-2.5 font-sans text-[14px] font-semibold text-ink transition-colors hover:bg-accent-light"
+        className="relative mt-6 inline-block rounded-full bg-cta-gradient px-6 py-2.5 font-sans text-[14px] font-semibold text-text-onAccent transition-all hover:shadow-accent-glow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
       >
         Start a session
       </Link>

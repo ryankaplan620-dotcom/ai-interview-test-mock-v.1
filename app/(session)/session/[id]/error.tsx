@@ -77,12 +77,13 @@ export default function SessionError({
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ink px-6 py-12">
-      <div className="w-full max-w-[540px] rounded-2xl border border-ink-border bg-ink-surface p-10">
+    <div className="relative min-h-screen bg-gradient-dark">
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12">
+      <div className="w-full max-w-[540px] rounded-2xl border border-white/[0.08] bg-ink/70 p-10 backdrop-blur-md">
         <p className="font-mono text-[11px] font-medium tracking-label text-accent">
           SESSION INTERRUPTED
         </p>
-        <h1 className="mt-3 font-display text-[28px] font-semibold leading-[1.2] tracking-heading text-text-primary">
+        <h1 className="mt-3 font-display text-[28px] font-bold leading-[1.15] tracking-[-0.03em] text-text-primary">
           The interview couldn't continue.
         </h1>
         <p className="mt-5 font-sans text-[15px] leading-relaxed text-text-secondary">
@@ -100,14 +101,14 @@ export default function SessionError({
           <button
             onClick={handleEndAndExit}
             disabled={isPending}
-            className="inline-flex h-11 items-center rounded-full bg-cta-gradient px-5 font-sans text-[14px] font-semibold text-text-onAccent transition-all duration-200 ease-brand hover:shadow-accent-glow disabled:cursor-wait disabled:opacity-60"
+            className="inline-flex h-11 items-center rounded-full bg-cta-gradient px-5 font-sans text-[14px] font-semibold text-text-onAccent transition-all duration-200 ease-brand hover:shadow-accent-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cosmos disabled:cursor-wait disabled:opacity-60"
           >
             {isPending ? "Exiting…" : "Back to dashboard"}
           </button>
           <button
             onClick={() => reset()}
             disabled={isPending}
-            className="inline-flex h-11 items-center rounded-full border border-ink-border bg-ink-raised px-5 font-sans text-[14px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent disabled:opacity-60"
+            className="inline-flex h-11 items-center rounded-full border border-white/[0.12] bg-white/[0.04] px-5 font-sans text-[14px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cosmos disabled:opacity-60"
           >
             Try again
           </button>
@@ -143,6 +144,7 @@ export default function SessionError({
           </a>{" "}
           and we'll take a look.
         </p>
+      </div>
       </div>
     </div>
   );

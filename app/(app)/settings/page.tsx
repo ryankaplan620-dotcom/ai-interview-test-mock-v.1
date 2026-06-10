@@ -16,7 +16,7 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-[840px] px-6 py-12 sm:px-10">
       <div className="mb-10">
         <span className="font-mono text-[11px] font-medium tracking-label text-accent">SETTINGS</span>
-        <h1 className="mt-3 font-display text-[32px] font-semibold tracking-heading text-text-primary">
+        <h1 className="mt-3 font-display text-[32px] font-bold tracking-[-0.03em] text-text-primary">
           Account
         </h1>
       </div>
@@ -34,7 +34,14 @@ export default async function SettingsPage() {
 
         {/* Subscription */}
         <Panel title="Subscription">
-          <Row label="Plan" value={tierConfig.label} />
+          <div className="flex items-center justify-between gap-4">
+            <span className="font-mono text-[11px] font-medium tracking-label text-text-tertiary">
+              PLAN
+            </span>
+            <span className="inline-flex items-center rounded-full bg-accent/10 px-3 py-1 font-sans text-[12px] font-semibold text-accent ring-1 ring-inset ring-accent/30">
+              {tierConfig.label}
+            </span>
+          </div>
           <Row
             label="Price"
             value={`${formatPrice(tierConfig.priceUsd)} / ${tierConfig.billing.label.toLowerCase()}`}
@@ -76,7 +83,7 @@ export default async function SettingsPage() {
           <div className="mt-4">
             <Link
               href="/settings/memory"
-              className="inline-flex h-9 items-center rounded-full border border-ink-border bg-ink-raised px-4 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+              className="inline-flex h-9 items-center rounded-full border border-ink-border bg-ink-raised px-4 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               View what interviewers remember →
             </Link>
@@ -92,13 +99,13 @@ export default async function SettingsPage() {
           <div className="mt-4 flex flex-wrap gap-3">
             <a
               href="mailto:support@folio.io?subject=Data%20export%20request"
-              className="inline-flex h-9 items-center rounded-full border border-ink-border bg-ink-raised px-4 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+              className="inline-flex h-9 items-center rounded-full border border-ink-border bg-ink-raised px-4 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Request data export
             </a>
             <a
               href="mailto:support@folio.io?subject=Account%20deletion%20request"
-              className="inline-flex h-9 items-center rounded-full border border-rose-900 bg-transparent px-4 font-sans text-[13px] font-medium text-rose-400 transition-colors hover:bg-rose-950"
+              className="inline-flex h-9 items-center rounded-full border border-rose-900 bg-transparent px-4 font-sans text-[13px] font-medium text-rose-400 transition-colors hover:bg-rose-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Delete account
             </a>

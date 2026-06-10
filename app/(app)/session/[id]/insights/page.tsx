@@ -116,12 +116,14 @@ export default async function SessionInsightsPage({ params, searchParams }: Page
           Feedback
         </Link>
         <span className="font-mono text-[10px] text-text-secondary">/</span>
-        <span className="font-mono text-[11px] tracking-wider text-text-secondary">Insights</span>
+        <span className="font-mono text-[11px] tracking-label text-text-secondary">INSIGHTS</span>
       </div>
 
       {/* Header */}
       <header className="mb-10">
-        <p className="font-mono text-[11px] tracking-label text-accent/80">SESSION INSIGHTS</p>
+        <p className="font-mono text-[11px] tracking-label">
+          <span className="text-gradient-violet">SESSION INTELLIGENCE</span>
+        </p>
         <h1 className="mt-2 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-text-primary sm:text-[40px]">
           {persona.firstName} at {persona.firm}
         </h1>
@@ -197,8 +199,9 @@ function TabLink({
   return (
     <Link
       href={`/session/${sessionId}/insights?tab=${tab}`}
+      aria-current={isActive ? "page" : undefined}
       className={[
-        "px-4 py-2.5 font-sans text-[13px] font-medium transition-colors",
+        "px-4 py-2.5 font-sans text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
         isActive
           ? "border-b-2 border-accent text-text-primary"
           : "text-text-secondary hover:text-text-primary",
@@ -408,7 +411,7 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
                 className="rounded-lg border border-ink-border bg-ink px-4 py-3"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full border border-ink-border bg-ink-surface px-2 py-0.5 font-mono text-[10px] tracking-wider text-accent">
+                  <span className="rounded-full border border-ink-border bg-ink-surface px-2 py-0.5 font-mono text-[10px] tracking-label text-accent">
                     {moment.type.toUpperCase()}
                   </span>
                   <span className="font-mono text-[11px] text-text-tertiary">
@@ -615,18 +618,18 @@ function NetworkTab({ analytics }: { analytics: SessionAnalytics | null }) {
             {network.latency_ms !== null && (
               <div>
                 <dt className="font-sans text-[12px] text-text-tertiary">Latency</dt>
-                <dd className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-text-primary">
+                <dd className="mt-1 font-display text-[28px] font-bold tracking-[-0.03em] tabular-nums text-text-primary">
                   {network.latency_ms}
-                  <span className="text-[13px] text-text-secondary"> ms</span>
+                  <span className="font-mono text-[12px] font-normal tracking-normal text-text-secondary"> ms</span>
                 </dd>
               </div>
             )}
             {network.packet_loss_pct !== null && (
               <div>
                 <dt className="font-sans text-[12px] text-text-tertiary">Packet Loss</dt>
-                <dd className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-text-primary">
+                <dd className="mt-1 font-display text-[28px] font-bold tracking-[-0.03em] tabular-nums text-text-primary">
                   {network.packet_loss_pct}
-                  <span className="text-[13px] text-text-secondary">%</span>
+                  <span className="font-mono text-[12px] font-normal tracking-normal text-text-secondary">%</span>
                 </dd>
               </div>
             )}
@@ -678,7 +681,7 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function CardHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="font-sans text-[15px] font-semibold text-text-primary">{children}</h3>
+    <h3 className="font-mono text-[11px] uppercase tracking-label text-text-tertiary">{children}</h3>
   );
 }
 
@@ -732,9 +735,9 @@ function MeterDisplay({ label, value }: { label: string; value: number }) {
     <div>
       <div className="flex items-baseline justify-between">
         <CardHeading>{label}</CardHeading>
-        <span className="font-mono text-[22px] font-semibold tabular-nums text-text-primary">
+        <span className="font-display text-[30px] font-bold leading-none tracking-[-0.03em] tabular-nums text-text-primary">
           {pct}
-          <span className="text-[13px] text-text-secondary">%</span>
+          <span className="font-mono text-[12px] font-normal tracking-normal text-text-secondary">%</span>
         </span>
       </div>
       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-ink-border">
@@ -778,7 +781,7 @@ function DiscussionPointRow({ point }: { point: KeyDiscussionPoint }) {
         <p className="font-sans text-[14px] font-medium text-text-primary">{point.topic}</p>
         <span
           className={[
-            "flex-shrink-0 rounded-full border px-2.5 py-0.5 font-mono text-[10px] tracking-wider",
+            "flex-shrink-0 rounded-full border px-2.5 py-0.5 font-mono text-[10px] tracking-label",
             sentimentStyle,
           ].join(" ")}
         >

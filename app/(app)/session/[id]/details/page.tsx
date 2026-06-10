@@ -106,8 +106,8 @@ export default async function SessionDetailsPage({ params }: PageProps) {
 
       {/* Header */}
       <header>
-        <p className="font-mono text-[11px] tracking-label text-accent/80">SESSION DETAILS</p>
-        <h1 className="mt-2 font-display text-[32px] font-semibold leading-[1.1] text-text-primary sm:text-[40px]">
+        <p className="font-mono text-[11px] tracking-label text-accent">SESSION DETAILS</p>
+        <h1 className="mt-2 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-text-primary sm:text-[40px]">
           {persona.firstName} at {persona.firm}
         </h1>
         <p className="mt-2 font-sans text-[14px] text-text-secondary">
@@ -138,7 +138,7 @@ export default async function SessionDetailsPage({ params }: PageProps) {
           {analytics?.overall_sentiment && (
             <div className="rounded-xl border border-ink-border bg-ink-surface p-5">
               <p className="font-mono text-[10px] tracking-label text-text-tertiary">SENTIMENT</p>
-              <p className="mt-2 font-serif text-[15px] italic leading-relaxed text-text-primary">
+              <p className="mt-2 font-sans text-[15px] leading-relaxed text-text-primary">
                 {analytics.overall_sentiment}
               </p>
             </div>
@@ -242,7 +242,7 @@ export default async function SessionDetailsPage({ params }: PageProps) {
               <div className="mt-2 flex items-baseline gap-2">
                 <p
                   className={[
-                    "font-display text-[40px] font-semibold leading-none tabular-nums",
+                    "font-display text-[40px] font-bold leading-none tracking-[-0.03em] tabular-nums",
                     scoreColorClass(feedbackScore),
                   ].join(" ")}
                 >
@@ -297,7 +297,7 @@ export default async function SessionDetailsPage({ params }: PageProps) {
             </Link>
             <Link
               href="/session/new"
-              className="rounded-xl bg-accent px-5 py-3 text-center font-sans text-[13px] font-semibold text-ink transition-all hover:bg-accent-light"
+              className="rounded-xl bg-cta-gradient px-5 py-3 text-center font-sans text-[13px] font-semibold text-brand-ink transition-all hover:shadow-accent-glow"
             >
               Start new session →
             </Link>

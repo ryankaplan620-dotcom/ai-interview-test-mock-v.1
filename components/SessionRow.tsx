@@ -25,12 +25,13 @@ export interface SessionRowData {
 export function SessionRow({ session }: { session: SessionRowData }) {
   const href = hrefForSession(session.status, session.id);
   const isMuted = session.status === "abandoned" || session.status === "failed";
+  const version = personaVersion(session.persona);
 
   return (
     <Link
       href={href}
       className={[
-        "flex items-center justify-between gap-4 bg-ink-surface px-5 py-4 transition-colors hover:bg-ink-raised",
+        "flex items-center justify-between gap-4 bg-ink-surface px-5 py-4 transition-colors hover:bg-ink-raised focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none",
         isMuted ? "opacity-70 hover:opacity-100" : "",
       ].join(" ")}
     >
@@ -38,9 +39,18 @@ export function SessionRow({ session }: { session: SessionRowData }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-sans text-[14px] font-medium text-text-primary">
           {personaLabel(session.persona)}
-          {session.target_firm ? ` · ${session.target_firm}` : ""}
+          {version && (
+            <span className="ml-1.5 align-baseline font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+              {version}
+            </span>
+          )}
+          {session.target_firm ? (
+            <span className="text-text-secondary"> · {session.target_firm}</span>
+          ) : (
+            ""
+          )}
         </p>
-        <p className="mt-0.5 truncate font-sans text-[12px] text-text-tertiary">
+        <p className="mt-1 truncate font-sans text-[12px] text-text-tertiary">
           {formatInterviewType(session.interview_type)} · {formatDuration(session)}
           {session.started_at ? ` · ${formatRelativeDate(session.started_at)}` : ""}
         </p>
@@ -58,7 +68,7 @@ export function SessionRow({ session }: { session: SessionRowData }) {
             <Link
               href={`/session/${session.id}/insights`}
               onClick={(e) => e.stopPropagation()}
-              className="font-mono text-[10px] tracking-label text-accent/70 transition-colors hover:text-accent"
+              className="rounded-full font-mono text-[10px] tracking-label text-accent/70 transition-colors hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               title="View session insights"
             >
               Insights
@@ -66,7 +76,7 @@ export function SessionRow({ session }: { session: SessionRowData }) {
             <Link
               href={`/session/${session.id}/details`}
               onClick={(e) => e.stopPropagation()}
-              className="font-mono text-[10px] tracking-label text-text-tertiary transition-colors hover:text-accent"
+              className="rounded-full font-mono text-[10px] tracking-label text-text-tertiary transition-colors hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               title="View session details"
             >
               Details
@@ -86,7 +96,12 @@ function ScoreBadge({ score }: { score: number }) {
   const color = scoreColorClass(score);
   return (
     <div className="flex items-baseline gap-1">
-      <span className={["font-display text-[22px] font-semibold tabular-nums leading-none", color].join(" ")}>
+      <span
+        className={[
+          "font-display text-[22px] font-bold leading-none tracking-[-0.03em] tabular-nums",
+          color,
+        ].join(" ")}
+      >
         {score}
       </span>
       <span className="font-mono text-[10px] tracking-label text-text-tertiary">/100</span>
@@ -105,7 +120,11 @@ function StatusPill({ status }: { status: SessionStatus }) {
     >
       {config.dotClass && (
         <span
-          className={["h-1.5 w-1.5 rounded-full", config.dotClass, config.animate ? "animate-pulse" : ""].join(" ")}
+          className={[
+            "h-1.5 w-1.5 rounded-full",
+            config.dotClass,
+            config.animate ? "animate-pulse motion-reduce:animate-none" : "",
+          ].join(" ")}
           aria-hidden
         />
       )}
@@ -164,6 +183,16 @@ function personaLabel(p: PersonaId): string {
     gemma: "Gemma Brooks",
   };
   return map[p] ?? p;
+}
+
+/** Mono version tags for the current roster. Legacy persona ids return null
+ *  and render name-only via the personaLabel text fallback. */
+function personaVersion(p: PersonaId): string | null {
+  const map: Record<PersonaId, string> = {
+    sarah: "v.2",
+    gemma: "v.3",
+  };
+  return map[p] ?? null;
 }
 
 function formatInterviewType(t: InterviewType): string {

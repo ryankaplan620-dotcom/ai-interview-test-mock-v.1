@@ -48,19 +48,16 @@ export default function SignupPage() {
 
   if (confirmationSent) {
     return (
-      <div className="w-full max-w-[380px] px-6">
-        <div className="flex items-center justify-center gap-2.5">
-          <FolioMark className="h-8 w-8 text-accent" />
-          <span className="font-display text-xl font-semibold tracking-[-0.025em] text-text-primary">
-            Folio
+      <div className="w-full max-w-[400px]">
+        <div className="rounded-2xl border border-accent/30 bg-ink-surface p-8 text-center shadow-accent-glow sm:p-10">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+            <FolioMark className="h-6 w-6" color="#63D88A" />
           </span>
-        </div>
-        <div className="mt-10 rounded-2xl border border-accent/30 bg-accent/5 p-8 text-center">
-          <h1 className="font-display text-[22px] font-semibold text-text-primary">
-            Confirm your email.
+          <h1 className="mt-6 font-display text-[24px] font-bold tracking-heading text-text-primary">
+            Confirm your email
           </h1>
           <p className="mt-3 font-sans text-[15px] leading-relaxed text-text-secondary">
-            We sent a confirmation link to <span className="text-text-primary">{email}</span>. Click it to
+            We sent a confirmation link to <span className="font-medium text-text-primary">{email}</span>. Click it to
             activate your account.
           </p>
         </div>
@@ -69,27 +66,23 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="w-full max-w-[380px] px-6">
-      {/* Logo */}
-      <div className="flex items-center justify-center gap-2.5">
-        <FolioMark className="h-8 w-8 text-accent" />
-        <span className="font-display text-xl font-semibold tracking-[-0.025em] text-text-primary">
-          Folio
-        </span>
-      </div>
-
-      {/* Card */}
-      <div className="mt-10 rounded-2xl border border-ink-border bg-ink-surface p-8">
-        <h1 className="font-display text-[24px] font-semibold tracking-heading text-text-primary">
+    <div className="w-full max-w-[400px]">
+      <div className="rounded-2xl border border-ink-border bg-ink-surface p-8 sm:p-10">
+        <h1 className="font-display text-[26px] font-bold tracking-heading text-text-primary">
           Start your free trial
         </h1>
-        <p className="mt-1.5 font-sans text-[14px] text-text-secondary">
+        <p className="mt-2 font-sans text-[14px] text-text-secondary">
           15 days, all features, no credit card.
         </p>
 
-        <form onSubmit={handleSignup} className="mt-8 space-y-4">
+        <form onSubmit={handleSignup} className="mt-8 space-y-5">
           <div>
-            <label htmlFor="signup-name" className="sr-only">Full name</label>
+            <label
+              htmlFor="signup-name"
+              className="mb-2 block font-sans text-[13px] font-medium text-text-primary"
+            >
+              Full name
+            </label>
             <input
               id="signup-name"
               type="text"
@@ -97,13 +90,18 @@ export default function SignupPage() {
               autoComplete="name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Full name"
-              className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
+              placeholder="Your full name"
+              className="h-11 w-full rounded-xl border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary transition-colors duration-200 placeholder:text-text-tertiary focus:border-accent focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="signup-email" className="sr-only">Email address</label>
+            <label
+              htmlFor="signup-email"
+              className="mb-2 block font-sans text-[13px] font-medium text-text-primary"
+            >
+              Email address
+            </label>
             <input
               id="signup-email"
               type="email"
@@ -112,15 +110,20 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
+              className="h-11 w-full rounded-xl border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary transition-colors duration-200 placeholder:text-text-tertiary focus:border-accent focus:outline-none"
             />
-            <p className="mt-1.5 font-sans text-[11px] text-text-tertiary">
+            <p className="mt-2 font-sans text-[12px] text-text-secondary">
               Use .edu email to unlock the $49 Basic student plan.
             </p>
           </div>
 
           <div>
-            <label htmlFor="signup-password" className="sr-only">Password</label>
+            <label
+              htmlFor="signup-password"
+              className="mb-2 block font-sans text-[13px] font-medium text-text-primary"
+            >
+              Password
+            </label>
             <input
               id="signup-password"
               type="password"
@@ -129,8 +132,8 @@ export default function SignupPage() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password (8+ characters)"
-              className="h-11 w-full rounded-lg border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
+              placeholder="8+ characters"
+              className="h-11 w-full rounded-xl border border-ink-border bg-ink px-4 font-sans text-[14px] text-text-primary transition-colors duration-200 placeholder:text-text-tertiary focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -143,25 +146,25 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="h-11 w-full rounded-lg bg-cta-gradient font-sans text-[14px] font-semibold text-text-onAccent transition-all duration-200 ease-brand hover:shadow-accent-glow disabled:cursor-wait disabled:opacity-60"
+            className="h-12 w-full rounded-full bg-cta-gradient font-sans text-[14px] font-semibold text-text-onAccent transition-all duration-200 ease-brand hover:shadow-accent-glow disabled:cursor-wait disabled:opacity-60"
           >
             {loading ? "Creating account..." : "Start free trial"}
           </button>
 
-          <p className="text-center font-sans text-[11px] text-text-tertiary">
+          <p className="text-center font-sans text-[12px] leading-relaxed text-text-tertiary">
             By continuing, you agree to our{" "}
-            <Link href="/legal/terms" className="underline hover:text-accent">Terms</Link>{" "}and{" "}
-            <Link href="/legal/privacy" className="underline hover:text-accent">Privacy Policy</Link>.
+            <Link href="/legal/terms" className="underline transition-colors hover:text-accent">Terms</Link>{" "}and{" "}
+            <Link href="/legal/privacy" className="underline transition-colors hover:text-accent">Privacy Policy</Link>.
           </p>
         </form>
-
-        <p className="mt-6 text-center font-sans text-[13px] text-text-secondary">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-accent transition-opacity hover:opacity-80">
-            Sign in
-          </Link>
-        </p>
       </div>
+
+      <p className="mt-6 text-center font-sans text-[13px] text-text-secondary">
+        Already have an account?{" "}
+        <Link href="/login" className="font-medium text-accent transition-opacity hover:opacity-80">
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }

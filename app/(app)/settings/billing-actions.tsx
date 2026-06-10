@@ -34,7 +34,7 @@ export function BillingActions({
       <div>
         <Link
           href="/pricing"
-          className="inline-flex h-10 items-center rounded-full bg-cta-gradient px-5 font-sans text-[13px] font-semibold text-text-onAccent transition-all hover:shadow-accent-glow-lg"
+          className="inline-flex h-10 items-center rounded-full bg-cta-gradient px-5 font-sans text-[13px] font-semibold text-text-onAccent transition-all hover:shadow-accent-glow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           Choose a plan →
         </Link>
@@ -48,13 +48,13 @@ export function BillingActions({
       <button
         onClick={openPortal}
         disabled={loading}
-        className="inline-flex h-10 items-center rounded-full border border-ink-border bg-ink-raised px-5 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent disabled:opacity-60"
+        className="inline-flex h-10 items-center rounded-full bg-cta-gradient px-5 font-sans text-[13px] font-semibold text-text-onAccent transition-all hover:shadow-accent-glow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-60"
       >
         {loading ? "Opening..." : "Manage billing →"}
       </button>
       <Link
         href="/pricing"
-        className="inline-flex h-10 items-center rounded-full border border-ink-border bg-ink-raised px-5 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent"
+        className="inline-flex h-10 items-center rounded-full border border-ink-border bg-ink-raised px-5 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
       >
         Change plan
       </Link>

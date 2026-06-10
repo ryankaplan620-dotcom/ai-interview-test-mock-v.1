@@ -42,14 +42,15 @@ export function LinkButton({
 
 function buttonStyles(variant: Variant, size: Size): string {
   const base =
-    "inline-flex items-center justify-center rounded-full font-sans font-semibold tracking-body transition-all duration-200 ease-brand disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-sans font-semibold tracking-body transition-all duration-200 ease-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60";
 
   const variants: Record<Variant, string> = {
     primary:
-      "bg-cta-gradient text-text-onAccent hover:shadow-accent-glow-lg",
+      "bg-cta-gradient text-text-onAccent shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] hover:shadow-accent-glow-lg active:translate-y-px",
     secondary:
-      "bg-ink-surface border border-ink-border text-text-primary hover:border-accent hover:text-accent",
-    ghost: "text-text-primary hover:text-accent",
+      "border border-ink-border bg-ink-raised text-text-primary hover:border-accent/50 hover:text-accent active:translate-y-px",
+    ghost:
+      "text-text-secondary hover:bg-white/[0.06] hover:text-text-primary active:translate-y-px",
   };
 
   const sizes: Record<Size, string> = {

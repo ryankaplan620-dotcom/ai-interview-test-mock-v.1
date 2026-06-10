@@ -236,21 +236,22 @@ export function OutreachClient({
         <span className="font-mono text-[11px] font-medium tracking-label text-accent">
           OUTREACH
         </span>
-        <h1 className="mt-3 font-display text-[36px] font-semibold tracking-heading text-text-primary sm:text-[42px]">
-          Network smarter.
+        <h1 className="mt-3 font-display text-[36px] font-bold tracking-[-0.03em] text-text-primary sm:text-[42px]">
+          Network <span className="text-gradient-mint">smarter.</span>
         </h1>
-        <p className="mt-2 font-serif text-[18px] italic text-text-secondary">
+        <p className="mt-2 font-sans text-[16px] text-text-secondary">
           Scout contacts, draft outreach, and track your pipeline.
         </p>
       </div>
 
       {/* Action error banner */}
       {actionError && (
-        <div className="mb-4 flex items-center justify-between rounded-lg border border-red-400/20 bg-red-400/5 px-4 py-3">
-          <p className="font-sans text-[13px] text-red-400">{actionError}</p>
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-rose-300/30 bg-rose-300/5 px-4 py-3">
+          <p className="font-sans text-[13px] text-rose-300/90">{actionError}</p>
           <button
             onClick={() => setActionError(null)}
-            className="ml-4 font-sans text-[12px] text-red-400/60 hover:text-red-400"
+            aria-label="Dismiss error"
+            className="ml-4 font-sans text-[12px] text-rose-300/60 transition-colors hover:text-rose-300/90"
           >
             ✕
           </button>
@@ -258,12 +259,13 @@ export function OutreachClient({
       )}
 
       {/* Tabs */}
-      <div className="mb-8 flex gap-1 rounded-lg border border-ink-border bg-ink-surface p-1">
+      <div className="mb-8 flex gap-1 rounded-full border border-ink-border bg-ink-surface p-1">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 rounded-md px-4 py-2 font-sans text-[13.5px] font-medium tracking-body transition-colors ${
+            aria-pressed={tab === t.key}
+            className={`flex-1 rounded-full px-4 py-2 font-sans text-[13.5px] font-medium tracking-body transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               tab === t.key
                 ? "bg-ink-raised text-text-primary"
                 : "text-text-tertiary hover:text-text-secondary"
@@ -271,7 +273,13 @@ export function OutreachClient({
           >
             {t.label}
             {t.count !== undefined && t.count > 0 && (
-              <span className="ml-2 rounded-full bg-ink-border px-1.5 py-0.5 font-mono text-[10px] text-text-secondary">
+              <span
+                className={`ml-2 rounded-full px-1.5 py-0.5 font-mono text-[10px] ${
+                  tab === t.key
+                    ? "bg-accent/15 text-accent"
+                    : "bg-ink-border text-text-secondary"
+                }`}
+              >
                 {t.count}
               </span>
             )}
@@ -363,8 +371,9 @@ function ScoutTab({
   return (
     <div className="space-y-8">
       {/* Scout form */}
-      <div className="rounded-xl border border-ink-border bg-ink-surface p-6">
-        <h2 className="mb-4 font-display text-lg font-semibold tracking-heading text-text-primary">
+      <div className="rounded-2xl border border-ink-border bg-ink-surface p-6">
+        <p className="font-mono text-[10px] font-medium tracking-label text-accent">SCOUT</p>
+        <h2 className="mb-4 mt-1 font-display text-lg font-bold tracking-[-0.03em] text-text-primary">
           Find contacts
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
@@ -411,11 +420,11 @@ function ScoutTab({
         <button
           onClick={onScout}
           disabled={scouting || !targetCompany.trim() || !targetRole.trim()}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 font-sans text-[13.5px] font-semibold text-text-onAccent transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="mt-4 inline-flex items-center gap-2 rounded-full bg-cta-gradient px-5 py-2.5 font-sans text-[13.5px] font-semibold text-ink transition-all hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-40"
         >
           {scouting ? (
             <>
-              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-text-onAccent border-t-transparent" />
+              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink border-t-transparent motion-reduce:animate-none" />
               Scouting...
             </>
           ) : (
@@ -423,7 +432,7 @@ function ScoutTab({
           )}
         </button>
         {scoutError && (
-          <p className="mt-3 font-sans text-[13px] text-red-400">{scoutError}</p>
+          <p className="mt-3 font-sans text-[13px] text-rose-300/90">{scoutError}</p>
         )}
       </div>
 
@@ -476,7 +485,7 @@ function ScoutTab({
                 <button
                   onClick={() => onDraftEmail(contact.id)}
                   disabled={draftingContactId === contact.id}
-                  className="shrink-0 rounded-full border border-accent/30 px-3.5 py-1.5 font-sans text-[12px] font-medium text-accent transition-colors hover:bg-accent/10 disabled:opacity-40"
+                  className="shrink-0 rounded-full border border-accent/30 px-3.5 py-1.5 font-sans text-[12px] font-medium text-accent transition-colors hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-40"
                 >
                   {draftingContactId === contact.id ? "Drafting..." : "Draft email \u2192"}
                 </button>
@@ -558,7 +567,7 @@ function MiniProfile({
               href={linkedinUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-sans text-[12.5px] text-accent transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-border bg-ink-raised/40 px-2.5 py-1 font-sans text-[12px] text-accent transition-colors hover:border-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <LinkedInGlyph />
               View LinkedIn
@@ -569,9 +578,9 @@ function MiniProfile({
       )}
 
       {tenureSignal && (
-        <div className="mt-4 rounded-lg border border-ink-border bg-ink-raised/40 px-3.5 py-2.5">
-          <p className="font-mono text-[10px] tracking-label text-text-tertiary">PUBLIC SIGNAL</p>
-          <p className="mt-1 font-serif text-[13px] italic leading-[1.5] text-text-primary">
+        <div className="mt-4 rounded-lg border border-violet/25 bg-violet/[0.07] px-3.5 py-2.5">
+          <p className="font-mono text-[10px] tracking-label text-violet">PUBLIC SIGNAL</p>
+          <p className="mt-1 font-sans text-[13px] leading-[1.5] text-text-primary">
             {tenureSignal}
           </p>
         </div>
@@ -620,7 +629,7 @@ function EmailChip({
     <button
       type="button"
       onClick={copy}
-      className="group inline-flex items-center gap-1.5 rounded-md border border-ink-border bg-ink-raised/40 px-2.5 py-1 font-mono text-[11.5px] text-text-primary transition-colors hover:border-accent/60"
+      className="group inline-flex items-center gap-1.5 rounded-full border border-ink-border bg-ink-raised/40 px-2.5 py-1 font-mono text-[11.5px] text-text-primary transition-colors hover:border-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
     >
       <span>{copied ? "Copied" : email}</span>
       {isGuessed && (
@@ -680,8 +689,9 @@ function DraftsTab({
 }) {
   if (drafts.length === 0) {
     return (
-      <div className="rounded-xl border border-ink-border bg-ink-surface p-12 text-center">
-        <p className="font-sans text-[14px] text-text-tertiary">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark p-12 text-center">
+        <p className="font-mono text-[10px] tracking-label text-text-tertiary">DRAFTS</p>
+        <p className="mt-3 font-sans text-[14px] text-text-secondary">
           No drafts yet. Scout some contacts and click &ldquo;Draft email&rdquo; to get started.
         </p>
       </div>
@@ -737,13 +747,13 @@ function DraftsTab({
                 <div className="flex gap-2">
                   <button
                     onClick={() => onSaveEdit(draft.id)}
-                    className="rounded-full bg-accent px-4 py-1.5 font-sans text-[12px] font-semibold text-text-onAccent transition-opacity hover:opacity-90"
+                    className="rounded-full bg-accent px-4 py-1.5 font-sans text-[12px] font-semibold text-ink transition-all hover:bg-accent-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   >
                     Save
                   </button>
                   <button
                     onClick={onCancelEditing}
-                    className="rounded-full border border-ink-border px-4 py-1.5 font-sans text-[12px] font-medium text-text-secondary transition-colors hover:text-text-primary"
+                    className="rounded-full border border-ink-border px-4 py-1.5 font-sans text-[12px] font-medium text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     Cancel
                   </button>
@@ -761,19 +771,19 @@ function DraftsTab({
                 <div className="mt-4 flex gap-2">
                   <button
                     onClick={() => onStartEditing(draft)}
-                    className="rounded-full border border-ink-border px-3.5 py-1.5 font-sans text-[12px] font-medium text-text-secondary transition-colors hover:text-text-primary"
+                    className="rounded-full border border-ink-border px-3.5 py-1.5 font-sans text-[12px] font-medium text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => onSend(draft.id)}
-                    className="rounded-full bg-accent px-3.5 py-1.5 font-sans text-[12px] font-semibold text-text-onAccent transition-opacity hover:opacity-90"
+                    className="rounded-full bg-accent px-3.5 py-1.5 font-sans text-[12px] font-semibold text-ink transition-all hover:bg-accent-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   >
                     Send
                   </button>
                   <button
                     onClick={() => onDelete(draft.id)}
-                    className="rounded-full border border-ink-border px-3.5 py-1.5 font-sans text-[12px] font-medium text-red-400 transition-colors hover:border-red-400/30"
+                    className="rounded-full border border-ink-border px-3.5 py-1.5 font-sans text-[12px] font-medium text-rose-300/90 transition-colors hover:border-rose-300/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/60"
                   >
                     Delete
                   </button>
@@ -800,8 +810,9 @@ function SentTab({
 }) {
   if (drafts.length === 0) {
     return (
-      <div className="rounded-xl border border-ink-border bg-ink-surface p-12 text-center">
-        <p className="font-sans text-[14px] text-text-tertiary">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark p-12 text-center">
+        <p className="font-mono text-[10px] tracking-label text-text-tertiary">SENT</p>
+        <p className="mt-3 font-sans text-[14px] text-text-secondary">
           No sent emails yet. Draft and send your first outreach above.
         </p>
       </div>
@@ -853,9 +864,9 @@ function SentTab({
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    draft: "border-yellow-500/30 text-yellow-400",
+    draft: "border-amber-300/30 text-amber-300/90",
     ready: "border-accent/30 text-accent",
-    sent: "border-blue-500/30 text-blue-400",
+    sent: "border-text-secondary/30 text-text-secondary",
   };
 
   return (

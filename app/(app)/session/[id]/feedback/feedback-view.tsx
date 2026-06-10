@@ -4,7 +4,6 @@ import Link from "next/link";
 import type { FeedbackPayload, FeedbackQuote } from "@/lib/pipeline/feedback-types";
 import type { InterviewType, SessionMode } from "@/types/supabase";
 import { QaFeedbackPanel } from "./qa-panel";
-import { scoreColorClass } from "@/lib/utils/score-color";
 
 export interface SessionMeta {
   id: string;
@@ -32,7 +31,7 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
       <div className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-1">
         <Link
           href="/dashboard"
-          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary"
+          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           ← Dashboard
         </Link>
@@ -44,11 +43,11 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
 
       {/* Header */}
       <header>
-        <p className="font-mono text-[11px] tracking-label text-accent/80">SESSION FEEDBACK</p>
-        <h1 className="mt-2 font-display text-[32px] font-semibold leading-[1.1] text-text-primary sm:text-[40px]">
+        <p className="font-mono text-[11px] tracking-label text-accent">SESSION FEEDBACK</p>
+        <h1 className="mt-3 font-display text-[34px] font-extrabold leading-[1.08] tracking-[-0.03em] text-text-primary sm:text-[42px]">
           {sessionMeta.personaFirstName} at {sessionMeta.personaFirm}
         </h1>
-        <p className="mt-2 font-sans text-[14px] text-text-secondary">
+        <p className="mt-3 font-sans text-[14px] text-text-secondary">
           {humanInterviewType(sessionMeta.interviewType)} · {humanMode(sessionMeta.mode)}
           {sessionMeta.targetFirm ? ` · targeting ${sessionMeta.targetFirm}` : ""}
           {sessionMeta.actualDurationSeconds !== null
@@ -57,36 +56,40 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
         </p>
       </header>
 
-      {/* Score hero */}
-      <section className="mt-10 rounded-2xl border border-ink-border bg-ink-surface px-8 py-10">
-        <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+      {/* Score hero — the Folio scorecard */}
+      <section className="relative mt-10 overflow-hidden rounded-2xl border border-ink-border bg-ink-surface px-8 py-10 sm:px-10">
+        <div
+          className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-accent/[0.06] blur-3xl"
+          aria-hidden
+        />
+
+        <div className="relative flex flex-col gap-10 sm:flex-row sm:items-center sm:justify-between">
+          {/* Overall numeral */}
           <div>
-            <p className="font-mono text-[11px] tracking-label text-text-tertiary">OVERALL</p>
-            <p
-              className={[
-                "mt-1 font-display font-semibold leading-none tabular-nums",
-                "text-[84px] sm:text-[112px]",
-                scoreColorClass(feedback.overall_score),
-              ].join(" ")}
-            >
-              {feedback.overall_score}
-            </p>
-            <p className="mt-1 font-sans text-[13px] text-text-secondary">
+            <p className="font-mono text-[11px] tracking-label text-text-tertiary">OVERALL SCORE</p>
+            <div className="mt-2 flex items-baseline gap-3">
+              <p className="text-gradient-mint font-display text-[96px] font-extrabold leading-none tracking-[-0.03em] tabular-nums sm:text-[120px]">
+                {feedback.overall_score}
+              </p>
+              <span className="font-mono text-[13px] text-text-tertiary">/ 100</span>
+            </div>
+            <p className="mt-3 inline-flex items-center gap-2 font-sans text-[13px] font-medium text-text-secondary">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
               {scoreLabel(feedback.overall_score)}
             </p>
           </div>
 
-          {/* Sub-score breakdown */}
-          <div className="grid w-full grid-cols-3 gap-3 sm:w-auto sm:min-w-[420px]">
-            <SubScoreCard label="Structure" value={feedback.structure_score} />
-            <SubScoreCard label="Specificity" value={feedback.specificity_score} />
-            <SubScoreCard label="Delivery" value={feedback.delivery_score} />
+          {/* Dimension breakdown */}
+          <div className="flex w-full flex-col gap-5 sm:w-auto sm:min-w-[320px] sm:max-w-[360px]">
+            <ScoreRow label="Structure" value={feedback.structure_score} />
+            <ScoreRow label="Specificity" value={feedback.specificity_score} />
+            <ScoreRow label="Delivery" value={feedback.delivery_score} />
           </div>
         </div>
 
         {/* Summary prose */}
         {feedback.summary && (
-          <p className="mt-8 border-t border-ink-border pt-6 font-serif text-[17px] italic leading-[1.55] text-text-primary">
+          <p className="relative mt-9 border-t border-ink-border pt-7 font-sans text-[16px] leading-[1.65] text-text-secondary">
             {feedback.summary}
           </p>
         )}
@@ -109,13 +112,13 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
       {/* Quote-based coaching */}
       {feedback.feedback_quotes.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-display text-[22px] font-semibold text-text-primary">
+          <h2 className="font-display text-[24px] font-bold tracking-heading text-text-primary">
             Moments that matter
           </h2>
           <p className="mt-1 font-sans text-[13px] text-text-secondary">
             Specific turns where a small change would've landed harder.
           </p>
-          <div className="mt-6 flex flex-col gap-4">
+          <div className="mt-6 flex flex-col gap-5">
             {feedback.feedback_quotes.map((q, i) => (
               <QuoteCard key={i} quote={q} />
             ))}
@@ -133,13 +136,13 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
       <section className="mt-10 flex flex-col items-center gap-3">
         <Link
           href={`/session/${sessionMeta.id}/insights`}
-          className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
+          className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           View detailed insights →
         </Link>
         <Link
           href={`/session/${sessionMeta.id}/details`}
-          className="inline-flex items-center gap-1 font-sans text-[12px] text-text-tertiary transition-opacity hover:opacity-80"
+          className="inline-flex items-center gap-1 font-sans text-[12px] text-text-tertiary transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           View full analytics →
         </Link>
@@ -153,13 +156,13 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/session/new"
-            className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-ink transition-all hover:bg-accent-light"
+            className="rounded-full bg-cta-gradient px-5 py-2.5 font-sans text-[13px] font-semibold text-brand-ink transition-all hover:shadow-accent-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             Start another session →
           </Link>
           <Link
             href="/dashboard"
-            className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60"
+            className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             Back to dashboard
           </Link>
@@ -173,20 +176,24 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
 // Sub-components
 // ==========================================================================
 
-function SubScoreCard({ label, value }: { label: string; value: number }) {
+function ScoreRow({ label, value }: { label: string; value: number }) {
+  const width = Math.max(0, Math.min(100, value));
   return (
-    <div className="rounded-xl border border-ink-border/60 bg-ink-raised/40 px-4 py-3">
-      <p className="font-mono text-[10px] tracking-label text-text-tertiary">
-        {label.toUpperCase()}
-      </p>
-      <p
-        className={[
-          "mt-1 font-display text-[28px] font-semibold leading-none tabular-nums",
-          scoreColorClass(value),
-        ].join(" ")}
-      >
-        {value}
-      </p>
+    <div>
+      <div className="flex items-baseline justify-between gap-4">
+        <p className="font-mono text-[10px] tracking-label text-text-tertiary">
+          {label.toUpperCase()}
+        </p>
+        <p className="font-display text-[20px] font-bold leading-none tabular-nums text-text-primary">
+          {value}
+        </p>
+      </div>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]" aria-hidden>
+        <div
+          className="h-full rounded-full bg-accent"
+          style={{ width: `${width}%` }}
+        />
+      </div>
     </div>
   );
 }
@@ -224,31 +231,53 @@ function ListBlock({
 
 function QuoteCard({ quote }: { quote: FeedbackQuote }) {
   return (
-    <article className="rounded-2xl border border-ink-border bg-ink-surface p-6">
-      {typeof quote.timestamp_seconds === "number" && (
-        <p className="font-mono text-[10px] tracking-label text-text-tertiary">
-          {formatTimestamp(quote.timestamp_seconds)}
-        </p>
-      )}
-
-      <blockquote className="mt-2 border-l-2 border-ink-border pl-4">
-        <p className="font-serif text-[15px] italic leading-[1.55] text-text-secondary">
+    <article className="overflow-hidden rounded-2xl border border-ink-border bg-ink-surface">
+      {/* What you said */}
+      <div className="p-6 sm:p-7">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center rounded-full bg-white/[0.06] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
+            What you said
+          </span>
+          {typeof quote.timestamp_seconds === "number" && (
+            <span className="font-mono text-[10px] tracking-label text-text-tertiary">
+              {formatTimestamp(quote.timestamp_seconds)}
+            </span>
+          )}
+        </div>
+        <p className="mt-3 font-sans text-[15px] italic leading-[1.6] text-text-secondary">
           &ldquo;{quote.user_quote}&rdquo;
-        </p>
-      </blockquote>
-
-      <div className="mt-5">
-        <p className="font-mono text-[10px] tracking-label text-accent/80">STRONGER VERSION</p>
-        <p className="mt-1.5 font-sans text-[15px] leading-[1.6] text-text-primary">
-          {quote.stronger_version}
         </p>
       </div>
 
-      <div className="mt-4">
-        <p className="font-mono text-[10px] tracking-label text-text-tertiary">WHY</p>
-        <p className="mt-1.5 font-sans text-[13px] leading-[1.55] text-text-secondary">
-          {quote.reasoning}
+      {/* Connector */}
+      <div className="relative flex items-center justify-center border-y border-ink-border/60 bg-ink-raised/40 py-2">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-brand-ink shadow-accent-glow">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+            <path
+              d="M8 3v10M8 13l-3.5-3.5M8 13l3.5-3.5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </div>
+
+      {/* The stronger version */}
+      <div className="bg-accent/[0.04] p-6 sm:p-7">
+        <span className="inline-flex items-center rounded-full bg-accent/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+          The stronger version
+        </span>
+        <p className="mt-3 font-sans text-[15px] font-medium leading-[1.6] text-text-primary">
+          {quote.stronger_version}
         </p>
+        <div className="mt-5 border-t border-ink-border/50 pt-4">
+          <p className="font-mono text-[10px] tracking-label text-text-tertiary">WHY</p>
+          <p className="mt-1.5 font-sans text-[13px] leading-[1.6] text-text-secondary">
+            {quote.reasoning}
+          </p>
+        </div>
       </div>
     </article>
   );

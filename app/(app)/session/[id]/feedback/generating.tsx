@@ -99,13 +99,13 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
     return (
       <div className="mx-auto max-w-[720px] px-6 py-16 sm:px-10">
         <p className="font-mono text-[11px] tracking-label text-rose-300/80">FEEDBACK FAILED</p>
-        <h1 className="mt-3 font-display text-[28px] font-semibold text-text-primary">
+        <h1 className="mt-4 font-display text-[28px] font-bold leading-[1.15] tracking-[-0.03em] text-text-primary sm:text-[32px]">
           We couldn&rsquo;t generate feedback for this session.
         </h1>
-        <p className="mt-3 font-sans text-[14px] text-text-secondary">
+        <p className="mt-3 font-sans text-[14px] leading-[1.6] text-text-secondary">
           {error ?? "Unknown error."}
         </p>
-        <div className="mt-8 flex gap-3">
+        <div className="mt-8 flex flex-wrap gap-3">
           <button
             onClick={() => {
               startedRef.current = false;
@@ -114,13 +114,13 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
               setStageIdx(0);
               router.refresh();
             }}
-            className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-ink transition-all hover:bg-accent-light"
+            className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-brand-ink transition-all hover:bg-accent-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             Try again
           </button>
           <a
             href="/dashboard"
-            className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60"
+            className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             Back to dashboard
           </a>
@@ -129,34 +129,39 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
     );
   }
 
-  // Generating state
+  // Generating state — cosmos cover moment
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-[720px] flex-col items-center justify-center px-6 py-16 text-center sm:px-10">
-      <div className="relative h-12 w-12">
-        <div className="absolute inset-0 rounded-full border-2 border-ink-border" />
-        <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-accent" />
-      </div>
+    <div className="mx-auto max-w-[880px] px-6 py-10 sm:px-10 sm:py-14">
+      <div className="bg-gradient-dark relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/[0.08] px-6 py-20 text-center">
+        {/* Mint pulse */}
+        <div className="relative flex h-14 w-14 items-center justify-center" aria-hidden>
+          <span className="absolute inset-0 animate-pulse-ring rounded-full border border-accent/40 motion-reduce:animate-none" />
+          <span className="absolute inset-2 rounded-full bg-accent/10" />
+          <span className="h-3 w-3 rounded-full bg-accent shadow-accent-glow" />
+        </div>
 
-      <p className="mt-8 font-mono text-[11px] tracking-label text-accent/80">
-        FEEDBACK IN PROGRESS
-      </p>
-      <h1 className="mt-2 font-display text-[26px] font-semibold text-text-primary">
-        Reviewing your session with {sessionMeta.personaFirstName}
-      </h1>
+        <p className="mt-9 font-mono text-[11px] tracking-label text-accent">
+          FEEDBACK IN PROGRESS
+        </p>
+        <h1 className="mt-3 font-display text-[28px] font-bold leading-[1.15] tracking-[-0.03em] text-text-primary sm:text-[32px]">
+          Reviewing your session with {sessionMeta.personaFirstName}
+        </h1>
 
-      <div className="mt-6 flex h-5 items-center justify-center">
-        <p
-          key={stageIdx}
-          className="animate-fade-in font-sans text-[14px] text-text-secondary"
-        >
-          {STAGES[stageIdx]}&hellip;
+        {/* Mono status line */}
+        <div className="mt-7 flex h-5 items-center justify-center" aria-live="polite">
+          <p
+            key={stageIdx}
+            className="animate-fade-in font-mono text-[12px] tracking-[0.08em] text-text-secondary"
+          >
+            {STAGES[stageIdx]}&hellip;
+          </p>
+        </div>
+
+        <p className="mt-10 max-w-[460px] font-sans text-[13px] leading-[1.6] text-text-tertiary">
+          Usually 15-30 seconds. We&rsquo;re reading the transcript carefully and
+          drafting feedback that points to specific moments instead of generic advice.
         </p>
       </div>
-
-      <p className="mt-10 max-w-[460px] font-sans text-[12px] leading-[1.55] text-text-tertiary">
-        Usually 15-30 seconds. We&rsquo;re reading the transcript carefully and
-        drafting feedback that points to specific moments instead of generic advice.
-      </p>
 
       <style jsx>{`
         @keyframes fade-in {
@@ -171,6 +176,11 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
         }
         .animate-fade-in {
           animation: fade-in 0.4s ease-out;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-fade-in {
+            animation: none;
+          }
         }
       `}</style>
     </div>

@@ -269,15 +269,15 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
             ? ` · ATTEMPT ${Math.min(nextAttemptNumber, drill.targetAttempts)} / ${drill.targetAttempts}`
             : ""}
         </p>
-        <h1 className="mt-2 font-display text-[26px] font-semibold leading-[1.2] text-text-primary sm:text-[32px]">
+        <h1 className="mt-2 font-display text-[26px] font-bold leading-[1.2] tracking-[-0.03em] text-text-primary sm:text-[32px]">
           {drill.promptText}
         </h1>
         {drill.pushback && (
-          <div className="mt-5 rounded-lg border border-amber-300/30 bg-amber-300/5 px-4 py-3">
+          <div className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/5 px-4 py-3">
             <p className="font-mono text-[10px] tracking-label text-amber-300/80">
               THEN THE INTERVIEWER PUSHES BACK
             </p>
-            <p className="mt-1.5 font-serif text-[15px] italic leading-[1.5] text-text-primary">
+            <p className="mt-1.5 font-sans text-[15px] italic leading-[1.5] text-text-primary">
               &ldquo;{drill.pushback}&rdquo;
             </p>
           </div>
@@ -367,15 +367,15 @@ function IntroPhase({
       {drill.whatItsLookingFor && (
         <div className="rounded-2xl border border-ink-border bg-ink-surface px-6 py-5">
           <p className="font-mono text-[10px] tracking-label text-accent/80">WHAT TO AIM FOR</p>
-          <p className="mt-2 font-serif text-[16px] italic leading-[1.55] text-text-primary">
+          <p className="mt-2 font-sans text-[15px] leading-[1.55] text-text-primary">
             {drill.whatItsLookingFor}
           </p>
         </div>
       )}
 
-      <div className="mt-8 rounded-2xl border border-accent/20 bg-gradient-to-br from-ink-surface to-ink-raised px-6 py-8">
+      <div className="relative mt-8 overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark px-6 py-8">
         <p className="font-mono text-[10px] tracking-label text-accent">READY?</p>
-        <p className="mt-2 font-display text-[20px] font-semibold text-text-primary">
+        <p className="mt-2 font-display text-[20px] font-bold tracking-[-0.03em] text-text-primary">
           {introHeadline(drill)}
         </p>
         <p className="mt-2 font-sans text-[14px] leading-[1.6] text-text-secondary">
@@ -386,7 +386,7 @@ function IntroPhase({
           {micState === "idle" && (
             <button
               onClick={onRequestMic}
-              className="rounded-full bg-accent px-6 py-3 font-sans text-[14px] font-semibold text-ink transition-all hover:bg-accent-light"
+              className="rounded-full bg-cta-gradient px-6 py-3 font-sans text-[14px] font-semibold text-ink shadow-accent-glow transition-all hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Allow microphone →
             </button>
@@ -397,7 +397,7 @@ function IntroPhase({
           {micState === "granted" && (
             <button
               onClick={onStart}
-              className="rounded-full bg-accent px-6 py-3 font-sans text-[14px] font-semibold text-ink transition-all hover:bg-accent-light"
+              className="rounded-full bg-cta-gradient px-6 py-3 font-sans text-[14px] font-semibold text-ink shadow-accent-glow transition-all hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Start attempt 1 →
             </button>
@@ -427,11 +427,11 @@ function ReadyPhase({
   uploadError: string | null;
 }) {
   return (
-    <div className="rounded-2xl border border-accent/20 bg-gradient-to-br from-ink-surface to-ink-raised px-6 py-8 text-center">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark px-6 py-8 text-center">
       <p className="font-mono text-[10px] tracking-label text-accent">
         {isLastAttempt ? "LAST REP" : "NEXT REP"}
       </p>
-      <p className="mt-3 font-display text-[22px] font-semibold text-text-primary">
+      <p className="mt-3 font-display text-[22px] font-bold tracking-[-0.03em] text-text-primary">
         Attempt {nextAttemptNumber} of {drill.targetAttempts}
       </p>
       <p className="mt-2 font-sans text-[13px] text-text-secondary">
@@ -446,7 +446,7 @@ function ReadyPhase({
 
       <button
         onClick={onStart}
-        className="mt-6 rounded-full bg-accent px-6 py-3 font-sans text-[14px] font-semibold text-ink transition-all hover:bg-accent-light"
+        className="mt-6 rounded-full bg-cta-gradient px-6 py-3 font-sans text-[14px] font-semibold text-ink shadow-accent-glow transition-all hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
       >
         Start recording →
       </button>
@@ -467,13 +467,13 @@ function RecordingPhase({
   const approaching = remaining < 15;
 
   return (
-    <div className="rounded-2xl border border-accent/40 bg-accent/5 px-6 py-10 text-center">
+    <div className="rounded-2xl border border-accent/40 bg-accent/5 px-6 py-10 text-center shadow-accent-glow">
       <div className="mx-auto flex h-16 w-16 items-center justify-center">
-        <div className="absolute h-16 w-16 animate-ping rounded-full bg-accent/30" />
+        <div className="absolute h-16 w-16 animate-ping rounded-full bg-accent/30 motion-reduce:animate-none" />
         <div className="relative h-4 w-4 rounded-full bg-accent" />
       </div>
       <p className="mt-6 font-mono text-[11px] tracking-label text-accent">RECORDING</p>
-      <p className="mt-2 font-display text-[42px] font-semibold tabular-nums text-text-primary">
+      <p className="mt-2 font-display text-[42px] font-bold tracking-[-0.03em] tabular-nums text-text-primary">
         {formatTime(elapsedSeconds)}
       </p>
       <p
@@ -487,7 +487,7 @@ function RecordingPhase({
 
       <button
         onClick={onStop}
-        className="mt-8 rounded-full border border-ink-border bg-ink-surface px-6 py-3 font-sans text-[14px] font-semibold text-text-primary transition-all hover:border-accent"
+        className="mt-8 rounded-full border border-ink-border bg-ink-surface px-6 py-3 font-sans text-[14px] font-semibold text-text-primary transition-all hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
       >
         ■ Stop recording
       </button>
@@ -501,8 +501,8 @@ function UploadingPhase() {
       <div className="mx-auto h-10 w-10">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-ink-border border-t-accent" />
       </div>
-      <p className="mt-6 font-mono text-[11px] tracking-label text-accent">ANALYZING</p>
-      <p className="mt-2 font-display text-[18px] font-semibold text-text-primary">
+      <p className="mt-6 font-mono text-[11px] tracking-label text-violet">ANALYZING</p>
+      <p className="mt-2 font-display text-[18px] font-bold tracking-[-0.03em] text-text-primary">
         Listening back and taking notes.
       </p>
       <p className="mt-1 font-sans text-[12px] text-text-tertiary">Usually 10–20 seconds.</p>
@@ -523,10 +523,13 @@ function AttemptFeedback({
     <div className="flex flex-col gap-6">
       {/* Score hero */}
       <div className="rounded-2xl border border-ink-border bg-ink-surface px-6 py-6">
-        <div className="flex items-baseline gap-3">
+        <p className="font-mono text-[10px] tracking-label text-violet">
+          ATTEMPT {attempt.attempt_number} ANALYSIS
+        </p>
+        <div className="mt-3 flex items-baseline gap-3">
           <p
             className={[
-              "font-display text-[56px] font-semibold leading-none tabular-nums",
+              "font-display text-[56px] font-extrabold leading-none tracking-[-0.03em] tabular-nums",
               scoreColorClass(attempt.overall_score ?? 0),
             ].join(" ")}
           >
@@ -534,7 +537,7 @@ function AttemptFeedback({
           </p>
           <p className="font-mono text-[11px] tracking-label text-text-tertiary">/100</p>
         </div>
-        <p className="mt-4 font-serif text-[16px] italic leading-[1.55] text-text-primary">
+        <p className="mt-4 font-sans text-[15px] leading-[1.55] text-text-primary">
           {attempt.summary}
         </p>
       </div>
@@ -590,7 +593,7 @@ function AttemptFeedback({
         <div className="flex justify-center pt-4">
           <button
             onClick={onNextAttempt}
-            className="rounded-full bg-accent px-6 py-3 font-sans text-[14px] font-semibold text-ink transition-all hover:bg-accent-light"
+            className="rounded-full bg-cta-gradient px-6 py-3 font-sans text-[14px] font-semibold text-ink shadow-accent-glow transition-all hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             Go again →
           </button>
@@ -618,12 +621,12 @@ function CompletionPhase({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="rounded-2xl border border-accent/30 bg-gradient-to-br from-ink-surface to-ink-raised px-6 py-8">
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark px-6 py-8">
         <p className="font-mono text-[11px] tracking-label text-accent">DRILL COMPLETE</p>
-        <h2 className="mt-2 font-display text-[28px] font-semibold leading-tight text-text-primary">
+        <h2 className="mt-2 font-display text-[28px] font-bold leading-tight tracking-[-0.03em] text-text-primary">
           {delta > 15 ? "Big jump. Nice work." : delta > 5 ? "Clear improvement." : "You pushed through all five."}
         </h2>
-        <p className="mt-3 font-serif text-[16px] italic leading-[1.55] text-text-secondary">
+        <p className="mt-3 font-sans text-[15px] leading-[1.55] text-text-secondary">
           {last?.summary ?? "Review your attempts below and run it again whenever."}
         </p>
 
@@ -631,7 +634,7 @@ function CompletionPhase({
           <div className="mt-6 flex items-center gap-4">
             <span
               className={[
-                "font-display text-[20px] font-semibold tabular-nums",
+                "font-display text-[20px] font-bold tracking-[-0.03em] tabular-nums",
                 scoreColorClass(first.overall_score ?? 0),
               ].join(" ")}
             >
@@ -640,7 +643,7 @@ function CompletionPhase({
             <span className="font-mono text-[11px] tracking-label text-text-tertiary">ATTEMPT 1 →</span>
             <span
               className={[
-                "font-display text-[28px] font-semibold tabular-nums",
+                "font-display text-[28px] font-extrabold tracking-[-0.03em] tabular-nums",
                 scoreColorClass(last.overall_score ?? 0),
               ].join(" ")}
             >
@@ -679,7 +682,7 @@ function CompletionPhase({
               <div className="flex-shrink-0">
                 <p
                   className={[
-                    "font-display text-[24px] font-semibold tabular-nums leading-none",
+                    "font-display text-[24px] font-bold tracking-[-0.03em] tabular-nums leading-none",
                     scoreColorClass(a.overall_score ?? 0),
                   ].join(" ")}
                 >
@@ -695,13 +698,13 @@ function CompletionPhase({
       <div className="flex flex-wrap gap-3 pt-2">
         <button
           onClick={onNewDrill}
-          className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-ink transition-all hover:bg-accent-light"
+          className="rounded-full bg-cta-gradient px-5 py-2.5 font-sans text-[13px] font-semibold text-ink transition-all hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           Drill another question →
         </button>
         <Link
           href="/dashboard"
-          className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60"
+          className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           Back to dashboard
         </Link>

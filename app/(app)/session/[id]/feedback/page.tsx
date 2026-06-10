@@ -142,56 +142,62 @@ function NoFeedbackState({
           };
 
   return (
-    <div className="mx-auto max-w-[640px] px-6 py-16 sm:px-10">
+    <div className="mx-auto max-w-[720px] px-6 py-16 sm:px-10">
       {/* Breadcrumb */}
       <div className="mb-8">
         <Link
           href="/dashboard"
-          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary"
+          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           ← Dashboard
         </Link>
       </div>
 
-      {/* Status chip */}
-      <span
-        className={[
-          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium tracking-label",
-          config.chipClass,
-        ].join(" ")}
-      >
-        {config.chipLabel}
-      </span>
-
-      {/* Headline */}
-      <h1 className="mt-4 font-display text-[32px] font-semibold text-text-primary">
-        {config.headline}
-      </h1>
-
-      {/* Session context */}
-      <p className="mt-2 font-sans text-[13px] text-text-tertiary">
-        {personaFirstName} at {personaFirm} · {sessionId.slice(0, 8).toUpperCase()}
-      </p>
-
-      {/* Body */}
-      <p className="mt-6 font-serif text-[17px] italic leading-[1.55] text-text-secondary">
-        {config.body}
-      </p>
-
-      {/* CTAs */}
-      <div className="mt-10 flex flex-wrap gap-3">
-        <Link
-          href="/session/new"
-          className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-ink transition-all hover:bg-accent-light"
+      {/* Cosmos empty-state card */}
+      <div className="bg-gradient-dark relative overflow-hidden rounded-2xl border border-white/[0.08] px-8 py-12 sm:px-12 sm:py-14">
+        {/* Status chip */}
+        <span
+          className={[
+            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium tracking-label",
+            config.chipClass,
+          ].join(" ")}
         >
-          {config.primaryCta} →
-        </Link>
-        <Link
-          href="/dashboard"
-          className="rounded-full border border-ink-border bg-ink-surface px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60"
-        >
-          Back to dashboard
-        </Link>
+          {config.chipLabel}
+        </span>
+
+        {/* Headline */}
+        <h1 className="mt-5 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-text-primary sm:text-[36px]">
+          {config.headline}
+        </h1>
+
+        {/* Session context */}
+        <p className="mt-3 font-sans text-[13px] text-text-tertiary">
+          {personaFirstName} at {personaFirm} ·{" "}
+          <span className="font-mono text-[11px] tracking-label">
+            {sessionId.slice(0, 8).toUpperCase()}
+          </span>
+        </p>
+
+        {/* Body */}
+        <p className="mt-6 max-w-[52ch] font-sans text-[15px] leading-[1.65] text-text-secondary">
+          {config.body}
+        </p>
+
+        {/* CTAs */}
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link
+            href="/session/new"
+            className="rounded-full bg-cta-gradient px-5 py-2.5 font-sans text-[13px] font-semibold text-brand-ink transition-all hover:shadow-accent-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          >
+            {config.primaryCta} →
+          </Link>
+          <Link
+            href="/dashboard"
+            className="rounded-full border border-white/[0.08] bg-white/[0.04] px-5 py-2.5 font-sans text-[13px] text-text-primary transition-all hover:border-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          >
+            Back to dashboard
+          </Link>
+        </div>
       </div>
     </div>
   );

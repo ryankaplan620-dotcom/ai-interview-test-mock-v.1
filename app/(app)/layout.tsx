@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { FolioMark } from "@/components/FolioMark";
 import { SignOutButton } from "@/components/SignOutButton";
-import { AppMobileNav } from "@/components/AppNav";
+import { AppDesktopNav, AppMobileNav } from "@/components/AppNav";
+import { LinkButton } from "@/components/Button";
 import { getProfile, getUserTier, requireUser } from "@/lib/auth/server";
 import { TIERS } from "@/lib/tiers";
 
@@ -19,58 +20,42 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <div className="pointer-events-none fixed inset-0 bg-depth-glow opacity-60" aria-hidden />
 
       {/* Top nav */}
-      <header className="relative z-10 border-b border-ink-border/40 bg-ink/80 backdrop-blur-md">
-        <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 sm:px-10">
-          <div className="flex items-center gap-10">
-            <Link href="/dashboard" className="inline-flex items-center gap-2.5">
+      <header className="sticky top-0 z-20 border-b border-white/[0.08] bg-ink/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-6 sm:px-10">
+          <div className="flex min-w-0 items-center gap-8 lg:gap-10">
+            <Link
+              href="/dashboard"
+              className="inline-flex flex-shrink-0 items-center gap-2.5 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+            >
               <FolioMark className="h-6 w-6 text-accent" />
-              <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">
+              <span className="font-display text-[18px] font-bold tracking-[-0.03em] text-text-primary">
                 Folio
               </span>
             </Link>
 
-            <nav className="hidden items-center gap-8 md:flex">
-              <Link
-                href="/dashboard"
-                className="font-sans text-[13.5px] font-medium tracking-body text-text-secondary transition-colors hover:text-text-primary"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/session/new"
-                className="font-sans text-[13.5px] font-medium tracking-body text-text-secondary transition-colors hover:text-text-primary"
-              >
-                Practice
-              </Link>
-              <Link
-                href="/outreach"
-                className="font-sans text-[13.5px] font-medium tracking-body text-text-secondary transition-colors hover:text-text-primary"
-              >
-                Outreach
-              </Link>
-              <Link
-                href="/settings"
-                className="font-sans text-[13.5px] font-medium tracking-body text-text-secondary transition-colors hover:text-text-primary"
-              >
-                Settings
-              </Link>
-            </nav>
+            <AppDesktopNav />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
             <Link
               href="/pricing"
-              className="hidden items-center gap-1.5 rounded-full border border-ink-border bg-ink-surface px-3 py-1.5 sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-full border border-ink-border bg-ink-surface px-3 py-1.5 transition-colors hover:border-accent/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:inline-flex"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
               <span className="font-mono text-[10px] font-medium tracking-label text-accent">
                 {tierConfig.label.toUpperCase()}
               </span>
             </Link>
-            <span className="hidden font-sans text-[13.5px] text-text-secondary md:inline">
+
+            <span className="hidden max-w-[160px] truncate font-sans text-[13px] text-text-secondary lg:inline">
               {profile?.full_name ?? profile?.email?.split("@")[0]}
             </span>
+
             <SignOutButton />
+
+            <LinkButton href="/session/new" size="sm" className="hidden md:inline-flex">
+              New session
+            </LinkButton>
           </div>
         </div>
       </header>

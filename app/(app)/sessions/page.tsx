@@ -71,7 +71,7 @@ export default async function SessionsPage({ searchParams }: PageProps) {
       <div className="mb-6">
         <Link
           href="/dashboard"
-          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary"
+          className="rounded-full font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           ← Dashboard
         </Link>
@@ -80,9 +80,12 @@ export default async function SessionsPage({ searchParams }: PageProps) {
       {/* Header */}
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] tracking-label text-accent">ALL SESSIONS</p>
-          <h1 className="mt-2 font-display text-[32px] font-semibold tracking-heading text-text-primary sm:text-[36px]">
-            {totalCount} session{totalCount === 1 ? "" : "s"}
+          <p className="font-mono text-[11px] font-medium tracking-label text-accent">
+            ALL SESSIONS
+          </p>
+          <h1 className="mt-2 font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.03em] text-text-primary sm:text-[40px]">
+            <span className="text-gradient-mint tabular-nums">{totalCount}</span> session
+            {totalCount === 1 ? "" : "s"}
           </h1>
         </div>
         <LinkButton href="/session/new" size="md">
@@ -91,7 +94,7 @@ export default async function SessionsPage({ searchParams }: PageProps) {
       </header>
 
       {/* Filter tabs */}
-      <nav className="mb-6 flex gap-1 border-b border-ink-border">
+      <nav className="mb-6 flex flex-wrap gap-2" aria-label="Filter sessions">
         <FilterTab href="/sessions" label="All" active={filter === "all"} />
         <FilterTab href="/sessions?filter=completed" label="Completed" active={filter === "completed"} />
         <FilterTab
@@ -103,7 +106,7 @@ export default async function SessionsPage({ searchParams }: PageProps) {
 
       {/* Session list */}
       {sessions.length > 0 ? (
-        <ul className="divide-y divide-ink-border/40 overflow-hidden rounded-xl border border-ink-border">
+        <ul className="divide-y divide-white/[0.08] overflow-hidden rounded-2xl border border-ink-border">
           {sessions.map((session) => (
             <li key={session.id}>
               <SessionRow session={session} />
@@ -111,17 +114,23 @@ export default async function SessionsPage({ searchParams }: PageProps) {
           ))}
         </ul>
       ) : (
-        <div className="rounded-xl border border-dashed border-ink-border bg-ink-surface/50 p-10 text-center">
-          <p className="font-sans text-[14px] text-text-secondary">
-            {filter === "completed"
-              ? "No completed sessions yet. Finish one and it'll show up here."
-              : filter === "incomplete"
-                ? "No incomplete sessions. Nice."
-                : "No sessions yet."}
-          </p>
-          <LinkButton href="/session/new" size="sm" className="mt-4">
-            Start a session →
-          </LinkButton>
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark p-12 text-center">
+          <div
+            className="pointer-events-none absolute left-1/2 top-0 h-40 w-80 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl"
+            aria-hidden
+          />
+          <div className="relative">
+            <p className="mx-auto max-w-sm font-sans text-[14px] leading-relaxed text-text-secondary">
+              {filter === "completed"
+                ? "No completed sessions yet. Finish one and it'll show up here."
+                : filter === "incomplete"
+                  ? "No incomplete sessions. Nice."
+                  : "No sessions yet."}
+            </p>
+            <LinkButton href="/session/new" size="sm" className="mt-5">
+              Start a session →
+            </LinkButton>
+          </div>
         </div>
       )}
 
@@ -153,11 +162,12 @@ function FilterTab({ href, label, active }: { href: string; label: string; activ
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={[
-        "border-b-2 px-4 py-2 font-sans text-[13px] font-medium transition-colors -mb-px",
+        "inline-flex h-9 items-center rounded-full border px-4 font-sans text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         active
-          ? "border-accent text-text-primary"
-          : "border-transparent text-text-tertiary hover:text-text-secondary",
+          ? "border-accent/30 bg-accent/10 text-accent"
+          : "border-ink-border bg-ink-surface text-text-tertiary hover:border-ink-border hover:text-text-secondary",
       ].join(" ")}
     >
       {label}
@@ -182,7 +192,7 @@ function PaginationLink({
   return (
     <Link
       href={href}
-      className="font-sans text-[13px] font-medium text-text-secondary transition-colors hover:text-accent"
+      className="rounded-full font-sans text-[13px] font-medium text-text-secondary transition-colors hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
       {children}
     </Link>

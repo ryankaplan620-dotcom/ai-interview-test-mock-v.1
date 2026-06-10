@@ -30,10 +30,11 @@ export default async function PracticePage({ searchParams }: PageProps) {
       {/* Header */}
       <header>
         <p className="font-mono text-[11px] tracking-label text-accent">PRACTICE</p>
-        <h1 className="mt-2 font-display text-[32px] font-semibold tracking-heading text-text-primary sm:text-[40px]">
-          Drill one thing until it's automatic.
+        <h1 className="mt-2 font-display text-[32px] font-bold tracking-[-0.03em] text-text-primary sm:text-[40px]">
+          Drill one thing until it&rsquo;s{" "}
+          <span className="text-gradient-mint">automatic.</span>
         </h1>
-        <p className="mt-3 max-w-[620px] font-serif text-[17px] italic leading-[1.55] text-text-secondary">
+        <p className="mt-3 max-w-[620px] font-sans text-[16px] leading-[1.55] text-text-secondary">
           Full interviews build range. Drills build reps. Pick a skill, run it until you stop thinking about it.
         </p>
       </header>

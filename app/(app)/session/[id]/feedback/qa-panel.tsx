@@ -120,11 +120,14 @@ export function QaFeedbackPanel({ sessionId, initial }: QaFeedbackPanelProps) {
   if (state.kind === "error") {
     return (
       <section className="mt-8 rounded-2xl border border-ink-border bg-ink-surface px-8 py-7">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-[20px] font-semibold text-text-primary">
-            Q&A section
-          </h2>
-          <span className="font-mono text-[10px] tracking-label text-rose-400/80">ERROR</span>
+        <div className="flex items-baseline justify-between gap-4">
+          <div>
+            <p className="font-mono text-[11px] tracking-label text-violet">Q&A INTELLIGENCE</p>
+            <h2 className="mt-1 font-display text-[20px] font-bold tracking-heading text-text-primary">
+              Q&A section
+            </h2>
+          </div>
+          <span className="font-mono text-[10px] tracking-label text-rose-300/90">ERROR</span>
         </div>
         <p className="mt-3 font-sans text-[13px] text-text-tertiary">{state.message}</p>
       </section>
@@ -134,13 +137,22 @@ export function QaFeedbackPanel({ sessionId, initial }: QaFeedbackPanelProps) {
   if (state.kind === "loading" || state.kind === "pending") {
     return (
       <section className="mt-8 rounded-2xl border border-ink-border bg-ink-surface px-8 py-7">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-[20px] font-semibold text-text-primary">
-            Q&A section
-          </h2>
-          <span className="font-mono text-[10px] tracking-label text-accent/80">ANALYSING</span>
+        <div className="flex items-baseline justify-between gap-4">
+          <div>
+            <p className="font-mono text-[11px] tracking-label text-violet">Q&A INTELLIGENCE</p>
+            <h2 className="mt-1 font-display text-[20px] font-bold tracking-heading text-text-primary">
+              Q&A section
+            </h2>
+          </div>
+          <span className="inline-flex items-center gap-2 font-mono text-[10px] tracking-label text-accent">
+            <span className="relative flex h-1.5 w-1.5" aria-hidden>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60 motion-reduce:animate-none" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+            </span>
+            ANALYSING
+          </span>
         </div>
-        <p className="mt-3 font-sans text-[13px] italic text-text-tertiary">
+        <p className="mt-3 font-sans text-[13px] text-text-tertiary">
           Evaluating your end-of-interview questions…
         </p>
       </section>
@@ -156,21 +168,21 @@ export function QaFeedbackPanel({ sessionId, initial }: QaFeedbackPanelProps) {
       {/* Header row */}
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] tracking-label text-accent/80">Q&A SECTION</p>
-          <h2 className="mt-1 font-display text-[22px] font-semibold text-text-primary">
+          <p className="font-mono text-[11px] tracking-label text-violet">Q&A INTELLIGENCE</p>
+          <h2 className="mt-1.5 font-display text-[22px] font-bold tracking-heading text-text-primary">
             Your end-of-interview questions
           </h2>
         </div>
         <div className="text-right">
           <p
             className={[
-              "font-display font-semibold leading-none tabular-nums text-[40px]",
+              "font-display font-extrabold leading-none tracking-[-0.03em] tabular-nums text-[40px]",
               scoreColorClass(feedback.overall_score),
             ].join(" ")}
           >
             {feedback.overall_score}
           </p>
-          <p className="mt-1 font-mono text-[10px] tracking-label text-text-tertiary">
+          <p className="mt-1.5 font-mono text-[10px] tracking-label text-text-tertiary">
             {feedback.questions_asked_count === 0
               ? "NO QUESTIONS ASKED"
               : `${feedback.questions_asked_count} QUESTION${feedback.questions_asked_count === 1 ? "" : "S"}`}
@@ -179,7 +191,7 @@ export function QaFeedbackPanel({ sessionId, initial }: QaFeedbackPanelProps) {
       </div>
 
       {/* Sub-scores */}
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <SubScoreCard label="Preparation" value={feedback.preparation_score} />
         <SubScoreCard label="Specificity" value={feedback.specificity_score} />
         <SubScoreCard label="Engagement" value={feedback.engagement_score} />
@@ -187,7 +199,7 @@ export function QaFeedbackPanel({ sessionId, initial }: QaFeedbackPanelProps) {
       </div>
 
       {/* Summary */}
-      <p className="mt-6 font-serif text-[15px] italic leading-[1.6] text-text-secondary">
+      <p className="mt-6 font-sans text-[15px] leading-[1.65] text-text-secondary">
         {feedback.summary}
       </p>
 
@@ -217,7 +229,7 @@ export function QaFeedbackPanel({ sessionId, initial }: QaFeedbackPanelProps) {
                 key={i}
                 className="flex gap-3 font-sans text-[14px] leading-[1.55] text-text-primary"
               >
-                <span className="mt-[8px] h-1 w-1 flex-shrink-0 rounded-full bg-accent" />
+                <span className="mt-[8px] h-1 w-1 flex-shrink-0 rounded-full bg-accent" aria-hidden />
                 <span>{s}</span>
               </li>
             ))}
@@ -230,17 +242,19 @@ export function QaFeedbackPanel({ sessionId, initial }: QaFeedbackPanelProps) {
 
 function QaQuestionCard({ entry }: { entry: QaQuestionBreakdown }) {
   return (
-    <div className="rounded-xl border border-ink-border bg-ink-raised px-5 py-4">
-      <p className="font-serif text-[15px] italic leading-[1.55] text-text-primary">
-        "{entry.question}"
-      </p>
-      <p className="mt-2 font-sans text-[13px] leading-[1.55] text-text-secondary">
-        <span className="font-mono text-[10px] tracking-label text-text-tertiary">SIGNAL · </span>
-        {entry.signal}
-      </p>
-      <div className="mt-3 border-t border-ink-border/40 pt-3">
-        <p className="font-mono text-[10px] tracking-label text-accent/80">STRONGER</p>
-        <p className="mt-1 font-sans text-[14px] leading-[1.55] text-text-primary">
+    <div className="overflow-hidden rounded-xl border border-ink-border bg-ink-raised">
+      <div className="px-5 py-4">
+        <p className="font-sans text-[15px] italic leading-[1.6] text-text-primary">
+          &ldquo;{entry.question}&rdquo;
+        </p>
+        <p className="mt-2.5 font-sans text-[13px] leading-[1.55] text-text-secondary">
+          <span className="font-mono text-[10px] tracking-label text-text-tertiary">SIGNAL · </span>
+          {entry.signal}
+        </p>
+      </div>
+      <div className="border-t border-ink-border/60 bg-accent/[0.04] px-5 py-4">
+        <p className="font-mono text-[10px] tracking-label text-accent">STRONGER</p>
+        <p className="mt-1.5 font-sans text-[14px] font-medium leading-[1.55] text-text-primary">
           {entry.stronger_version}
         </p>
         <p className="mt-2 font-sans text-[13px] leading-[1.55] text-text-tertiary">
@@ -252,15 +266,20 @@ function QaQuestionCard({ entry }: { entry: QaQuestionBreakdown }) {
 }
 
 function SubScoreCard({ label, value }: { label: string; value: number }) {
+  const width = Math.max(0, Math.min(100, value));
   return (
-    <div className="rounded-lg border border-ink-border bg-ink-raised px-3 py-2.5">
-      <p className="font-mono text-[10px] tracking-label text-text-tertiary">
-        {label.toUpperCase()}
-      </p>
-      <p className={[scoreColorClass(value), "mt-0.5 font-display text-[22px] font-semibold tabular-nums"].join(" ")}>
-        {value}
-      </p>
+    <div className="rounded-xl border border-ink-border/60 bg-ink-raised/40 px-4 py-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="font-mono text-[10px] tracking-label text-text-tertiary">
+          {label.toUpperCase()}
+        </p>
+        <p className="font-display text-[18px] font-bold leading-none tabular-nums text-text-primary">
+          {value}
+        </p>
+      </div>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]" aria-hidden>
+        <div className="h-full rounded-full bg-accent" style={{ width: `${width}%` }} />
+      </div>
     </div>
   );
 }
-

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { FolioMark } from "@/components/FolioMark";
 import { endSession, markSessionStarted } from "./actions";
 import type { PersonaId, InterviewType, SessionStatus, SessionMode } from "@/types/supabase";
@@ -64,6 +65,16 @@ export interface SessionViewProps {
 
 type Phase = "permissions" | "pre-call" | "live" | "ending";
 type MediaState = "idle" | "requesting" | "granted" | "denied" | "error";
+
+// --------------------------------------------------------------------------
+// Agent portraits — product roster is Sarah (v.2) and Gemma (v.3) only.
+// Legacy persona ids fall back to the monogram treatment.
+// --------------------------------------------------------------------------
+
+const AGENT_PORTRAITS: Record<string, { src: string; version: string }> = {
+  sarah: { src: "/images/agents/sarah.png", version: "v.2" },
+  gemma: { src: "/images/agents/gemma.png", version: "v.3" },
+};
 
 // --------------------------------------------------------------------------
 // Component
@@ -449,97 +460,100 @@ function PreCallScreen({
   const ready = mediaState === "granted";
 
   return (
-    <div className="mx-auto max-w-[1040px] px-6 py-12 sm:px-10">
-      <p className="font-mono text-[11px] tracking-label text-text-tertiary">
-        SESSION · {session.interview_type.replace(/_/g, " ").toUpperCase()} · {targetMinutes} MIN
-      </p>
-      <h1 className="mt-3 font-display text-[36px] font-bold tracking-[-0.03em] text-text-primary">
-        You're about to meet {persona.firstName}.
-      </h1>
-      <p className="mt-2 font-sans text-[16px] italic text-text-secondary">
-        {interviewPitchLine(persona, session)}
-      </p>
+    <div className="relative min-h-screen bg-gradient-dark">
+      <div className="relative z-10 mx-auto max-w-[1040px] px-6 py-12 sm:px-10">
+        <p className="font-mono text-[11px] font-medium tracking-label text-accent">
+          SESSION · {session.interview_type.replace(/_/g, " ").toUpperCase()} · {targetMinutes} MIN
+        </p>
+        <h1 className="mt-3 font-display text-[36px] font-extrabold leading-[1.05] tracking-[-0.03em] text-text-primary sm:text-[42px]">
+          <span className="text-gradient-mint">{persona.firstName}</span> is ready to interview
+          you.
+        </h1>
+        <p className="mt-3 font-sans text-[15px] leading-relaxed text-text-secondary">
+          {interviewPitchLine(persona, session)}
+        </p>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_380px]">
-        {/* Self-view preview */}
-        <div className="overflow-hidden rounded-2xl border border-ink-border bg-ink-surface">
-          <div className="relative aspect-video w-full bg-ink">
-            {ready ? (
-              <video
-                ref={attachSelfVideo} data-self-view
-                autoPlay
-                muted
-                playsInline
-                className="h-full w-full scale-x-[-1] object-cover"
-              />
-            ) : (
-              <MediaPlaceholder state={mediaState} message={mediaError} onRetry={onRetryMedia} />
-            )}
-            {ready && (
-              <div className="pointer-events-none absolute inset-0 flex items-end justify-between p-4">
-                <span className="rounded-md bg-ink/80 px-2 py-1 font-mono text-[10px] tracking-label text-text-secondary backdrop-blur-sm">
-                  PREVIEW · YOU
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center justify-between border-t border-ink-border px-4 py-3">
-            <p className="font-sans text-[12px] text-text-tertiary">
-              {ready
-                ? "Audio and video look good. You can mute or turn off your camera anytime."
-                : "We need camera and microphone access to run the call."}
-            </p>
-          </div>
-        </div>
-
-        {/* Persona + mode card */}
-        <aside className="flex flex-col gap-4 rounded-2xl border border-ink-border bg-gradient-to-br from-ink-surface to-ink-raised p-6">
-          <PersonaBadge persona={persona} />
-
-          <div className="border-t border-ink-border pt-4">
-            <p className="font-mono text-[10px] tracking-label text-text-tertiary">FORMAT</p>
-            <p className="mt-1 font-sans text-[14px] text-text-primary">
-              {formatLabel(session.interview_type)} · {modeLabel(session.mode)}
-            </p>
-          </div>
-
-          {(session.target_firm || session.target_role) && (
-            <div className="border-t border-ink-border pt-4">
-              <p className="font-mono text-[10px] tracking-label text-text-tertiary">TARGET</p>
-              <p className="mt-1 font-sans text-[14px] text-text-primary">
-                {[session.target_firm, session.target_role].filter(Boolean).join(" · ")}
-              </p>
-              {session.target_firm && !runtimeFeatures.firmCalibration && (
-                <p className="mt-1 font-sans text-[11px] text-text-tertiary">
-                  Saved for your notes. Firm-specific calibration activates on Pro.
-                </p>
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_380px]">
+          {/* Self-view preview */}
+          <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-ink/60 backdrop-blur-sm">
+            <div className="relative aspect-video w-full bg-ink">
+              {ready ? (
+                <video
+                  ref={attachSelfVideo} data-self-view
+                  autoPlay
+                  muted
+                  playsInline
+                  className="h-full w-full scale-x-[-1] object-cover"
+                />
+              ) : (
+                <MediaPlaceholder state={mediaState} message={mediaError} onRetry={onRetryMedia} />
+              )}
+              {ready && (
+                <div className="pointer-events-none absolute inset-0 flex items-end justify-between p-4">
+                  <span className="rounded-full bg-ink/80 px-2.5 py-1 font-mono text-[10px] tracking-label text-text-secondary backdrop-blur-sm">
+                    PREVIEW · YOU
+                  </span>
+                </div>
               )}
             </div>
-          )}
-
-          <div className="border-t border-ink-border pt-4">
-            <p className="font-mono text-[10px] tracking-label text-text-tertiary">BEFORE YOU START</p>
-            <ul className="mt-2 space-y-1.5 font-sans text-[12px] leading-relaxed text-text-secondary">
-              <li>• Find a quiet spot. Close tabs that make noise.</li>
-              <li>• Sit where you'd sit for the real interview.</li>
-              <li>• Treat this like the real thing. That's where the value is.</li>
-            </ul>
+            <div className="flex items-center justify-between border-t border-white/[0.08] px-4 py-3">
+              <p className="font-sans text-[12px] text-text-tertiary">
+                {ready
+                  ? "Audio and video look good. You can mute or turn off your camera anytime."
+                  : "We need camera and microphone access to run the call."}
+              </p>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onStart}
-            disabled={!ready}
-            className={[
-              "mt-2 rounded-full px-6 py-3 font-sans text-[14px] font-semibold transition-all",
-              ready
-                ? "bg-accent text-ink hover:bg-accent-highlight"
-                : "cursor-not-allowed bg-ink-raised text-text-tertiary",
-            ].join(" ")}
-          >
-            {ready ? `Start the call →` : "Waiting for camera..."}
-          </button>
-        </aside>
+          {/* Persona + mode card */}
+          <aside className="flex flex-col gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-6 backdrop-blur-sm">
+            <PersonaBadge persona={persona} />
+
+            <div className="border-t border-white/[0.08] pt-4">
+              <p className="font-mono text-[10px] tracking-label text-text-tertiary">FORMAT</p>
+              <p className="mt-1 font-sans text-[14px] text-text-primary">
+                {formatLabel(session.interview_type)} · {modeLabel(session.mode)}
+              </p>
+            </div>
+
+            {(session.target_firm || session.target_role) && (
+              <div className="border-t border-white/[0.08] pt-4">
+                <p className="font-mono text-[10px] tracking-label text-text-tertiary">TARGET</p>
+                <p className="mt-1 font-sans text-[14px] text-text-primary">
+                  {[session.target_firm, session.target_role].filter(Boolean).join(" · ")}
+                </p>
+                {session.target_firm && !runtimeFeatures.firmCalibration && (
+                  <p className="mt-1 font-sans text-[11px] text-text-tertiary">
+                    Saved for your notes. Firm-specific calibration activates on Pro.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="border-t border-white/[0.08] pt-4">
+              <p className="font-mono text-[10px] tracking-label text-text-tertiary">BEFORE YOU START</p>
+              <ul className="mt-2 space-y-1.5 font-sans text-[12px] leading-relaxed text-text-secondary">
+                <li>• Find a quiet spot. Close tabs that make noise.</li>
+                <li>• Sit where you'd sit for the real interview.</li>
+                <li>• Treat this like the real thing. That's where the value is.</li>
+              </ul>
+            </div>
+
+            <button
+              type="button"
+              onClick={onStart}
+              disabled={!ready}
+              className={[
+                "mt-2 inline-flex h-12 items-center justify-center rounded-full px-6 font-sans text-[14px] font-semibold transition-all duration-200 ease-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cosmos",
+                ready
+                  ? "bg-cta-gradient text-ink hover:shadow-accent-glow"
+                  : "cursor-not-allowed border border-white/[0.08] bg-white/[0.04] text-text-tertiary",
+              ].join(" ")}
+            >
+              {ready ? `Join the interview →` : "Waiting for camera..."}
+            </button>
+          </aside>
+        </div>
       </div>
     </div>
   );
@@ -606,13 +620,13 @@ function LiveCallScreen({
         <div className="flex items-center gap-2">
           <span
             className={[
-              "flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] tracking-label",
+              "flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[11px] tabular-nums tracking-label",
               overBudget ? "border-accent/60 text-accent" : "border-ink-border text-text-secondary",
             ].join(" ")}
           >
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60 motion-reduce:animate-none" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
             </span>
             {elapsedLabel} / {targetMinutes}:00
           </span>
@@ -700,7 +714,7 @@ function LiveCallScreen({
         <button
           type="button"
           onClick={onEnd}
-          className="ml-4 flex items-center gap-2 rounded-full bg-red-500 px-5 py-2.5 font-sans text-[13px] font-semibold text-white transition-all hover:bg-red-400"
+          className="ml-4 flex h-11 items-center gap-2 rounded-full bg-red-500 px-5 font-sans text-[13px] font-semibold text-white transition-all duration-200 ease-brand hover:bg-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           <EndCallIcon />
           End call
@@ -759,7 +773,7 @@ function MockInputPanel({
           type="button"
           onClick={submit}
           disabled={!value.trim()}
-          className="rounded-lg bg-accent px-3 py-2 font-sans text-[12px] font-semibold text-ink disabled:opacity-50"
+          className="rounded-lg bg-accent px-3 py-2 font-sans text-[12px] font-semibold text-ink transition-colors hover:bg-accent-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink disabled:opacity-50"
         >
           Send
         </button>
@@ -774,12 +788,14 @@ function MockInputPanel({
 
 function EndingScreen() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-ink px-6">
-      <FolioMark className="h-10 w-10 text-accent" />
-      <p className="mt-6 font-display text-[18px] font-semibold text-text-primary">Wrapping up.</p>
-      <p className="mt-1 font-sans text-[13px] text-text-secondary">
-        Saving your session. Feedback in a moment.
-      </p>
+    <div className="relative min-h-screen bg-gradient-dark">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6">
+        <FolioMark className="h-10 w-10 text-accent" />
+        <p className="mt-6 font-display text-[18px] font-bold tracking-heading text-text-primary">Wrapping up.</p>
+        <p className="mt-1 font-sans text-[13px] text-text-secondary">
+          Saving your session. Feedback in a moment.
+        </p>
+      </div>
     </div>
   );
 }
@@ -807,16 +823,18 @@ function PersonaFrame({
     [remoteStream],
   );
 
+  const portrait = AGENT_PORTRAITS[persona.id];
+
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div
         className={[
-          "relative flex h-[420px] w-[560px] items-center justify-center overflow-hidden rounded-3xl border transition-colors",
-          speaking ? "border-accent/60" : "border-ink-border",
+          "relative flex h-[420px] w-[560px] items-center justify-center overflow-hidden rounded-3xl border bg-ink-surface transition-colors",
+          speaking ? "border-accent/60 shadow-accent-glow" : "border-ink-border",
         ].join(" ")}
         style={{
-          background:
-            "radial-gradient(ellipse at top, rgba(99,216,138,0.12), transparent 60%), radial-gradient(ellipse at bottom right, rgba(65,176,108,0.08), transparent 55%), #151923",
+          backgroundImage:
+            "radial-gradient(ellipse at top, rgba(99,216,138,0.12), transparent 60%), radial-gradient(ellipse at bottom right, rgba(65,176,108,0.08), transparent 55%)",
         }}
         aria-label={`${persona.name} frame`}
       >
@@ -850,7 +868,7 @@ function PersonaFrame({
           <div className="flex flex-col items-center">
             <div
               className={[
-                "flex h-44 w-44 items-center justify-center rounded-full border transition-all duration-500",
+                "relative flex h-44 w-44 items-center justify-center overflow-hidden rounded-full border transition-all duration-500 motion-reduce:transition-none",
                 speaking
                   ? "scale-105 border-accent/60 shadow-accent-glow-lg"
                   : "scale-100 border-accent/30",
@@ -859,11 +877,29 @@ function PersonaFrame({
                 background: "radial-gradient(circle at 30% 30%, rgba(99,216,138,0.25), rgba(14,17,22,0.9) 70%)",
               }}
             >
-              <span className="font-display text-[64px] font-semibold text-accent">
-                {persona.firstName[0]}
-              </span>
+              {portrait ? (
+                <Image
+                  src={portrait.src}
+                  alt={persona.name}
+                  fill
+                  sizes="176px"
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <span className="font-display text-[64px] font-bold text-accent">
+                  {persona.firstName[0]}
+                </span>
+              )}
             </div>
-            <p className="mt-6 font-display text-[18px] font-semibold text-text-primary">{persona.name}</p>
+            <p className="mt-6 flex items-center gap-2 font-display text-[18px] font-bold tracking-heading text-text-primary">
+              {persona.name}
+              {portrait && (
+                <span className="rounded-full border border-white/[0.12] bg-ink/60 px-2 py-0.5 font-mono text-[10px] font-normal tracking-normal text-accent">
+                  {portrait.version}
+                </span>
+              )}
+            </p>
             <p className="mt-0.5 font-sans text-[12px] text-text-secondary">
               {persona.title} · {persona.firm}
             </p>
@@ -878,16 +914,31 @@ function PersonaFrame({
 }
 
 function PersonaBadge({ persona }: { persona: SessionViewPersona }) {
+  const portrait = AGENT_PORTRAITS[persona.id];
+
   return (
     <div className="flex items-center gap-3">
-      <div
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-deep font-display text-[18px] font-semibold text-ink"
-        aria-hidden="true"
-      >
-        {persona.firstName[0]}
-      </div>
+      {portrait ? (
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/[0.12]">
+          <Image src={portrait.src} alt={persona.name} fill sizes="48px" className="object-cover" />
+        </div>
+      ) : (
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-deep font-display text-[18px] font-bold text-ink"
+          aria-hidden="true"
+        >
+          {persona.firstName[0]}
+        </div>
+      )}
       <div>
-        <p className="font-sans text-[14px] font-semibold text-text-primary">{persona.name}</p>
+        <p className="flex items-center gap-2 font-sans text-[14px] font-semibold text-text-primary">
+          {persona.name}
+          {portrait && (
+            <span className="rounded-full border border-white/[0.12] bg-ink/60 px-2 py-0.5 font-mono text-[10px] font-normal text-accent">
+              {portrait.version}
+            </span>
+          )}
+        </p>
         <p className="font-sans text-[12px] text-text-secondary">
           {persona.title} · {persona.firm}
         </p>
@@ -923,7 +974,7 @@ function MediaPlaceholder({
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-full border border-accent/40 bg-accent/10 px-4 py-2 font-sans text-[12px] font-semibold text-accent transition-all hover:bg-accent/20"
+        className="inline-flex h-11 items-center rounded-full border border-accent/40 bg-accent/10 px-5 font-sans text-[12px] font-semibold text-accent transition-all duration-200 ease-brand hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
       >
         Try again
       </button>
@@ -951,7 +1002,7 @@ function ControlButton({
       aria-label={label}
       title={label}
       className={[
-        "flex h-11 w-11 items-center justify-center rounded-full border transition-all",
+        "flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-200 ease-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
         active
           ? "border-ink-border bg-ink-raised text-text-primary hover:bg-ink-surface"
           : dangerWhenInactive

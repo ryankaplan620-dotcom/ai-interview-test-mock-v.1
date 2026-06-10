@@ -46,17 +46,17 @@ export default async function IntelAdminIndexPage() {
   return (
     <div className="min-h-screen bg-ink px-6 py-12 text-text-primary sm:px-10">
       <div className="mx-auto max-w-5xl">
-        <span className="font-mono text-[11px] font-medium tracking-label text-accent">
-          ADMIN
+        <span className="font-mono text-[11px] font-medium tracking-label text-violet">
+          ADMIN · INTELLIGENCE
         </span>
-        <h1 className="mt-3 font-display text-[36px] font-semibold tracking-heading">
+        <h1 className="mt-3 font-display text-[36px] font-bold tracking-[-0.03em]">
           Company Intelligence
         </h1>
         <p className="mt-2 text-text-secondary">
           {companies.length} cached companies
         </p>
 
-        <div className="mt-8 overflow-x-auto rounded-lg border border-ink-border">
+        <div className="mt-8 overflow-x-auto rounded-xl border border-ink-border">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-ink-border bg-ink-surface text-left text-text-tertiary">
@@ -99,10 +99,10 @@ export default async function IntelAdminIndexPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                        className={`inline-block rounded-full px-2 py-0.5 font-mono text-[11px] font-medium ${
                           stale
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-green-500/20 text-green-400"
+                            ? "bg-amber-500/15 text-amber-400"
+                            : "bg-accent/15 text-accent"
                         }`}
                       >
                         {stale ? "stale" : "fresh"}

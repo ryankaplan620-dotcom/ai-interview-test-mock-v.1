@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { startSession, type StartSessionResult } from "./actions";
 import type { PersonaId, InterviewType, SubscriptionTier } from "@/types/supabase";
 import type { InterviewMode } from "@/lib/personas/types";
@@ -40,6 +41,12 @@ const MODES: { id: InterviewMode; label: string; description: string }[] = [
   { id: "standard", label: "Standard", description: "The real baseline." },
   { id: "hard", label: "Hard", description: "Interrupts sooner. No rescue hints." },
 ];
+
+// Brand presentation metadata for the agent roster (display-only).
+const PERSONA_META: Record<PersonaId, { version: string; portrait: string }> = {
+  sarah: { version: "v.2", portrait: "/images/agents/sarah.png" },
+  gemma: { version: "v.3", portrait: "/images/agents/gemma.png" },
+};
 
 // --------------------------------------------------------------------------
 // Component
@@ -105,56 +112,82 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
 
   return (
     <div className="mx-auto max-w-[1040px] px-6 py-12 sm:px-10">
-      <div className="mb-10">
+      <div className="mb-12">
         <Link
           href="/dashboard"
-          className="font-sans text-[13px] text-text-secondary transition-colors hover:text-accent"
+          className="font-sans text-[13px] text-text-secondary transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
         >
           ← Back to dashboard
         </Link>
-        <h1 className="mt-4 font-display text-[36px] font-semibold tracking-heading text-text-primary">
-          Start a practice session.
+        <p className="mt-6 font-mono text-[11px] tracking-label text-accent">NEW SESSION</p>
+        <h1 className="mt-3 font-display text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-text-primary sm:text-[42px]">
+          Start a practice <span className="text-gradient-mint">session</span>.
         </h1>
-        <p className="mt-2 font-serif text-[16px] italic text-text-secondary">
+        <p className="mt-3 max-w-[480px] font-sans text-[15px] leading-relaxed text-text-secondary">
           Pick who interviews you. Pick what they ask about. Run the call.
         </p>
       </div>
 
       {/* --- Step 1: Persona --- */}
       <Section number="01" label="Choose your interviewer">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2">
           {personas.map((p) => {
             const selected = personaId === p.id;
+            const meta = PERSONA_META[p.id];
             return (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => onPersonaSelect(p.id)}
-                className={[
-                  "group flex items-start gap-4 rounded-xl border p-4 text-left transition-all",
-                  selected
-                    ? "border-accent bg-ink-raised"
-                    : "border-ink-border bg-ink-surface hover:border-accent/60 hover:bg-ink-raised",
-                ].join(" ")}
                 aria-pressed={selected}
+                className={[
+                  "group relative overflow-hidden rounded-2xl border text-left transition-all duration-200 ease-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+                  selected
+                    ? "border-accent ring-1 ring-accent bg-ink-raised shadow-accent-glow"
+                    : "border-ink-border bg-ink-surface hover:border-accent/50 hover:bg-ink-raised",
+                ].join(" ")}
               >
-                <div
-                  className={[
-                    "flex h-14 w-14 shrink-0 items-center justify-center rounded-full font-serif text-[20px] font-semibold transition-all",
-                    selected
-                      ? "bg-accent text-ink"
-                      : "bg-gradient-to-br from-accent/80 to-accent-deep text-ink",
-                  ].join(" ")}
-                >
-                  {p.firstName[0]}
+                {/* Portrait */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-dark">
+                  <Image
+                    src={meta.portrait}
+                    alt={`${p.name}, ${p.title} at ${p.firm}`}
+                    fill
+                    sizes="(min-width: 640px) 480px, 100vw"
+                    className="object-cover object-top"
+                  />
+                  {/* Fade into the panel below */}
+                  <div
+                    className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink-surface to-transparent"
+                    aria-hidden="true"
+                  />
+                  {/* Version pill */}
+                  <span className="absolute right-4 top-4 rounded-full bg-accent px-3 py-1 font-mono text-[11px] font-medium text-ink">
+                    {meta.version}
+                  </span>
                 </div>
-                <div className="min-w-0">
-                  <p className="font-sans text-[14px] font-semibold text-text-primary">{p.name}</p>
-                  <p className="mt-0.5 truncate font-sans text-[12px] text-text-secondary">
+
+                {/* Identity */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-display text-[19px] font-bold tracking-[-0.03em] text-text-primary">
+                      {p.name}
+                    </p>
+                    {selected && (
+                      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-label text-accent">
+                        <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+                        SELECTED
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 font-sans text-[13px] text-text-secondary">
                     {p.title} · {p.firm}
                   </p>
-                  <p className="mt-1 font-sans text-[12px] leading-snug text-text-tertiary">
+                  <p className="mt-3 font-sans text-[13px] leading-relaxed text-text-tertiary">
                     {p.tagline}
+                  </p>
+                  <p className="mt-4 font-mono text-[10px] tracking-label text-text-tertiary">
+                    {p.defaultDurationMinutes} MIN DEFAULT
                   </p>
                 </div>
               </button>
@@ -179,9 +212,9 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
                 type="button"
                 onClick={() => setInterviewType(t.id)}
                 className={[
-                  "rounded-full border px-5 py-2 font-sans text-[13px] transition-all",
+                  "rounded-full border px-5 py-2.5 font-sans text-[13px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
                   selected
-                    ? "border-accent bg-accent/10 text-accent"
+                    ? "border-accent bg-accent/10 font-medium text-accent"
                     : "border-ink-border bg-ink-surface text-text-primary hover:border-accent/60 hover:text-accent",
                 ].join(" ")}
                 aria-pressed={selected}
@@ -218,9 +251,9 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
                 onClick={() => !disabled && setMode(m.id)}
                 disabled={disabled}
                 className={[
-                  "relative rounded-full border px-5 py-2 font-sans text-[13px] transition-all",
+                  "relative rounded-full border px-5 py-2.5 font-sans text-[13px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
                   selected && !disabled
-                    ? "border-accent bg-accent/10 text-accent"
+                    ? "border-accent bg-accent/10 font-medium text-accent"
                     : "border-ink-border bg-ink-surface text-text-primary",
                   disabled
                     ? "cursor-not-allowed opacity-50"
@@ -274,15 +307,17 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
         )}
 
         {/* Panel toggle — Pro+ */}
-        <div className="mt-6 flex items-center justify-between rounded-lg border border-ink-border bg-ink-surface px-4 py-3">
+        <div className="mt-6 flex items-center justify-between rounded-xl border border-ink-border bg-ink-surface px-5 py-4">
           <div>
-            <p className="font-sans text-[13px] text-text-primary">
+            <p className="font-sans text-[13px] font-medium text-text-primary">
               Panel interview
               {!hasPanel && (
-                <span className="ml-2 font-mono text-[10px] tracking-label text-accent/80">PRO</span>
+                <span className="ml-2 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[10px] tracking-label text-accent">
+                  PRO
+                </span>
               )}
             </p>
-            <p className="mt-0.5 font-sans text-[11px] text-text-tertiary">
+            <p className="mt-1 font-sans text-[12px] text-text-tertiary">
               Two or three interviewers trade off. Closer to a superday round.
             </p>
           </div>
@@ -306,9 +341,9 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
           onClick={onSubmit}
           disabled={!canSubmit}
           className={[
-            "rounded-full px-7 py-3 font-sans text-[14px] font-semibold transition-all",
+            "rounded-full px-8 py-3.5 font-sans text-[14px] font-semibold transition-all duration-200 ease-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
             canSubmit
-              ? "bg-accent text-ink hover:bg-accent-light"
+              ? "bg-cta-gradient text-brand-ink shadow-accent-glow hover:shadow-accent-glow-lg"
               : "cursor-not-allowed bg-ink-raised text-text-tertiary",
           ].join(" ")}
         >
@@ -342,10 +377,10 @@ function Section({
   disabledHint?: string;
 }) {
   return (
-    <section className={`mb-10 ${disabled ? "opacity-50" : ""}`}>
-      <div className="mb-4 flex items-baseline gap-3">
-        <span className="font-mono text-[11px] tracking-label text-text-tertiary">{number}</span>
-        <h2 className="font-display text-[16px] font-semibold text-text-primary">{label}</h2>
+    <section className={`mb-12 ${disabled ? "opacity-50" : ""}`}>
+      <div className="mb-5 flex items-baseline gap-3">
+        <span className="font-mono text-[11px] tracking-label text-accent/70">{number}</span>
+        <h2 className="font-display text-[17px] font-bold tracking-[-0.02em] text-text-primary">{label}</h2>
         {sublabel && <span className="font-sans text-[12px] text-text-tertiary">· {sublabel}</span>}
       </div>
       {disabled && disabledHint ? (
@@ -372,7 +407,7 @@ function LabelledInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block font-mono text-[10px] tracking-label text-text-tertiary">
+      <span className="mb-2 block font-mono text-[10px] tracking-label text-text-tertiary">
         {label.toUpperCase()}
       </span>
       <input
@@ -381,7 +416,7 @@ function LabelledInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full rounded-lg border border-ink-border bg-ink-surface px-3 py-2.5 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
+        className="w-full rounded-lg border border-ink-border bg-ink-surface px-4 py-2.5 font-sans text-[14px] text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
       />
     </label>
   );
@@ -404,7 +439,7 @@ function Toggle({
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
       className={[
-        "relative h-6 w-11 shrink-0 rounded-full transition-colors",
+        "relative h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
         checked && !disabled ? "bg-accent" : "bg-ink-border",
         disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
       ].join(" ")}
@@ -420,4 +455,4 @@ function Toggle({
 }
 
 // Re-export so server page can reuse the type
-export type { PickerPersona };
+export type { PickerPersona }

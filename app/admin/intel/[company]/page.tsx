@@ -20,13 +20,13 @@ interface PageProps {
 
 function statusBadge(status: string) {
   const colors: Record<string, string> = {
-    ok: "bg-green-500/20 text-green-400",
-    stale: "bg-yellow-500/20 text-yellow-400",
-    error: "bg-red-500/20 text-red-400",
+    ok: "bg-accent/15 text-accent",
+    stale: "bg-amber-500/15 text-amber-400",
+    error: "bg-rose-500/15 text-rose-400",
   };
   return (
     <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${colors[status] ?? "bg-ink-border text-text-tertiary"}`}
+      className={`inline-block rounded-full px-2 py-0.5 font-mono text-[11px] font-medium ${colors[status] ?? "bg-ink-border text-text-tertiary"}`}
     >
       {status}
     </span>
@@ -74,7 +74,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
           >
             &larr; Back to index
           </Link>
-          <h1 className="mt-4 font-display text-2xl font-semibold">
+          <h1 className="mt-4 font-display text-2xl font-bold tracking-[-0.02em]">
             No intel found for &ldquo;{companyKey}&rdquo;
           </h1>
           <p className="mt-2 text-text-secondary">
@@ -82,7 +82,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
           </p>
           <a
             href={`/api/admin/intel/refresh?company=${encodeURIComponent(companyKey)}`}
-            className="mt-6 inline-block rounded-lg bg-accent px-4 py-2 text-sm font-medium text-text-onAccent hover:bg-accent-deep"
+            className="mt-6 inline-block rounded-full bg-cta-gradient px-5 py-2 text-sm font-semibold text-text-onAccent transition-all hover:shadow-accent-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
             Fetch now
           </a>
@@ -107,10 +107,10 @@ export default async function IntelCompanyPage({ params }: PageProps) {
 
         {/* Header */}
         <div>
-          <span className="font-mono text-[11px] font-medium tracking-label text-accent">
-            INTEL DETAIL
+          <span className="font-mono text-[11px] font-medium tracking-label text-violet">
+            INTELLIGENCE · DETAIL
           </span>
-          <h1 className="mt-3 font-display text-[36px] font-semibold tracking-heading">
+          <h1 className="mt-3 font-display text-[36px] font-bold tracking-[-0.03em]">
             {intel.company.name}
           </h1>
           <p className="mt-1 text-text-secondary">
@@ -121,7 +121,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
         </div>
 
         {/* Freshness */}
-        <section className="rounded-lg border border-ink-border bg-ink-surface p-6">
+        <section className="rounded-xl border border-ink-border bg-ink-surface p-6">
           <h2 className="mb-4 font-mono text-xs font-medium tracking-label text-text-tertiary">
             FRESHNESS
           </h2>
@@ -151,7 +151,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
           <div className="mt-4">
             <a
               href={`/api/admin/intel/refresh?company=${encodeURIComponent(companyKey)}`}
-              className="inline-block rounded-lg bg-accent px-4 py-2 text-sm font-medium text-text-onAccent hover:bg-accent-deep"
+              className="inline-block rounded-full bg-cta-gradient px-5 py-2 text-sm font-semibold text-text-onAccent transition-all hover:shadow-accent-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Refresh now
             </a>
@@ -159,7 +159,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
         </section>
 
         {/* Sources */}
-        <section className="rounded-lg border border-ink-border bg-ink-surface p-6">
+        <section className="rounded-xl border border-ink-border bg-ink-surface p-6">
           <h2 className="mb-4 font-mono text-xs font-medium tracking-label text-text-tertiary">
             SOURCES ({intel.sources.length})
           </h2>
@@ -191,7 +191,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
         </section>
 
         {/* Questions by type */}
-        <section className="rounded-lg border border-ink-border bg-ink-surface p-6">
+        <section className="rounded-xl border border-ink-border bg-ink-surface p-6">
           <h2 className="mb-4 font-mono text-xs font-medium tracking-label text-text-tertiary">
             QUESTIONS ({intel.questions.length})
           </h2>
@@ -200,10 +200,12 @@ export default async function IntelCompanyPage({ params }: PageProps) {
               {Object.entries(typeCounts).map(([type, count]) => (
                 <div
                   key={type}
-                  className="rounded-lg border border-ink-border px-4 py-2"
+                  className="rounded-xl border border-ink-border bg-ink-raised px-4 py-2"
                 >
-                  <p className="text-xs text-text-tertiary">{type}</p>
-                  <p className="mt-1 font-mono text-lg font-semibold">
+                  <p className="font-mono text-[10px] tracking-label text-text-tertiary">
+                    {type.toUpperCase()}
+                  </p>
+                  <p className="mt-1 font-display text-lg font-bold tracking-[-0.02em]">
                     {count}
                   </p>
                 </div>
@@ -215,7 +217,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
         </section>
 
         {/* Culture */}
-        <section className="rounded-lg border border-ink-border bg-ink-surface p-6">
+        <section className="rounded-xl border border-ink-border bg-ink-surface p-6">
           <h2 className="mb-4 font-mono text-xs font-medium tracking-label text-text-tertiary">
             CULTURE
           </h2>
@@ -270,7 +272,7 @@ export default async function IntelCompanyPage({ params }: PageProps) {
         </section>
 
         {/* Recent news */}
-        <section className="rounded-lg border border-ink-border bg-ink-surface p-6">
+        <section className="rounded-xl border border-ink-border bg-ink-surface p-6">
           <h2 className="mb-4 font-mono text-xs font-medium tracking-label text-text-tertiary">
             RECENT NEWS ({intel.recent.news.length})
           </h2>
