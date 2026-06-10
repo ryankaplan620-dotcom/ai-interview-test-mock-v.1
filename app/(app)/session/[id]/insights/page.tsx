@@ -104,28 +104,28 @@ export default async function SessionInsightsPage({ params, searchParams }: Page
       <div className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-1">
         <Link
           href="/dashboard"
-          className="font-sans text-[12px] text-[#8B949E] transition-colors hover:text-[#C9D1D9]"
+          className="font-sans text-[12px] text-text-secondary transition-colors hover:text-text-primary"
         >
           Dashboard
         </Link>
-        <span className="font-mono text-[10px] text-[#8B949E]">/</span>
+        <span className="font-mono text-[10px] text-text-secondary">/</span>
         <Link
           href={`/session/${session.id}/feedback`}
-          className="font-sans text-[12px] text-[#8B949E] transition-colors hover:text-[#C9D1D9]"
+          className="font-sans text-[12px] text-text-secondary transition-colors hover:text-text-primary"
         >
           Feedback
         </Link>
-        <span className="font-mono text-[10px] text-[#8B949E]">/</span>
-        <span className="font-mono text-[11px] tracking-wider text-[#8B949E]">Insights</span>
+        <span className="font-mono text-[10px] text-text-secondary">/</span>
+        <span className="font-mono text-[11px] tracking-wider text-text-secondary">Insights</span>
       </div>
 
       {/* Header */}
       <header className="mb-10">
-        <p className="font-mono text-[11px] tracking-widest text-[#00DC82]/80">SESSION INSIGHTS</p>
-        <h1 className="mt-2 text-[32px] font-semibold leading-[1.1] text-[#F0F6FC] sm:text-[40px]">
+        <p className="font-mono text-[11px] tracking-label text-accent/80">SESSION INSIGHTS</p>
+        <h1 className="mt-2 font-display text-[32px] font-bold leading-[1.1] tracking-[-0.03em] text-text-primary sm:text-[40px]">
           {persona.firstName} at {persona.firm}
         </h1>
-        <p className="mt-2 font-sans text-[14px] text-[#8B949E]">
+        <p className="mt-2 font-sans text-[14px] text-text-secondary">
           {humanInterviewType(session.interview_type)} · {humanMode(session.mode)}
           {session.target_firm ? ` · targeting ${session.target_firm}` : ""}
           {session.actual_duration_seconds !== null
@@ -136,7 +136,7 @@ export default async function SessionInsightsPage({ params, searchParams }: Page
       </header>
 
       {/* Tab bar */}
-      <nav className="mb-8 flex gap-1 border-b border-[#21262D]">
+      <nav className="mb-8 flex gap-1 border-b border-ink-border">
         <TabLink tab="perception" activeTab={activeTab} sessionId={session.id}>
           Perception
         </TabLink>
@@ -166,10 +166,10 @@ export default async function SessionInsightsPage({ params, searchParams }: Page
       )}
 
       {/* Back link */}
-      <div className="mt-10 border-t border-[#21262D] pt-8 text-center">
+      <div className="mt-10 border-t border-ink-border pt-8 text-center">
         <Link
           href={`/session/${session.id}/feedback`}
-          className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-[#00DC82] transition-opacity hover:opacity-80"
+          className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80"
         >
           Back to feedback
         </Link>
@@ -200,8 +200,8 @@ function TabLink({
       className={[
         "px-4 py-2.5 font-sans text-[13px] font-medium transition-colors",
         isActive
-          ? "border-b-2 border-[#00DC82] text-[#F0F6FC]"
-          : "text-[#8B949E] hover:text-[#C9D1D9]",
+          ? "border-b-2 border-accent text-text-primary"
+          : "text-text-secondary hover:text-text-primary",
       ].join(" ")}
     >
       {children}
@@ -216,9 +216,9 @@ function TabLink({
 function LoadingState() {
   return (
     <div className="flex flex-col items-center justify-center py-20">
-      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#21262D] border-t-[#00DC82]" />
-      <p className="font-sans text-[15px] text-[#8B949E]">Insights are being generated...</p>
-      <p className="mt-1 font-sans text-[12px] text-[#484F58]">
+      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-ink-border border-t-accent" />
+      <p className="font-sans text-[15px] text-text-secondary">Insights are being generated...</p>
+      <p className="mt-1 font-sans text-[12px] text-text-tertiary">
         This usually takes a few moments after the session ends.
       </p>
     </div>
@@ -257,7 +257,7 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
         <div className="lg:col-span-2">
           <Card>
             <CardHeading>Perception Summary</CardHeading>
-            <p className="mt-3 font-sans text-[14px] leading-relaxed text-[#8B949E]">
+            <p className="mt-3 font-sans text-[14px] leading-relaxed text-text-secondary">
               {analytics.perception_summary}
             </p>
           </Card>
@@ -269,7 +269,7 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
         <Card>
           <CardHeading>User Appearance</CardHeading>
           {analytics.appearance_description && (
-            <p className="mt-3 font-sans text-[14px] leading-relaxed text-[#8B949E]">
+            <p className="mt-3 font-sans text-[14px] leading-relaxed text-text-secondary">
               {analytics.appearance_description}
             </p>
           )}
@@ -289,12 +289,12 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
               )}
               {appearance.notable_features && appearance.notable_features.length > 0 && (
                 <div>
-                  <dt className="font-sans text-[12px] text-[#484F58]">Notable Features</dt>
+                  <dt className="font-sans text-[12px] text-text-tertiary">Notable Features</dt>
                   <dd className="mt-1 flex flex-wrap gap-1.5">
                     {appearance.notable_features.map((f, i) => (
                       <span
                         key={i}
-                        className="rounded-full border border-[#21262D] bg-[#161B22] px-2.5 py-1 font-sans text-[12px] text-[#C9D1D9]"
+                        className="rounded-full border border-ink-border bg-ink-surface px-2.5 py-1 font-sans text-[12px] text-text-primary"
                       >
                         {f}
                       </span>
@@ -312,7 +312,7 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
         <Card>
           <CardHeading>Behavior &amp; Gestures</CardHeading>
           {analytics.behavior_description && (
-            <p className="mt-3 font-sans text-[14px] leading-relaxed text-[#8B949E]">
+            <p className="mt-3 font-sans text-[14px] leading-relaxed text-text-secondary">
               {analytics.behavior_description}
             </p>
           )}
@@ -330,13 +330,13 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
               )}
               {behavior.notable_patterns && behavior.notable_patterns.length > 0 && (
                 <div>
-                  <dt className="font-sans text-[12px] text-[#484F58]">Notable Patterns</dt>
+                  <dt className="font-sans text-[12px] text-text-tertiary">Notable Patterns</dt>
                   <dd className="mt-1">
                     <ul className="space-y-1">
                       {behavior.notable_patterns.map((p, i) => (
                         <li key={i} className="flex items-start gap-2">
-                          <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-[#00DC82]" />
-                          <span className="font-sans text-[13px] text-[#C9D1D9]">{p}</span>
+                          <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-accent" />
+                          <span className="font-sans text-[13px] text-text-primary">{p}</span>
                         </li>
                       ))}
                     </ul>
@@ -349,12 +349,12 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
           {/* Gesture observations (string[]) */}
           {analytics.gesture_observations && analytics.gesture_observations.length > 0 && (
             <div className="mt-4">
-              <p className="font-sans text-[12px] font-medium text-[#484F58]">Gestures Observed</p>
+              <p className="font-sans text-[12px] font-medium text-text-tertiary">Gestures Observed</p>
               <ul className="mt-2 space-y-1">
                 {analytics.gesture_observations.map((g, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-[#00DC82]" />
-                    <span className="font-sans text-[13px] text-[#C9D1D9]">{g}</span>
+                    <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-accent" />
+                    <span className="font-sans text-[13px] text-text-primary">{g}</span>
                   </li>
                 ))}
               </ul>
@@ -364,17 +364,17 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
           {/* Structured gestures */}
           {gestures && gestures.length > 0 && (
             <div className="mt-4">
-              <p className="font-sans text-[12px] font-medium text-[#484F58]">Gesture Details</p>
+              <p className="font-sans text-[12px] font-medium text-text-tertiary">Gesture Details</p>
               <div className="mt-2 space-y-2">
                 {gestures.map((g, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border border-[#21262D] bg-[#0D1117] px-3 py-2"
+                    className="rounded-lg border border-ink-border bg-ink px-3 py-2"
                   >
-                    <p className="font-sans text-[13px] font-medium text-[#C9D1D9]">
+                    <p className="font-sans text-[13px] font-medium text-text-primary">
                       {g.gesture}
                     </p>
-                    <p className="mt-0.5 font-sans text-[12px] text-[#8B949E]">
+                    <p className="mt-0.5 font-sans text-[12px] text-text-secondary">
                       {g.frequency} &middot; {g.context}
                     </p>
                   </div>
@@ -405,21 +405,21 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
             {notableMoments!.map((moment, i) => (
               <div
                 key={i}
-                className="rounded-lg border border-[#21262D] bg-[#0D1117] px-4 py-3"
+                className="rounded-lg border border-ink-border bg-ink px-4 py-3"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full border border-[#21262D] bg-[#161B22] px-2 py-0.5 font-mono text-[10px] tracking-wider text-[#00DC82]">
+                  <span className="rounded-full border border-ink-border bg-ink-surface px-2 py-0.5 font-mono text-[10px] tracking-wider text-accent">
                     {moment.type.toUpperCase()}
                   </span>
-                  <span className="font-mono text-[11px] text-[#484F58]">
+                  <span className="font-mono text-[11px] text-text-tertiary">
                     {formatTimestamp(moment.timestamp_seconds)}
                   </span>
                 </div>
-                <p className="mt-2 font-sans text-[13px] text-[#C9D1D9]">
+                <p className="mt-2 font-sans text-[13px] text-text-primary">
                   {moment.description}
                 </p>
                 {moment.significance && (
-                  <p className="mt-1 font-sans text-[12px] text-[#8B949E]">
+                  <p className="mt-1 font-sans text-[12px] text-text-secondary">
                     {moment.significance}
                   </p>
                 )}
@@ -454,23 +454,23 @@ function TranscriptTab({
           key={turn.id}
           className={[
             "flex gap-4 rounded-lg px-4 py-3",
-            turn.speaker === "interviewer" ? "bg-[#161B22]" : "",
+            turn.speaker === "interviewer" ? "bg-ink-surface" : "",
           ].join(" ")}
         >
           <div className="w-20 flex-shrink-0 pt-0.5">
-            <p className="font-mono text-[11px] text-[#484F58]">
+            <p className="font-mono text-[11px] text-text-tertiary">
               {formatTimestamp(turn.started_at_seconds)}
             </p>
             <p
               className={[
                 "mt-0.5 font-sans text-[12px] font-medium",
-                turn.speaker === "interviewer" ? "text-[#00DC82]" : "text-[#C9D1D9]",
+                turn.speaker === "interviewer" ? "text-accent" : "text-text-primary",
               ].join(" ")}
             >
               {turn.speaker === "interviewer" ? personaFirstName : "You"}
             </p>
           </div>
-          <p className="flex-1 font-sans text-[14px] leading-relaxed text-[#C9D1D9]">
+          <p className="flex-1 font-sans text-[14px] leading-relaxed text-text-primary">
             {turn.text}
           </p>
         </div>
@@ -514,14 +514,14 @@ function EmotionalTab({ analytics }: { analytics: SessionAnalytics | null }) {
           <Card>
             <CardHeading>Emotional Overview</CardHeading>
             {hasEmotionalSummary && (
-              <p className="mt-3 font-sans text-[14px] leading-relaxed text-[#8B949E]">
+              <p className="mt-3 font-sans text-[14px] leading-relaxed text-text-secondary">
                 {analytics.emotional_summary}
               </p>
             )}
             {hasSentiment && (
               <div className="mt-3">
-                <span className="font-sans text-[12px] text-[#484F58]">Overall Sentiment: </span>
-                <span className="font-sans text-[14px] italic text-[#C9D1D9]">
+                <span className="font-sans text-[12px] text-text-tertiary">Overall Sentiment: </span>
+                <span className="font-sans text-[14px] italic text-text-primary">
                   {analytics.overall_sentiment}
                 </span>
               </div>
@@ -600,7 +600,7 @@ function NetworkTab({ analytics }: { analytics: SessionAnalytics | null }) {
           <CardHeading>Connection Quality</CardHeading>
           <dl className="mt-4 space-y-4">
             <div>
-              <dt className="font-sans text-[12px] text-[#484F58]">Quality</dt>
+              <dt className="font-sans text-[12px] text-text-tertiary">Quality</dt>
               <dd className="mt-1">
                 <span
                   className={[
@@ -614,19 +614,19 @@ function NetworkTab({ analytics }: { analytics: SessionAnalytics | null }) {
             </div>
             {network.latency_ms !== null && (
               <div>
-                <dt className="font-sans text-[12px] text-[#484F58]">Latency</dt>
-                <dd className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-[#C9D1D9]">
+                <dt className="font-sans text-[12px] text-text-tertiary">Latency</dt>
+                <dd className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-text-primary">
                   {network.latency_ms}
-                  <span className="text-[13px] text-[#8B949E]"> ms</span>
+                  <span className="text-[13px] text-text-secondary"> ms</span>
                 </dd>
               </div>
             )}
             {network.packet_loss_pct !== null && (
               <div>
-                <dt className="font-sans text-[12px] text-[#484F58]">Packet Loss</dt>
-                <dd className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-[#C9D1D9]">
+                <dt className="font-sans text-[12px] text-text-tertiary">Packet Loss</dt>
+                <dd className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-text-primary">
                   {network.packet_loss_pct}
-                  <span className="text-[13px] text-[#8B949E]">%</span>
+                  <span className="text-[13px] text-text-secondary">%</span>
                 </dd>
               </div>
             )}
@@ -642,18 +642,18 @@ function NetworkTab({ analytics }: { analytics: SessionAnalytics | null }) {
             {screenActivities!.map((activity, i) => (
               <div
                 key={i}
-                className="rounded-lg border border-[#21262D] bg-[#0D1117] px-4 py-3"
+                className="rounded-lg border border-ink-border bg-ink px-4 py-3"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-sans text-[13px] font-medium text-[#C9D1D9]">
+                  <span className="font-sans text-[13px] font-medium text-text-primary">
                     {activity.activity}
                   </span>
-                  <span className="font-mono text-[11px] text-[#484F58]">
+                  <span className="font-mono text-[11px] text-text-tertiary">
                     {formatTimestamp(activity.timestamp_seconds)}
                   </span>
                 </div>
                 {activity.description && (
-                  <p className="mt-1 font-sans text-[12px] text-[#8B949E]">
+                  <p className="mt-1 font-sans text-[12px] text-text-secondary">
                     {activity.description}
                   </p>
                 )}
@@ -672,20 +672,20 @@ function NetworkTab({ analytics }: { analytics: SessionAnalytics | null }) {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[#21262D] bg-[#161B22] p-6">{children}</div>
+    <div className="rounded-xl border border-ink-border bg-ink-surface p-6">{children}</div>
   );
 }
 
 function CardHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="font-sans text-[15px] font-semibold text-[#F0F6FC]">{children}</h3>
+    <h3 className="font-sans text-[15px] font-semibold text-text-primary">{children}</h3>
   );
 }
 
 function EmptyCard({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-[#21262D] bg-[#161B22]/50 p-10 text-center">
-      <p className="font-sans text-[14px] text-[#8B949E]">{message}</p>
+    <div className="rounded-xl border border-dashed border-ink-border bg-ink-surface/50 p-10 text-center">
+      <p className="font-sans text-[14px] text-text-secondary">{message}</p>
     </div>
   );
 }
@@ -693,8 +693,8 @@ function EmptyCard({ message }: { message: string }) {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="font-sans text-[12px] text-[#484F58]">{label}</dt>
-      <dd className="mt-0.5 font-sans text-[13px] text-[#C9D1D9]">{value}</dd>
+      <dt className="font-sans text-[12px] text-text-tertiary">{label}</dt>
+      <dd className="mt-0.5 font-sans text-[13px] text-text-primary">{value}</dd>
     </div>
   );
 }
@@ -702,23 +702,23 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 function EmotionRow({ state }: { state: EmotionalState }) {
   const pct = Math.round(state.intensity * 100);
   return (
-    <div className="rounded-lg border border-[#21262D] bg-[#0D1117] px-4 py-3">
+    <div className="rounded-lg border border-ink-border bg-ink px-4 py-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-sans text-[13px] font-medium text-[#C9D1D9]">
+        <span className="font-sans text-[13px] font-medium text-text-primary">
           {state.emotion}
         </span>
         <div className="flex items-center gap-2">
           {state.timestamp_seconds !== undefined && (
-            <span className="font-mono text-[10px] text-[#484F58]">
+            <span className="font-mono text-[10px] text-text-tertiary">
               {formatTimestamp(state.timestamp_seconds)}
             </span>
           )}
-          <span className="font-mono text-[11px] tabular-nums text-[#8B949E]">{pct}%</span>
+          <span className="font-mono text-[11px] tabular-nums text-text-secondary">{pct}%</span>
         </div>
       </div>
-      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#21262D]">
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ink-border">
         <div
-          className="h-full rounded-full bg-[#00DC82] transition-all"
+          className="h-full rounded-full bg-accent transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -732,14 +732,14 @@ function MeterDisplay({ label, value }: { label: string; value: number }) {
     <div>
       <div className="flex items-baseline justify-between">
         <CardHeading>{label}</CardHeading>
-        <span className="font-mono text-[22px] font-semibold tabular-nums text-[#F0F6FC]">
+        <span className="font-mono text-[22px] font-semibold tabular-nums text-text-primary">
           {pct}
-          <span className="text-[13px] text-[#8B949E]">%</span>
+          <span className="text-[13px] text-text-secondary">%</span>
         </span>
       </div>
-      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#21262D]">
+      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-ink-border">
         <div
-          className="h-full rounded-full bg-[#00DC82] transition-all"
+          className="h-full rounded-full bg-accent transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -749,15 +749,15 @@ function MeterDisplay({ label, value }: { label: string; value: number }) {
 
 function ToneShiftItem({ shift }: { shift: ToneShift }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-[#21262D] bg-[#0D1117] px-4 py-3">
-      <span className="rounded-full border border-[#21262D] bg-[#161B22] px-2.5 py-1 font-sans text-[12px] text-[#8B949E]">
+    <div className="flex items-center gap-3 rounded-lg border border-ink-border bg-ink px-4 py-3">
+      <span className="rounded-full border border-ink-border bg-ink-surface px-2.5 py-1 font-sans text-[12px] text-text-secondary">
         {shift.from}
       </span>
-      <span className="text-[#484F58]">&rarr;</span>
-      <span className="rounded-full border border-[#00DC82]/30 bg-[#00DC82]/10 px-2.5 py-1 font-sans text-[12px] text-[#00DC82]">
+      <span className="text-text-tertiary">&rarr;</span>
+      <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 font-sans text-[12px] text-accent">
         {shift.to}
       </span>
-      <span className="ml-auto font-mono text-[11px] text-[#484F58]">
+      <span className="ml-auto font-mono text-[11px] text-text-tertiary">
         {formatTimestamp(shift.at_seconds)}
       </span>
     </div>
@@ -767,15 +767,15 @@ function ToneShiftItem({ shift }: { shift: ToneShift }) {
 function DiscussionPointRow({ point }: { point: KeyDiscussionPoint }) {
   const sentimentStyle =
     point.sentiment === "positive"
-      ? "border-[#00DC82]/30 bg-[#00DC82]/10 text-[#00DC82]"
+      ? "border-accent/30 bg-accent/10 text-accent"
       : point.sentiment === "negative"
         ? "border-rose-300/30 bg-rose-300/5 text-rose-300/90"
-        : "border-[#21262D] bg-[#161B22] text-[#8B949E]";
+        : "border-ink-border bg-ink-surface text-text-secondary";
 
   return (
-    <div className="rounded-lg border border-[#21262D] bg-[#0D1117] px-4 py-3">
+    <div className="rounded-lg border border-ink-border bg-ink px-4 py-3">
       <div className="flex items-start justify-between gap-3">
-        <p className="font-sans text-[14px] font-medium text-[#C9D1D9]">{point.topic}</p>
+        <p className="font-sans text-[14px] font-medium text-text-primary">{point.topic}</p>
         <span
           className={[
             "flex-shrink-0 rounded-full border px-2.5 py-0.5 font-mono text-[10px] tracking-wider",
@@ -786,7 +786,7 @@ function DiscussionPointRow({ point }: { point: KeyDiscussionPoint }) {
         </span>
       </div>
       {point.details && (
-        <p className="mt-2 font-sans text-[13px] leading-relaxed text-[#8B949E]">
+        <p className="mt-2 font-sans text-[13px] leading-relaxed text-text-secondary">
           {point.details}
         </p>
       )}
@@ -832,7 +832,7 @@ function humanMode(m: SessionMode): string {
 function connectionQualityStyle(quality: string): string {
   const q = quality.toLowerCase();
   if (q === "excellent" || q === "good") {
-    return "border-[#00DC82]/30 bg-[#00DC82]/10 text-[#00DC82]";
+    return "border-accent/30 bg-accent/10 text-accent";
   }
   if (q === "fair" || q === "moderate") {
     return "border-amber-300/30 bg-amber-300/5 text-amber-300/90";

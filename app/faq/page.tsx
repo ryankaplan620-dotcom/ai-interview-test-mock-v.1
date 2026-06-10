@@ -106,7 +106,7 @@ export default function FaqPage() {
         <Container className="py-20 text-center sm:py-24 lg:py-28">
           <ScrollReveal>
             <Eyebrow>FAQ</Eyebrow>
-            <SectionHeading as="h1" className="mt-5">
+            <SectionHeading as="h1" className="mt-5 font-extrabold">
               Questions, answered.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[520px]">
@@ -129,7 +129,7 @@ export default function FaqPage() {
       <Section tone="tint">
         <Container className="text-center">
           <ScrollReveal>
-            <SectionHeading>Still have a question?</SectionHeading>
+            <SectionHeading className="font-bold">Still have a question?</SectionHeading>
             <Lede className="mx-auto mt-5 max-w-[460px]">
               We're happy to help. Reach the team directly and we'll get back to you.
             </Lede>

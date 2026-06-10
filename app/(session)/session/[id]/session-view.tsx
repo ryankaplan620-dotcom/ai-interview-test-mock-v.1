@@ -453,10 +453,10 @@ function PreCallScreen({
       <p className="font-mono text-[11px] tracking-label text-text-tertiary">
         SESSION · {session.interview_type.replace(/_/g, " ").toUpperCase()} · {targetMinutes} MIN
       </p>
-      <h1 className="mt-3 font-display text-[36px] font-semibold tracking-heading text-text-primary">
+      <h1 className="mt-3 font-display text-[36px] font-bold tracking-[-0.03em] text-text-primary">
         You're about to meet {persona.firstName}.
       </h1>
-      <p className="mt-2 font-serif text-[16px] italic text-text-secondary">
+      <p className="mt-2 font-sans text-[16px] italic text-text-secondary">
         {interviewPitchLine(persona, session)}
       </p>
 
@@ -533,7 +533,7 @@ function PreCallScreen({
             className={[
               "mt-2 rounded-full px-6 py-3 font-sans text-[14px] font-semibold transition-all",
               ready
-                ? "bg-accent text-ink hover:bg-accent-light"
+                ? "bg-accent text-ink hover:bg-accent-highlight"
                 : "cursor-not-allowed bg-ink-raised text-text-tertiary",
             ].join(" ")}
           >
@@ -598,7 +598,7 @@ function LiveCallScreen({
       {/* Top bar */}
       <header className="flex items-center justify-between border-b border-ink-border px-6 py-3">
         <div className="flex items-center gap-3">
-          <FolioMark className="h-5 w-5" color="#00F590" />
+          <FolioMark className="h-5 w-5 text-accent" />
           <span className="font-mono text-[11px] tracking-label text-text-tertiary">
             {session.interview_type.replace(/_/g, " ").toUpperCase()} · {modeLabel(session.mode).toUpperCase()}
           </span>
@@ -775,7 +775,7 @@ function MockInputPanel({
 function EndingScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-ink px-6">
-      <FolioMark className="h-10 w-10" color="#00F590" />
+      <FolioMark className="h-10 w-10 text-accent" />
       <p className="mt-6 font-display text-[18px] font-semibold text-text-primary">Wrapping up.</p>
       <p className="mt-1 font-sans text-[13px] text-text-secondary">
         Saving your session. Feedback in a moment.
@@ -816,7 +816,7 @@ function PersonaFrame({
         ].join(" ")}
         style={{
           background:
-            "radial-gradient(ellipse at top, rgba(0,245,144,0.12), transparent 60%), radial-gradient(ellipse at bottom right, rgba(0,212,120,0.08), transparent 55%), #161B22",
+            "radial-gradient(ellipse at top, rgba(99,216,138,0.12), transparent 60%), radial-gradient(ellipse at bottom right, rgba(65,176,108,0.08), transparent 55%), #151923",
         }}
         aria-label={`${persona.name} frame`}
       >
@@ -852,14 +852,14 @@ function PersonaFrame({
               className={[
                 "flex h-44 w-44 items-center justify-center rounded-full border transition-all duration-500",
                 speaking
-                  ? "scale-105 border-accent/60 shadow-[0_0_60px_rgba(0,245,144,0.25)]"
+                  ? "scale-105 border-accent/60 shadow-accent-glow-lg"
                   : "scale-100 border-accent/30",
               ].join(" ")}
               style={{
-                background: "radial-gradient(circle at 30% 30%, rgba(0,245,144,0.25), rgba(13,17,23,0.9) 70%)",
+                background: "radial-gradient(circle at 30% 30%, rgba(99,216,138,0.25), rgba(14,17,22,0.9) 70%)",
               }}
             >
-              <span className="font-serif text-[64px] font-semibold italic text-accent">
+              <span className="font-display text-[64px] font-semibold text-accent">
                 {persona.firstName[0]}
               </span>
             </div>
@@ -881,7 +881,7 @@ function PersonaBadge({ persona }: { persona: SessionViewPersona }) {
   return (
     <div className="flex items-center gap-3">
       <div
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-deep font-serif text-[18px] font-semibold text-ink"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-deep font-display text-[18px] font-semibold text-ink"
         aria-hidden="true"
       >
         {persona.firstName[0]}

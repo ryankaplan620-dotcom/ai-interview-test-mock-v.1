@@ -105,7 +105,7 @@ function AnimatedCounter() {
       <div ref={ref}>
         <div className="h-36 w-36 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 p-[3px] shadow-brand-glow">
           <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-white">
-            <span className="font-display text-[52px] font-semibold leading-none tracking-tight text-gray-900">
+            <span className="font-display text-[52px] font-bold leading-none tracking-[-0.03em] text-gray-900">
               {count}
             </span>
             <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-gray-400">
@@ -179,9 +179,17 @@ function RadarChart() {
         {axisVertices.map(([x, y], i) => (
           <line key={i} x1={CENTER} y1={CENTER} x2={x} y2={y} stroke="#E5E7EB" strokeWidth="0.75" />
         ))}
-        <polygon points={dataPath} fill="rgba(0,220,130,0.10)" stroke="#00DC82" strokeWidth="2" strokeLinejoin="round" />
+        <polygon
+          points={dataPath}
+          className="text-brand-500"
+          fill="currentColor"
+          fillOpacity="0.10"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
         {dataPoints.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r={3} fill="#00DC82" />
+          <circle key={i} cx={x} cy={y} r={3} className="text-brand-500" fill="currentColor" />
         ))}
         {dimensions.map((d, i) => {
           const [x, y] = labelPositions[i];

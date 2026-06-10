@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ScrollReveal } from "./ScrollReveal";
 import { Section, Eyebrow, SectionHeading, Lede, Button, ArrowLink, CheckIcon } from "@/components/marketing/ui";
 
@@ -88,42 +89,68 @@ export function PricingPreview() {
             <div
               className={`relative flex h-full flex-col rounded-2xl p-6 ${
                 tier.highlighted
-                  ? "border-2 border-brand bg-white shadow-card-hover lg:-mt-3 lg:pb-9"
+                  ? "bg-brand text-brand-ink shadow-brand-glow lg:-mt-3 lg:pb-9"
                   : "border border-gray-200/70 bg-white shadow-card"
               }`}
             >
               {tier.highlighted && (
-                <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-brand-ink">
+                <span className="absolute -top-3 left-6 rounded-full bg-brand-ink px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-accent">
                   MOST POPULAR
                 </span>
               )}
 
-              <h3 className="text-[20px] font-semibold text-gray-900">{tier.name}</h3>
-              <p className="mt-1 text-[13px] text-gray-500">{tier.tagline}</p>
+              <h3 className={`font-display text-[20px] font-bold tracking-[-0.02em] ${tier.highlighted ? "text-brand-ink" : "text-gray-900"}`}>
+                {tier.name}
+              </h3>
+              <p className={`mt-1 text-[13px] ${tier.highlighted ? "text-brand-ink/70" : "text-gray-500"}`}>
+                {tier.tagline}
+              </p>
 
               <div className="mt-5 flex items-baseline gap-1">
-                <span className="font-display text-[38px] font-semibold tracking-[-0.03em] text-gray-900">
+                <span
+                  className={`font-display text-[38px] font-bold tracking-[-0.03em] ${
+                    tier.highlighted ? "text-brand-ink" : "text-gray-900"
+                  }`}
+                >
                   {tier.price}
                 </span>
-                {tier.period && <span className="text-[14px] text-gray-400">{tier.period}</span>}
+                {tier.period && (
+                  <span className={`text-[14px] ${tier.highlighted ? "text-brand-ink/60" : "text-gray-400"}`}>
+                    {tier.period}
+                  </span>
+                )}
               </div>
 
-              <Button
-                href="/signup"
-                variant={tier.highlighted ? "primary" : "secondary"}
-                className="mt-5 w-full"
-              >
-                {tier.cta}
-              </Button>
+              {tier.highlighted ? (
+                <Link
+                  href="/signup"
+                  className="mt-5 inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-brand-ink px-5 text-[15px] font-medium tracking-[-0.01em] text-white transition-all duration-200 ease-out hover:-translate-y-px hover:bg-ink-deeper active:translate-y-0 focus-visible:outline-none"
+                >
+                  {tier.cta}
+                </Link>
+              ) : (
+                <Button href="/signup" variant="secondary" className="mt-5 w-full">
+                  {tier.cta}
+                </Button>
+              )}
 
-              <div className="mt-6 border-t border-gray-100 pt-5">
+              <div className={`mt-6 border-t pt-5 ${tier.highlighted ? "border-brand-ink/10" : "border-gray-100"}`}>
                 {tier.preamble && (
-                  <p className="mb-3 text-[13px] font-medium text-gray-900">{tier.preamble}</p>
+                  <p className={`mb-3 text-[13px] font-medium ${tier.highlighted ? "text-brand-ink" : "text-gray-900"}`}>
+                    {tier.preamble}
+                  </p>
                 )}
                 <ul className="flex flex-col gap-2.5">
                   {tier.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-[13px] leading-snug text-gray-600">
-                      <CheckIcon className="mt-0.5 h-4 w-4 text-brand-600" />
+                    <li
+                      key={f}
+                      className={`flex items-start gap-2.5 text-[13px] leading-snug ${
+                        tier.highlighted ? "text-brand-ink/85" : "text-gray-600"
+                      }`}
+                    >
+                      <CheckIcon
+                        className={`mt-0.5 h-4 w-4 ${tier.highlighted ? "text-brand-ink" : "text-brand-600"}`}
+                      />
                       {f}
                     </li>
                   ))}

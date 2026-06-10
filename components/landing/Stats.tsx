@@ -1,11 +1,11 @@
 import { ScrollReveal } from "./ScrollReveal";
 import { Section } from "@/components/marketing/ui";
 
-const stats = [
+const stats: { value: string; label: string; highlight?: boolean }[] = [
   { value: "200+", label: "Companies covered" },
   { value: "3", label: "Interviewer personas" },
   { value: "4", label: "Score dimensions" },
-  { value: "90s", label: "To your first score" },
+  { value: "90s", label: "To your first score", highlight: true },
 ];
 
 export function Stats() {
@@ -19,10 +19,16 @@ export function Stats() {
                 key={stat.label}
                 className={`px-6 py-9 text-center sm:py-11 ${i < 2 ? "border-b border-gray-200/70 md:border-b-0" : ""}`}
               >
-                <p className="font-display text-[44px] font-semibold leading-none tracking-[-0.03em] text-gray-900 sm:text-[52px]">
+                <p
+                  className={`font-display text-[44px] font-extrabold leading-none tracking-[-0.035em] sm:text-[52px] ${
+                    stat.highlight ? "text-brand-600" : "text-gray-900"
+                  }`}
+                >
                   {stat.value}
                 </p>
-                <p className="mt-3 text-[13.5px] font-medium text-gray-500">{stat.label}</p>
+                <p className={`mt-3 text-[13.5px] font-medium ${stat.highlight ? "text-brand-700" : "text-gray-500"}`}>
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>

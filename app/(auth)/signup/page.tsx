@@ -50,7 +50,7 @@ export default function SignupPage() {
     return (
       <div className="w-full max-w-[380px] px-6">
         <div className="flex items-center justify-center gap-2.5">
-          <FolioMark className="h-8 w-8" color="#00F590" />
+          <FolioMark className="h-8 w-8 text-accent" />
           <span className="font-display text-xl font-semibold tracking-[-0.025em] text-text-primary">
             Folio
           </span>
@@ -72,7 +72,7 @@ export default function SignupPage() {
     <div className="w-full max-w-[380px] px-6">
       {/* Logo */}
       <div className="flex items-center justify-center gap-2.5">
-        <FolioMark className="h-8 w-8" color="#00F590" />
+        <FolioMark className="h-8 w-8 text-accent" />
         <span className="font-display text-xl font-semibold tracking-[-0.025em] text-text-primary">
           Folio
         </span>

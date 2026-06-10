@@ -67,11 +67,11 @@ export function FAQ() {
               <div key={i} className={i !== 0 ? "border-t border-gray-100" : ""}>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-gray-50/60"
+                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-canvas/60"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                   aria-expanded={isOpen}
                 >
-                  <span className="text-[15.5px] font-medium text-gray-900">{faq.question}</span>
+                  <span className="text-[15.5px] font-semibold tracking-[-0.01em] text-gray-900">{faq.question}</span>
                   <span
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
                       isOpen ? "rotate-45 border-brand bg-brand text-brand-ink" : "border-gray-200 text-gray-400"

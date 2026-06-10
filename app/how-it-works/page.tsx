@@ -60,7 +60,7 @@ export default function HowItWorksPage() {
         <Container className="py-20 text-center sm:py-28 lg:py-32">
           <ScrollReveal>
             <Eyebrow>How it works</Eyebrow>
-            <SectionHeading as="h1" className="mx-auto mt-5 max-w-[760px]">
+            <SectionHeading as="h1" className="mx-auto mt-5 max-w-[760px] font-extrabold">
               The interview, before the interview.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[600px]">
@@ -82,7 +82,7 @@ export default function HowItWorksPage() {
         <ScrollReveal>
           <div className="text-center">
             <Eyebrow>The live loop</Eyebrow>
-            <SectionHeading className="mt-4">One conversation. Four moving parts.</SectionHeading>
+            <SectionHeading className="mt-4 font-bold">One conversation. Four moving parts.</SectionHeading>
           </div>
         </ScrollReveal>
         <ScrollReveal className="mt-12">
@@ -119,8 +119,8 @@ export default function HowItWorksPage() {
             <ScrollReveal key={step.n}>
               <div className="grid items-center gap-8 md:grid-cols-2 lg:gap-16">
                 <div className={i % 2 === 1 ? "md:order-2" : ""}>
-                  <span className="font-display text-[15px] font-semibold text-brand-600">{step.n}</span>
-                  <h3 className="mt-2 text-balance font-display text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-gray-900 sm:text-[34px]">
+                  <span className="font-mono text-[13px] font-semibold tracking-[0.12em] text-brand-600">{step.n}</span>
+                  <h3 className="mt-2 text-balance font-display text-[28px] font-bold leading-[1.1] tracking-[-0.03em] text-gray-900 sm:text-[34px]">
                     {step.title}
                   </h3>
                   <p className="mt-4 max-w-[480px] text-[16px] leading-relaxed text-gray-600">{step.body}</p>
@@ -152,7 +152,7 @@ export default function HowItWorksPage() {
       <Section tone="tint">
         <Container className="text-center">
           <ScrollReveal>
-            <SectionHeading>Run your first session free.</SectionHeading>
+            <SectionHeading className="font-bold">Run your first session free.</SectionHeading>
             <Lede className="mx-auto mt-5 max-w-[460px]">
               Under 90 seconds to your first Folio Score. No credit card required.
             </Lede>

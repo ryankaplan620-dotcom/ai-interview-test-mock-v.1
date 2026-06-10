@@ -15,7 +15,7 @@ function Track() {
       {companies.map((name) => (
         <span
           key={name}
-          className="whitespace-nowrap font-display text-[19px] font-semibold tracking-[-0.02em] text-gray-400 sm:text-[22px]"
+          className="whitespace-nowrap font-display text-[19px] font-semibold tracking-[-0.02em] text-gray-500 sm:text-[22px]"
         >
           {name}
         </span>

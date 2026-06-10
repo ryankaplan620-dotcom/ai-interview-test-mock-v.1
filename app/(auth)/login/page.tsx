@@ -18,7 +18,7 @@ function LoginSkeleton() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-ink px-6">
       <div className="w-full max-w-[380px] text-center">
-        <FolioMark className="mx-auto h-8 w-8" color="#00F590" />
+        <FolioMark className="mx-auto h-8 w-8 text-accent" />
         <p className="mt-6 font-sans text-[15px] text-text-secondary">Loading...</p>
       </div>
     </div>
@@ -60,7 +60,7 @@ function LoginForm() {
       <div className="w-full max-w-[380px]">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5">
-          <FolioMark className="h-8 w-8" color="#00F590" />
+          <FolioMark className="h-8 w-8 text-accent" />
           <span className="font-display text-xl font-semibold tracking-[-0.025em] text-text-primary">
             Folio
           </span>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FolioMark } from "../FolioMark";
+import { FolioMark } from "@/components/FolioMark";
 
 const columns: { heading: string; links: { label: string; href: string }[] }[] = [
   {
@@ -37,21 +37,21 @@ const socials: { label: string; href: string }[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200/70 bg-canvas-tint" aria-label="Site footer">
+    <footer className="border-t border-white/[0.08] bg-ink" aria-label="Site footer">
       <div className="mx-auto max-w-[1200px] px-6 py-16 sm:px-8 sm:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           {/* Brand block */}
           <div className="max-w-[280px]">
             <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Folio home">
-              <FolioMark className="h-6 w-6" color="#00DC82" />
-              <span className="font-display text-[17px] font-semibold tracking-[-0.025em] text-gray-900">
+              <FolioMark className="h-6 w-6" color="#63D88A" />
+              <span className="font-display text-[17px] font-bold tracking-[-0.025em] text-white">
                 Folio
               </span>
             </Link>
-            <p className="mt-4 text-[14px] leading-relaxed text-gray-500">
+            <p className="mt-4 text-[14px] leading-relaxed text-text-secondary">
               Live voice interview practice, indistinguishable from the real thing.
             </p>
-            <p className="mt-5 font-serif text-[18px] italic text-brand-700">
+            <p className="mt-5 font-serif text-[18px] italic text-accent">
               Built to get you hired.
             </p>
           </div>
@@ -62,11 +62,11 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-16 flex flex-col items-start justify-between gap-5 border-t border-gray-200/70 pt-8 sm:flex-row sm:items-center">
+        <div className="mt-16 flex flex-col items-start justify-between gap-5 border-t border-white/[0.08] pt-8 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2.5">
-            <FolioMark className="h-4 w-4" color="#9CA3AF" />
-            <p className="font-mono text-[11px] tracking-[0.12em] text-gray-400">
-              © {new Date().getFullYear()} FOLIO, INC.
+            <FolioMark className="h-4 w-4" color="#6E7480" />
+            <p className="font-mono text-[11px] tracking-[0.12em] text-text-tertiary">
+              © {new Date().getFullYear()} FOLIO LABS
             </p>
           </div>
 
@@ -75,7 +75,7 @@ export function Footer() {
               <a
                 key={s.label}
                 href={s.href}
-                className="text-[13px] font-medium text-gray-500 transition-colors hover:text-gray-900"
+                className="text-[13px] font-medium text-text-secondary transition-colors hover:text-accent"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -98,7 +98,7 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">
+      <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
         {heading}
       </h3>
       <ul className="mt-5 space-y-3.5">
@@ -106,7 +106,7 @@ function FooterColumn({
           <li key={link.href}>
             <Link
               href={link.href}
-              className="inline-block text-[14.5px] text-gray-600 transition-colors duration-200 hover:text-gray-950"
+              className="inline-block text-[14.5px] text-text-secondary transition-colors duration-200 hover:text-accent"
             >
               {link.label}
             </Link>

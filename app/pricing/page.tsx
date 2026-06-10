@@ -25,7 +25,7 @@ export default async function PricingPage() {
       <Section tone="white" className="pt-20 pb-10 sm:pt-28 sm:pb-12 lg:pt-32">
         <div className="mx-auto max-w-[840px] text-center">
           <Eyebrow>Pricing</Eyebrow>
-          <SectionHeading as="h1" className="mt-5">
+          <SectionHeading as="h1" className="mt-5 font-extrabold">
             Built for the cycle.{" "}
             <span className="font-serif font-normal italic text-brand-600">Not the month.</span>
           </SectionHeading>
@@ -50,9 +50,9 @@ export default async function PricingPage() {
       {/* Overage explainer */}
       <section className="px-6 pb-16 sm:px-8">
         <div className="mx-auto max-w-[860px]">
-          <div className="rounded-2xl border border-gray-200/70 bg-gray-50 p-8 shadow-card sm:p-10">
+          <div className="rounded-2xl border border-gray-200/70 bg-canvas-tint p-8 shadow-card sm:p-10">
             <Eyebrow>When you need more</Eyebrow>
-            <h3 className="mt-3 text-[22px] font-semibold text-gray-900">Overage sessions</h3>
+            <h3 className="mt-3 font-display text-[22px] font-bold tracking-[-0.02em] text-gray-900">Overage sessions</h3>
             <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-gray-600">
               Hit your included-session limit before your cycle ends? Pay per session to keep
               going: $20 each on Basic and Pro, $15 each on Max. No forced upgrade, no subscription
@@ -65,7 +65,7 @@ export default async function PricingPage() {
       {/* FAQ */}
       <Section tone="white" className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-[760px]">
-          <h2 className="text-center font-display text-[30px] font-semibold tracking-[-0.03em] text-gray-900">
+          <h2 className="text-center font-display text-[30px] font-bold tracking-[-0.03em] text-gray-900">
             Common questions
           </h2>
           <div className="mt-12 space-y-8">

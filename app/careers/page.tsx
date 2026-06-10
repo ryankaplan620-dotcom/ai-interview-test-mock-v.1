@@ -45,7 +45,7 @@ export default function CareersPage() {
         <div className="mx-auto max-w-[760px] text-center">
           <ScrollReveal>
             <Eyebrow>Careers</Eyebrow>
-            <SectionHeading as="h1" className="mt-5">
+            <SectionHeading as="h1" className="mt-5 font-extrabold">
               Build the thing that gets{" "}
               <span className="font-serif font-normal italic text-brand-600">people hired.</span>
             </SectionHeading>
@@ -61,9 +61,9 @@ export default function CareersPage() {
       {/* Values */}
       <Section tone="tint">
         <ScrollReveal>
-          <p className="text-center font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-            How we work
-          </p>
+          <div className="text-center">
+            <Eyebrow>How we work</Eyebrow>
+          </div>
         </ScrollReveal>
         <div className="mx-auto mt-12 grid max-w-[1000px] gap-6 sm:grid-cols-3">
           {values.map((value, i) => (
@@ -82,7 +82,7 @@ export default function CareersPage() {
         <div className="mx-auto max-w-[760px]">
           <ScrollReveal>
             <Eyebrow>Open roles</Eyebrow>
-            <SectionHeading className="mt-4">Join the team.</SectionHeading>
+            <SectionHeading className="mt-4 font-bold">Join the team.</SectionHeading>
           </ScrollReveal>
           <div className="mt-10 space-y-3.5">
             {roles.map((role, i) => (
@@ -114,7 +114,7 @@ export default function CareersPage() {
       <Section tone="tint">
         <Container className="text-center">
           <ScrollReveal>
-            <SectionHeading>Don&apos;t see your role?</SectionHeading>
+            <SectionHeading className="font-bold">Don&apos;t see your role?</SectionHeading>
             <Lede className="mx-auto mt-5 max-w-[460px]">
               Reach out anyway. We are always looking for people who care about this problem.
             </Lede>

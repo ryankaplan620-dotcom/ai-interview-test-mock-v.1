@@ -112,7 +112,7 @@ export function Engines() {
                         <Eyebrow>{band.eyebrow}</Eyebrow>
                       </div>
 
-                      <h3 className="mt-5 text-balance font-display text-[30px] font-semibold leading-[1.1] tracking-[-0.03em] text-gray-900 sm:text-[38px]">
+                      <h3 className="mt-5 text-balance font-display text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-gray-900 sm:text-[38px]">
                         {band.heading.split(band.accentWord)[0]}
                         <span className="text-brand-600">{band.accentWord}</span>
                       </h3>

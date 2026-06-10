@@ -91,7 +91,7 @@ export default function ContactPage() {
         <Container className="py-20 text-center sm:py-24 lg:py-28">
           <ScrollReveal>
             <Eyebrow>Contact</Eyebrow>
-            <SectionHeading as="h1" className="mt-5">
+            <SectionHeading as="h1" className="mt-5 font-extrabold">
               Get in touch.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[540px]">

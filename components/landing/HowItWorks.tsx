@@ -39,7 +39,7 @@ export function HowItWorks() {
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 font-mono text-[15px] font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
                 {step.number}
               </div>
-              <h3 className="mt-6 text-[20px] font-semibold leading-snug tracking-[-0.01em] text-gray-900">
+              <h3 className="mt-6 font-display text-[20px] font-bold leading-snug tracking-[-0.02em] text-gray-900">
                 {step.title}
               </h3>
               <p className="mt-3 text-[15px] leading-relaxed text-gray-600">{step.body}</p>

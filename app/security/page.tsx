@@ -47,7 +47,7 @@ export default function SecurityPage() {
         <div className="mx-auto max-w-[760px] text-center">
           <ScrollReveal>
             <Eyebrow>Security</Eyebrow>
-            <SectionHeading as="h1" className="mt-5">
+            <SectionHeading as="h1" className="mt-5 font-extrabold">
               Built on trust.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[560px]">
@@ -64,7 +64,7 @@ export default function SecurityPage() {
           {cards.map((card, i) => (
             <ScrollReveal key={card.title} delay={i * 90}>
               <Card className="h-full p-7 sm:p-8">
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-brand-50 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-700">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-700">
                   {card.detail}
                 </span>
                 <h3 className="mt-3 text-[19px] font-semibold text-gray-900">{card.title}</h3>
@@ -80,7 +80,7 @@ export default function SecurityPage() {
         <div className="mx-auto max-w-[700px]">
           <ScrollReveal>
             <Eyebrow>Session privacy</Eyebrow>
-            <SectionHeading className="mt-4">
+            <SectionHeading className="mt-4 font-bold">
               What happens in the session stays in the session.
             </SectionHeading>
           </ScrollReveal>
@@ -110,7 +110,7 @@ export default function SecurityPage() {
         <Container className="text-center">
           <ScrollReveal>
             <Eyebrow>Responsible disclosure</Eyebrow>
-            <SectionHeading className="mt-4">Found something?</SectionHeading>
+            <SectionHeading className="mt-4 font-bold">Found something?</SectionHeading>
             <Lede className="mx-auto mt-5 max-w-[520px]">
               Security concerns? We take them seriously. Reach out and we will respond within 48
               hours.

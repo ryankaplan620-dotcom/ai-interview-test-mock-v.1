@@ -55,7 +55,7 @@ function QuoteCard() {
     <div className="mx-auto max-w-[720px] overflow-hidden rounded-2xl border border-gray-200/70 bg-white shadow-card">
       {/* Before */}
       <div className="p-8 sm:p-10">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400">
+        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">
           What you said
         </span>
         <p key={`before-${activeIndex}`} className="mt-3 text-[18px] italic leading-relaxed text-gray-400 transition-opacity duration-500">
@@ -74,7 +74,7 @@ function QuoteCard() {
 
       {/* After */}
       <div className="bg-gradient-to-b from-brand-50/50 to-white p-8 sm:p-10">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-700">
+        <span className="inline-flex items-center rounded-full bg-brand-100/70 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-700">
           The stronger version
         </span>
         <p key={`after-${activeIndex}`} className="mt-3 text-[18px] font-medium leading-relaxed text-gray-900 transition-opacity duration-500">

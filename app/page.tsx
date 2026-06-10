@@ -3,6 +3,7 @@ import { Hero } from "@/components/landing/Hero";
 import { LogoBar } from "@/components/landing/LogoBar";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { ProductDemo } from "@/components/landing/ProductDemo";
+import { Statement } from "@/components/landing/Statement";
 import { Engines } from "@/components/landing/Engines";
 import { FolioScore } from "@/components/landing/FolioScore";
 import { QuoteDemo } from "@/components/landing/QuoteDemo";
@@ -22,6 +23,7 @@ export default function LandingPage() {
       <LogoBar />
       <HowItWorks />
       <ProductDemo />
+      <Statement />
       <Engines />
       <FolioScore />
       <QuoteDemo />

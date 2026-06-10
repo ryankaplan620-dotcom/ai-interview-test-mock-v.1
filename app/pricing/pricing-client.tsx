@@ -89,30 +89,44 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                 key={tierId}
                 className={`relative flex flex-col rounded-2xl p-6 ${
                   isRecommended
-                    ? "border-2 border-brand bg-white shadow-card-hover lg:-mt-3 lg:pb-9"
+                    ? "bg-brand text-brand-ink shadow-brand-glow lg:-mt-3 lg:pb-9"
                     : "border border-gray-200/70 bg-white shadow-card"
                 }`}
               >
                 {isRecommended && (
-                  <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-brand-ink">
+                  <span className="absolute -top-3 left-6 rounded-full bg-brand-ink px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-white">
                     MOST POPULAR
                   </span>
                 )}
 
                 <div>
-                  <h3 className="text-[20px] font-semibold text-gray-900">{tier.label}</h3>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-gray-500">{tier.features[0]}</p>
+                  <h3 className={`text-[20px] font-semibold ${isRecommended ? "text-brand-ink" : "text-gray-900"}`}>
+                    {tier.label}
+                  </h3>
+                  <p className={`mt-1.5 text-[13px] leading-relaxed ${isRecommended ? "text-brand-ink/70" : "text-gray-500"}`}>
+                    {tier.features[0]}
+                  </p>
                 </div>
 
                 <div className="mt-6">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-display text-[38px] font-semibold tracking-[-0.03em] text-gray-900">
+                    <span
+                      className={`font-display text-[38px] font-bold tracking-[-0.03em] ${
+                        isRecommended ? "text-brand-ink" : "text-gray-900"
+                      }`}
+                    >
                       {formatPrice(tier.priceUsd)}
                     </span>
-                    <span className="text-[13px] text-gray-400">/ {tier.billing.label.toLowerCase()}</span>
+                    <span className={`text-[13px] ${isRecommended ? "text-brand-ink/60" : "text-gray-400"}`}>
+                      / {tier.billing.label.toLowerCase()}
+                    </span>
                   </div>
                   {!unlimited && (
-                    <p className="mt-2 font-mono text-[11px] tracking-[0.1em] text-gray-400">
+                    <p
+                      className={`mt-2 font-mono text-[11px] tracking-[0.1em] ${
+                        isRecommended ? "text-brand-ink/60" : "text-gray-400"
+                      }`}
+                    >
                       AS LOW AS ${perSession.toFixed(2)} / SESSION
                     </p>
                   )}
@@ -127,38 +141,70 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                   onClick={() => handlePurchase(tierId)}
                   disabled={isCurrent || loadingTier === tierId}
                   className={`mt-6 inline-flex h-11 items-center justify-center rounded-xl text-[14px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    isRecommended
-                      ? "bg-brand text-brand-ink shadow-brand-glow hover:bg-brand-600"
-                      : isCurrent
-                        ? "border border-gray-200 bg-white text-gray-400"
-                        : "border border-gray-200 bg-white text-gray-900 hover:border-gray-300 hover:bg-gray-50"
+                    isCurrent
+                      ? isRecommended
+                        ? "border border-brand-ink/20 bg-white/30 text-brand-ink/70"
+                        : "border border-gray-200 bg-white text-gray-400"
+                      : isRecommended
+                        ? "bg-brand-ink text-white hover:bg-ink-raised"
+                        : "bg-brand text-brand-ink shadow-brand-glow hover:bg-brand-600"
                   }`}
                 >
                   {buttonLabel}
                 </button>
 
                 {/* Included sessions block */}
-                <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3.5">
-                  <p className="font-mono text-[10px] font-semibold tracking-[0.12em] text-gray-400">INCLUDED</p>
-                  <p className="mt-1 font-display text-[20px] font-semibold text-gray-900">
+                <div
+                  className={`mt-6 rounded-xl px-4 py-3.5 ${
+                    isRecommended ? "border border-brand-ink/10 bg-white/25" : "border border-gray-100 bg-gray-50"
+                  }`}
+                >
+                  <p
+                    className={`font-mono text-[10px] font-semibold tracking-[0.12em] ${
+                      isRecommended ? "text-brand-ink/60" : "text-gray-400"
+                    }`}
+                  >
+                    INCLUDED
+                  </p>
+                  <p
+                    className={`mt-1 font-display text-[20px] font-semibold ${
+                      isRecommended ? "text-brand-ink" : "text-gray-900"
+                    }`}
+                  >
                     {unlimited ? "Unlimited interviews" : `${tier.allotments.interviewSessions} full interviews`}
                   </p>
-                  <p className="mt-1 text-[12px] text-gray-500">+ unlimited drill practice</p>
+                  <p className={`mt-1 text-[12px] ${isRecommended ? "text-brand-ink/70" : "text-gray-500"}`}>
+                    + unlimited drill practice
+                  </p>
                   {!unlimited && (
-                    <p className="mt-2 text-[11.5px] leading-relaxed text-gray-400">
+                    <p
+                      className={`mt-2 text-[11.5px] leading-relaxed ${
+                        isRecommended ? "text-brand-ink/60" : "text-gray-400"
+                      }`}
+                    >
                       Need more? ${tier.overage.sessionPriceUsd} per overage session.
                     </p>
                   )}
                 </div>
 
-                <ul className="mt-6 space-y-2.5 border-t border-gray-100 pt-5">
+                <ul
+                  className={`mt-6 space-y-2.5 border-t pt-5 ${
+                    isRecommended ? "border-brand-ink/10" : "border-gray-100"
+                  }`}
+                >
                   {FEATURE_ROWS.map((row) => {
                     const included = tierHasFeature(tierId, row.feature);
                     return (
                       <li key={row.feature} className="flex items-start gap-2.5">
                         <span
                           className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center ${
-                            included ? "text-brand-600" : "text-gray-300"
+                            included
+                              ? isRecommended
+                                ? "text-brand-ink"
+                                : "text-brand-600"
+                              : isRecommended
+                                ? "text-brand-ink/30"
+                                : "text-gray-300"
                           }`}
                           aria-hidden
                         >
@@ -166,7 +212,13 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                         </span>
                         <span
                           className={`text-[12.5px] leading-relaxed ${
-                            included ? "text-gray-800" : "text-gray-400"
+                            included
+                              ? isRecommended
+                                ? "text-brand-ink/90"
+                                : "text-gray-800"
+                              : isRecommended
+                                ? "text-brand-ink/45"
+                                : "text-gray-400"
                           }`}
                         >
                           {row.label}

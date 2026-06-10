@@ -23,7 +23,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-6 sm:px-10">
           <div className="flex items-center gap-10">
             <Link href="/dashboard" className="inline-flex items-center gap-2.5">
-              <FolioMark className="h-6 w-6" color="#00F590" />
+              <FolioMark className="h-6 w-6 text-accent" />
               <span className="font-display text-lg font-semibold tracking-[-0.025em] text-text-primary">
                 Folio
               </span>

@@ -33,7 +33,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-[760px] text-center">
           <ScrollReveal>
             <Eyebrow>About</Eyebrow>
-            <SectionHeading as="h1" className="mt-5">
+            <SectionHeading as="h1" className="mt-5 font-extrabold">
               Built to get you hired.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[600px]">
@@ -51,7 +51,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-[700px]">
           <ScrollReveal>
             <Eyebrow>Why we exist</Eyebrow>
-            <SectionHeading className="mt-4">Interview prep is broken.</SectionHeading>
+            <SectionHeading className="mt-4 font-bold">Interview prep is broken.</SectionHeading>
           </ScrollReveal>
           <div className="mt-9 space-y-6 text-[16.5px] leading-[1.75] text-gray-600">
             {paragraphs.map((p, i) => (
@@ -66,14 +66,14 @@ export default function AboutPage() {
       {/* By the numbers */}
       <Section tone="tint">
         <ScrollReveal>
-          <p className="text-center font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-            By the numbers
-          </p>
+          <div className="text-center">
+            <Eyebrow>By the numbers</Eyebrow>
+          </div>
         </ScrollReveal>
         <div className="mt-12 grid grid-cols-2 gap-y-10 text-center md:grid-cols-4">
           {stats.map((stat, i) => (
             <ScrollReveal key={stat.label} delay={i * 100}>
-              <p className="font-display text-[48px] font-semibold leading-none tracking-[-0.03em] text-gray-900">
+              <p className="font-display text-[48px] font-bold leading-none tracking-[-0.03em] text-gray-900">
                 {stat.value}
               </p>
               <div className="mx-auto mt-3 h-[2px] w-10 bg-brand" aria-hidden />
@@ -87,7 +87,7 @@ export default function AboutPage() {
       <Section tone="white">
         <Container className="text-center">
           <ScrollReveal>
-            <SectionHeading>Ready to practice?</SectionHeading>
+            <SectionHeading className="font-bold">Ready to practice?</SectionHeading>
             <Lede className="mx-auto mt-5 max-w-[440px]">
               Under 90 seconds to your first Folio Score. No credit card.
             </Lede>

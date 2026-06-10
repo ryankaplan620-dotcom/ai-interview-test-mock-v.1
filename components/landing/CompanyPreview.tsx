@@ -1,5 +1,5 @@
 import { ScrollReveal } from "./ScrollReveal";
-import { Section, Eyebrow, SectionHeading, Lede, ArrowLink } from "@/components/marketing/ui";
+import { Section, SectionHeading, Lede, ArrowLink } from "@/components/marketing/ui";
 
 const companies = [
   { name: "Google", count: 67 },
@@ -17,7 +17,10 @@ export function CompanyPreview() {
   return (
     <Section tone="white">
       <ScrollReveal>
-        <Eyebrow>Company intelligence</Eyebrow>
+        {/* Violet is reserved for "intelligence" statements — this is one. */}
+        <span className="text-gradient-violet font-mono text-[12px] font-semibold uppercase tracking-[0.18em]">
+          Company intelligence
+        </span>
         <SectionHeading className="mt-4">Prepared for any room.</SectionHeading>
         <Lede className="mt-5 max-w-[600px]">
           200+ companies across every industry. Behavioral, technical, case, and general
@@ -33,7 +36,7 @@ export function CompanyPreview() {
                 {company.name.charAt(0)}
               </span>
               <div className="min-w-0 flex-1">
-                <span className="block truncate text-[14.5px] font-semibold text-gray-900">
+                <span className="block truncate text-[14.5px] font-semibold tracking-[-0.01em] text-gray-900">
                   {company.name}
                 </span>
                 <p className="mt-0.5 font-mono text-[11px] text-gray-400">{company.count} questions</p>
