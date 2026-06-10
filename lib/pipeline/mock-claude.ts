@@ -22,33 +22,23 @@ interface MockResponseInput {
 }
 
 const OPENINGS: Record<PersonaId, (firstName: string) => string> = {
-  priya: (n) =>
-    `Hi${n ? `, ${n}` : ""}. I'm Priya. Thanks for making time. Before we get started, walk me through your resume in about two minutes.`,
-  marcus: () =>
-    `Hi, I'm Marcus. Walk me through your story. Ninety seconds.`,
+  gemma: (n) =>
+    `Thanks for making the time${n ? `, ${n}` : ""}. I'm Gemma, I run hiring for our summer internship program. Let's keep this more of a conversation than an interrogation — so, to start: what drew you to this?`,
   sarah: (n) =>
     `Hey${n ? `, ${n}` : ""}, I'm Sarah. Great to meet you. Before we get into the problem, tell me a little about yourself and what you've been working on lately.`,
 };
 
 // Per-persona, per-turn response bank. Mocks rotate through these after the opening.
 const FOLLOWUPS: Record<PersonaId, string[]> = {
-  priya: [
-    "Got it. You mentioned that project — why that one, and not something else?",
-    "Can you give me a specific example of that?",
-    "How did you measure whether it worked?",
-    "Interesting. Tell me about a time you disagreed with a teammate. How did you handle it?",
-    "What would you do differently if you could replay that?",
-    "Okay. I want to pause you there — what's the one thing you'd point to?",
-    "Last question: what's something you've changed your mind about in the last year?",
-  ],
-  marcus: [
-    "Got it. Next: why banking. Why Goldman.",
-    "Who have you talked to here? What did they tell you that stuck?",
-    "How do the three financial statements link?",
-    "If depreciation increases by ten, what happens to free cash flow at a 25% tax rate?",
-    "Bottom line it. What's your weakness on the technical side?",
-    "Tell me about a time you worked under a tight deadline.",
-    "Alright. Two questions from you. Make them count.",
+  gemma: [
+    "So why commercial real estate? And why investment sales specifically, over something like banking or consulting?",
+    "Tell me about a time you got told no, over and over, and kept going anyway.",
+    "Be honest with me — did you actually enjoy that, or were you just pushing through it?",
+    "When's the last time someone gave you tough feedback? What'd you do with it?",
+    "Quick one: an owner tells you flat out they're not selling. What do you say next?",
+    "This job is straight commission, and the first year is mostly cold-calling with no guarantee. How does that sit with you?",
+    "What have you done on your own to learn about this business?",
+    "Alright — what do you want to ask me?",
   ],
   sarah: [
     "Cool. Before I give you the problem — any technical area you've been excited about lately?",
@@ -62,8 +52,7 @@ const FOLLOWUPS: Record<PersonaId, string[]> = {
 };
 
 const WRAPUP: Record<PersonaId, string> = {
-  priya: "Thanks for taking the time. You'll hear from recruiting in the next few days.",
-  marcus: "Alright. That's our time. Thanks.",
+  gemma: "This was a good conversation — thanks for the time. We'll follow up on next steps soon. Take care.",
   sarah: "Thanks so much for chatting today. The team will be in touch.",
 };
 

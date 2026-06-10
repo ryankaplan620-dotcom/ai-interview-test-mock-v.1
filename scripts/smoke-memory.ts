@@ -33,7 +33,7 @@ function assert(cond: unknown, label: string) {
 function makeMemory(partial: Partial<MemoryNote>): MemoryNote {
   return {
     id: "mem-1",
-    persona: "priya",
+    persona: "sarah",
     memory_text: "Default memory text.",
     category: "default",
     confidence: 3,

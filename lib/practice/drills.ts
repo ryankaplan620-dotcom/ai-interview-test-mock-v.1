@@ -1,13 +1,9 @@
 /**
  * Drill registry.
  *
- * Engine 2 is content-driven — drill types define their own rubrics, prompts,
- * and config shapes here. Adding a new drill type (pause coaching, 60s pitch,
- * pushback handling) is a pure content addition: register the drill, add its
- * feedback prompt to lib/practice/feedback.ts, ship.
- *
- * MVP ships story_polishing only. Others are stubbed with metadata so the
- * picker UI can show "coming soon" tiles.
+ * Two drill types ship today: pitch_60s and pushback_drill. Each defines its
+ * own prompt library + rubric. Adding a new drill type is content-only:
+ * register it here, add its feedback tool to lib/practice/feedback.ts.
  */
 
 import type { DrillType } from "@/types/supabase";
@@ -22,36 +18,25 @@ export interface DrillTypeConfig {
   shortName: string;
   tagline: string;
   description: string;
-  /** How many attempts per drill session. story_polishing = 5. */
+  /** How many attempts per drill session. */
   targetAttempts: number;
   /** Max seconds per attempt. */
   maxAttemptSeconds: number;
-  /** Is this drill type shipped in MVP? False = "coming soon" tile. */
+  /** Is this drill type shipped? False = "coming soon" tile. */
   available: boolean;
 }
 
 export const DRILL_TYPES: Record<DrillType, DrillTypeConfig> = {
-  story_polishing: {
-    id: "story_polishing",
-    name: "Story polishing",
-    shortName: "Story",
-    tagline: "Rehearse one answer until it's automatic.",
-    description:
-      "Pick a behavioral question. Answer it five times in a row. Between attempts, see what's working and what needs sharpening. By the fifth rep, your answer should land cleanly without thinking.",
-    targetAttempts: 5,
-    maxAttemptSeconds: 180,
-    available: true,
-  },
   pitch_60s: {
     id: "pitch_60s",
     name: "60-second pitch",
     shortName: "Pitch",
-    tagline: "Your resume walkthrough in exactly one minute.",
+    tagline: "Your story in exactly one minute.",
     description:
-      "One shot. Sixty seconds. Clear hook, clear story, clear landing. We measure how much of the minute you use and whether your core message survives the compression.",
+      "One shot. Sixty seconds. A clean hook, a clear through-line, a confident landing. We measure how much of the minute you use and whether your core signal survives the compression.",
     targetAttempts: 1,
-    maxAttemptSeconds: 75, // 60 + small grace for cutoff
-    available: false,
+    maxAttemptSeconds: 75, // 60 + grace for cutoff
+    available: true,
   },
   pause_drill: {
     id: "pause_drill",
@@ -70,101 +55,188 @@ export const DRILL_TYPES: Record<DrillType, DrillTypeConfig> = {
     shortName: "Pushback",
     tagline: "Hold your ground when the interviewer challenges.",
     description:
-      "Answer. Then get pushed on it. Defend, adjust, or concede — what you do under real-time pressure is what the final round tests.",
-    targetAttempts: 5,
-    maxAttemptSeconds: 120,
-    available: false,
+      "You'll see a question and the pushback you'll get on your answer. Deliver both back-to-back — the answer, then your recovery. What you do under real-time pressure is what the final round actually tests.",
+    targetAttempts: 1,
+    maxAttemptSeconds: 180,
+    available: true,
   },
 };
 
 // --------------------------------------------------------------------------
-// Story polishing prompt library
+// 60-second pitch prompts
 // --------------------------------------------------------------------------
 
-export interface StoryPolishingPrompt {
+export type PitchCategory = "opener" | "transition" | "fit" | "pitch";
+
+export interface Pitch60sPrompt {
   id: string;
   text: string;
-  /** Grouping for filter UI. */
-  category: "leadership" | "conflict" | "failure" | "achievement" | "why" | "weakness";
-  /** What good answers to this question do well — shown as brief guidance before first attempt. */
+  category: PitchCategory;
   whatItsLookingFor: string;
 }
 
-export const STORY_POLISHING_PROMPTS: StoryPolishingPrompt[] = [
+export const PITCH_60S_PROMPTS: Pitch60sPrompt[] = [
   {
-    id: "lead_team",
-    text: "Tell me about a time you led a team through a difficult situation.",
-    category: "leadership",
+    id: "tmay",
+    text: "Tell me about yourself.",
+    category: "opener",
     whatItsLookingFor:
-      "A specific team, a specific difficulty, what you did differently because you were leading, and the outcome. Not just 'we worked hard' — what decisions did you own?",
+      "A clean three-beat arc: where you are now, what brought you here, why you're sitting in this room. Most candidates over-narrate the chronology — cut straight to the relevant signal.",
   },
   {
-    id: "disagreement",
-    text: "Tell me about a time you had a disagreement with a teammate or manager.",
-    category: "conflict",
+    id: "walk_resume",
+    text: "Walk me through your resume.",
+    category: "opener",
     whatItsLookingFor:
-      "The other person's position before your own. What the disagreement actually was about. How you resolved it without the other person becoming the villain of your story.",
+      "Not item-by-item — pick the through-line that connects your roles and frame each as a step on that line. Skip whatever doesn't fit the line.",
   },
   {
-    id: "failure",
-    text: "Tell me about a time you failed.",
-    category: "failure",
+    id: "why_now",
+    text: "Why are you making this move now?",
+    category: "transition",
     whatItsLookingFor:
-      "A real failure, not a humblebrag. What you thought would happen, what actually happened, and what you changed afterward. The interviewer wants to see accountability without self-flagellation.",
+      "A specific push (what you've outgrown) and a specific pull (what this role offers that nothing else does). Avoid generic 'looking for new challenges' language.",
   },
   {
-    id: "proud",
-    text: "What's the accomplishment you're most proud of?",
-    category: "achievement",
+    id: "best_work",
+    text: "Tell me about the work you've done that's most relevant for this role.",
+    category: "fit",
     whatItsLookingFor:
-      "Not the biggest thing on your resume — the one that took the most from you. Specificity about what you actually did. Why this one, not others.",
+      "One specific project that maps directly to what the role requires. Concrete about your role, the stakes, the outcome. Resist the temptation to list three.",
   },
   {
-    id: "why_firm",
-    text: "Why this firm?",
-    category: "why",
+    id: "elevator",
+    text: "If we had 60 seconds in an elevator — who are you and why should I hire you?",
+    category: "pitch",
     whatItsLookingFor:
-      "One concrete thing the firm does that you can't get elsewhere. Names, deals, projects — not values-statement language. Don't repeat their marketing copy back to them.",
+      "Compress yourself to a single sentence of identity, then earn it with one credibility example. Most candidates skip the identity claim — don't.",
   },
   {
-    id: "why_role",
-    text: "Why this role?",
-    category: "why",
+    id: "pivot",
+    text: "Tell me how you got from your background to wanting this role.",
+    category: "transition",
     whatItsLookingFor:
-      "Connection between your actual background and what the role requires. Not 'I love the work' — what specifically about your experience has prepared you for this specific job.",
-  },
-  {
-    id: "weakness",
-    text: "What's your biggest weakness?",
-    category: "weakness",
-    whatItsLookingFor:
-      "An actual weakness, not a humblebrag ('I care too much'). What you've done about it with evidence of progress. Self-awareness beats fake humility.",
-  },
-  {
-    id: "conflict_hard",
-    text: "Tell me about a time you had to tell someone their work wasn't good enough.",
-    category: "conflict",
-    whatItsLookingFor:
-      "Direct language about what you said. The other person's reaction. What happened after. Most candidates soften this into unrecognizability — don't.",
-  },
-  {
-    id: "outside_comfort",
-    text: "Tell me about a time you stepped outside your comfort zone.",
-    category: "achievement",
-    whatItsLookingFor:
-      "What the comfort zone was. Why stepping out was uncomfortable specifically for you. What changed in you afterward, not just in the outcome.",
-  },
-  {
-    id: "change_mind",
-    text: "Tell me about a time you changed your mind on something important.",
-    category: "leadership",
-    whatItsLookingFor:
-      "Your original position. The specific thing that changed your mind. How you think about that topic now. Shows intellectual honesty — rarer than candidates think.",
+      "Treat your background as an asset that translates — name the transferable skills explicitly. Don't apologize for the pivot. Frame it as a deliberate move.",
   },
 ];
 
-export function getStoryPolishingPrompt(id: string): StoryPolishingPrompt | null {
-  return STORY_POLISHING_PROMPTS.find((p) => p.id === id) ?? null;
+export function getPitch60sPrompt(id: string): Pitch60sPrompt | null {
+  return PITCH_60S_PROMPTS.find((p) => p.id === id) ?? null;
+}
+
+// --------------------------------------------------------------------------
+// Pushback prompts
+// --------------------------------------------------------------------------
+
+export type PushbackCategory = "behavioral" | "case" | "fit" | "product";
+
+export interface PushbackPrompt {
+  id: string;
+  /** The opening question. */
+  initial: string;
+  /** The challenge the interviewer delivers after the candidate answers. */
+  pushback: string;
+  category: PushbackCategory;
+  whatItsLookingFor: string;
+}
+
+export const PUSHBACK_PROMPTS: PushbackPrompt[] = [
+  {
+    id: "weakness_dismissive",
+    initial: "What's your biggest weakness?",
+    pushback: "That sounds like a strength dressed up as a weakness. What's a real one?",
+    category: "behavioral",
+    whatItsLookingFor:
+      "Concede the framing fast. Don't fight it. Have a genuine second answer ready — a real weakness with evidence of active work on it. The recovery is the whole point.",
+  },
+  {
+    id: "team_credit",
+    initial: "Tell me about your biggest accomplishment.",
+    pushback: "It sounds like your team did most of that work. What did you specifically do?",
+    category: "behavioral",
+    whatItsLookingFor:
+      "Don't get defensive. Acknowledge the team explicitly. Then name two or three specific decisions or actions that were uniquely yours. Specificity beats insistence.",
+  },
+  {
+    id: "market_size_off",
+    initial: "Estimate the size of the US coffee market.",
+    pushback: "Your number is twice the actual figure. Which assumption is wrong?",
+    category: "case",
+    whatItsLookingFor:
+      "Don't defend the number. Walk back to your assumptions, name which is most likely overstated, and re-estimate live. Show the math repair, not the math defense.",
+  },
+  {
+    id: "design_critique",
+    initial: "Walk me through your approach to this product decision.",
+    pushback: "I'm not convinced — that approach would have failed at scale. What did you miss?",
+    category: "product",
+    whatItsLookingFor:
+      "Treat it as a real critique, not a test of resolve. Name what could have failed, weigh whether you'd actually change the call, then commit — either to an updated position or to holding the original with new evidence.",
+  },
+  {
+    id: "fit_doubt",
+    initial: "Why do you want to work here?",
+    pushback: "You could give that same answer to any firm. Why us specifically?",
+    category: "fit",
+    whatItsLookingFor:
+      "Concede the critique. Have a specific second answer — something only this firm has, in your own words. The interviewer is testing whether you actually researched the firm or just the role.",
+  },
+  {
+    id: "failure_softball",
+    initial: "Tell me about a time you failed.",
+    pushback: "That sounds like a learning experience, not a failure. When did something actually go wrong?",
+    category: "behavioral",
+    whatItsLookingFor:
+      "Pivot to a genuine failure with real downside — lost opportunity, broken trust, bad outcome. Show accountability without spiraling. The recovery line matters more than the failure itself.",
+  },
+  {
+    id: "case_recommend",
+    initial: "Based on what you've seen, what would you recommend the CEO do?",
+    pushback: "I asked for a recommendation, not a list of options. Pick one and defend it.",
+    category: "case",
+    whatItsLookingFor:
+      "Commit to a single recommendation. Acknowledge what you're trading off by picking it. Defending one clear call beats hedging across three.",
+  },
+  {
+    id: "leadership_easy",
+    initial: "Tell me about a time you led a team.",
+    pushback: "That sounds like coordination, not leadership. When did you actually have to influence people who disagreed with you?",
+    category: "behavioral",
+    whatItsLookingFor:
+      "Take the distinction seriously — coordination is not leadership. Either swap in a different example or reframe the same one around the influence moment, not the orchestration.",
+  },
+];
+
+export function getPushbackPrompt(id: string): PushbackPrompt | null {
+  return PUSHBACK_PROMPTS.find((p) => p.id === id) ?? null;
+}
+
+// --------------------------------------------------------------------------
+// Cross-drill prompt lookup (for the [id] page)
+// --------------------------------------------------------------------------
+
+export interface ResolvedPromptMeta {
+  text: string;
+  whatItsLookingFor: string;
+  /** Present only for pushback drills. */
+  pushback: string | null;
+}
+
+export function resolvePromptMeta(
+  drillType: DrillType,
+  promptId: string,
+): ResolvedPromptMeta | null {
+  if (drillType === "pitch_60s") {
+    const p = getPitch60sPrompt(promptId);
+    if (!p) return null;
+    return { text: p.text, whatItsLookingFor: p.whatItsLookingFor, pushback: null };
+  }
+  if (drillType === "pushback_drill") {
+    const p = getPushbackPrompt(promptId);
+    if (!p) return null;
+    return { text: p.initial, whatItsLookingFor: p.whatItsLookingFor, pushback: p.pushback };
+  }
+  return null;
 }
 
 // --------------------------------------------------------------------------

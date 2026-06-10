@@ -1,8 +1,7 @@
-import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
-import { DRILL_TYPES, getStoryPolishingPrompt } from "@/lib/practice/drills";
+import { DRILL_TYPES, resolvePromptMeta } from "@/lib/practice/drills";
 import { shouldMock } from "@/lib/pipeline/env";
 import type { DrillType, DrillStatus } from "@/types/supabase";
 import { PracticeView } from "./practice-view";
@@ -38,10 +37,6 @@ export default async function DrillRoomPage({ params }: PageProps) {
 
   if (!drill || drill.user_id !== user.id) notFound();
 
-  // Terminal drills — send to the completion screen within practice-view
-  // (practice-view handles the "drill done" state via prior attempts)
-
-  // Load prior attempts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: attemptsRaw } = await (supabase.from("drill_attempts") as any)
     .select("*")
@@ -68,9 +63,7 @@ export default async function DrillRoomPage({ params }: PageProps) {
   const drillConfig = DRILL_TYPES[drill.drill_type];
   if (!drillConfig) notFound();
 
-  // Story polishing specific — load prompt metadata for "what it's looking for" guidance
-  const promptMeta =
-    drill.drill_type === "story_polishing" ? getStoryPolishingPrompt(drill.prompt_id) : null;
+  const promptMeta = resolvePromptMeta(drill.drill_type, drill.prompt_id);
 
   return (
     <PracticeView
@@ -83,6 +76,7 @@ export default async function DrillRoomPage({ params }: PageProps) {
         targetAttempts: drillConfig.targetAttempts,
         maxAttemptSeconds: drillConfig.maxAttemptSeconds,
         whatItsLookingFor: promptMeta?.whatItsLookingFor ?? null,
+        pushback: promptMeta?.pushback ?? null,
       }}
       attempts={attempts}
       mockMode={shouldMock("deepgram") || shouldMock("claude")}

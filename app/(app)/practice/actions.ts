@@ -6,12 +6,13 @@ import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import {
   DRILL_TYPES,
-  getStoryPolishingPrompt,
+  getPitch60sPrompt,
+  getPushbackPrompt,
   isDrillTypeAvailable,
 } from "@/lib/practice/drills";
 
 const StartDrillInput = z.object({
-  drillType: z.enum(["story_polishing", "pitch_60s", "pause_drill", "pushback_drill"]),
+  drillType: z.enum(["pitch_60s", "pause_drill", "pushback_drill"]),
   promptId: z.string().min(1).max(100),
 });
 
@@ -34,12 +35,18 @@ export async function startDrill(input: z.infer<typeof StartDrillInput>): Promis
 
   const drillConfig = DRILL_TYPES[drillType];
 
-  // Resolve the prompt text from the registry based on drill type
+  // Resolve the prompt text from the registry based on drill type.
+  // For pushback drills, prompt_text stores the initial question; the pushback
+  // line lives in the prompt registry and is re-resolved at render time.
   let promptText: string;
-  if (drillType === "story_polishing") {
-    const prompt = getStoryPolishingPrompt(promptId);
+  if (drillType === "pitch_60s") {
+    const prompt = getPitch60sPrompt(promptId);
     if (!prompt) return { ok: false, error: "unknown_prompt" };
     promptText = prompt.text;
+  } else if (drillType === "pushback_drill") {
+    const prompt = getPushbackPrompt(promptId);
+    if (!prompt) return { ok: false, error: "unknown_prompt" };
+    promptText = prompt.initial;
   } else {
     return { ok: false, error: "drill_type_not_implemented" };
   }
@@ -74,7 +81,6 @@ export async function startDrill(input: z.infer<typeof StartDrillInput>): Promis
 export async function startDrillAndRedirect(input: z.infer<typeof StartDrillInput>) {
   const result = await startDrill(input);
   if (!result.ok) {
-    // Redirect back to picker with error (handled as simple query param)
     redirect(`/practice?error=${encodeURIComponent(result.error)}`);
   }
   redirect(`/practice/${result.drillId}`);
@@ -97,7 +103,7 @@ export async function abandonDrill(drillId: string): Promise<{ ok: boolean }> {
 
   const drill = drillRaw as { id: string; user_id: string; status: string } | null;
   if (!drill || drill.user_id !== user.id) return { ok: false };
-  if (drill.status !== "in_progress") return { ok: true }; // already terminal
+  if (drill.status !== "in_progress") return { ok: true };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase.from("drills") as any)

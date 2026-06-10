@@ -30,22 +30,17 @@
  * Run: npx tsx scripts/stress-personas.ts
  */
 
-import { PRIYA_CORE_IDENTITY, PRIYA_SELF_INTRODUCTION_TEMPLATE, PRIYA_DIFFICULTY_OVERLAYS } from "../lib/personas/prompts/priya";
-import { MARCUS_CORE_IDENTITY, MARCUS_SELF_INTRODUCTION_TEMPLATE, MARCUS_DIFFICULTY_OVERLAYS } from "../lib/personas/prompts/marcus";
 import { SARAH_CORE_IDENTITY, SARAH_SELF_INTRODUCTION_TEMPLATE, SARAH_DIFFICULTY_OVERLAYS } from "../lib/personas/prompts/sarah";
+import { GEMMA_CORE_IDENTITY, GEMMA_SELF_INTRODUCTION_TEMPLATE, GEMMA_DIFFICULTY_OVERLAYS } from "../lib/personas/prompts/gemma";
 
-const PRIYA_BASE_PROMPT = PRIYA_CORE_IDENTITY;
-const PRIYA_EASY_OVERLAY = PRIYA_DIFFICULTY_OVERLAYS.easy;
-const PRIYA_HARD_OVERLAY = PRIYA_DIFFICULTY_OVERLAYS.hard;
-const PRIYA_OPENING = PRIYA_SELF_INTRODUCTION_TEMPLATE;
-const MARCUS_BASE_PROMPT = MARCUS_CORE_IDENTITY;
-const MARCUS_EASY_OVERLAY = MARCUS_DIFFICULTY_OVERLAYS.easy;
-const MARCUS_HARD_OVERLAY = MARCUS_DIFFICULTY_OVERLAYS.hard;
-const MARCUS_OPENING = MARCUS_SELF_INTRODUCTION_TEMPLATE;
 const SARAH_BASE_PROMPT = SARAH_CORE_IDENTITY;
 const SARAH_EASY_OVERLAY = SARAH_DIFFICULTY_OVERLAYS.easy;
 const SARAH_HARD_OVERLAY = SARAH_DIFFICULTY_OVERLAYS.hard;
 const SARAH_OPENING = SARAH_SELF_INTRODUCTION_TEMPLATE;
+const GEMMA_BASE_PROMPT = GEMMA_CORE_IDENTITY;
+const GEMMA_EASY_OVERLAY = GEMMA_DIFFICULTY_OVERLAYS.easy;
+const GEMMA_HARD_OVERLAY = GEMMA_DIFFICULTY_OVERLAYS.hard;
+const GEMMA_OPENING = GEMMA_SELF_INTRODUCTION_TEMPLATE;
 
 interface PersonaBundle {
   id: string;
@@ -57,9 +52,8 @@ interface PersonaBundle {
 }
 
 const PERSONAS: PersonaBundle[] = [
-  { id: "priya", name: "Priya Patel",    base: PRIYA_BASE_PROMPT,    easy: PRIYA_EASY_OVERLAY,    hard: PRIYA_HARD_OVERLAY,    opening: PRIYA_OPENING },
-  { id: "marcus", name: "Marcus Hale",   base: MARCUS_BASE_PROMPT,   easy: MARCUS_EASY_OVERLAY,   hard: MARCUS_HARD_OVERLAY,   opening: MARCUS_OPENING },
   { id: "sarah", name: "Sarah Chen",     base: SARAH_BASE_PROMPT,    easy: SARAH_EASY_OVERLAY,    hard: SARAH_HARD_OVERLAY,    opening: SARAH_OPENING },
+  { id: "gemma", name: "Gemma Brooks",   base: GEMMA_BASE_PROMPT,    easy: GEMMA_EASY_OVERLAY,    hard: GEMMA_HARD_OVERLAY,    opening: GEMMA_OPENING },
 ];
 
 // --------------------------------------------------------------------------

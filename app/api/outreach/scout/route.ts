@@ -31,20 +31,46 @@ export async function POST(req: NextRequest) {
       requestId: crypto.randomUUID(),
     });
 
-    // Try to insert into outreach_contacts. If the table has different columns,
-    // catch the error and return contacts without persisting.
+    // Persist. Try the rich shape first (enrichment JSONB column). If that
+    // column doesn't exist yet (migration 0013 not applied), fall back to the
+    // legacy shape so we still keep contact rows.
     try {
       const supabase = createServerClient();
-      const rows = contacts.map((c) => ({
+
+      const rich = contacts.map((c) => ({
         user_id: user.id,
         name: c.name,
         title: c.title,
         company: c.company,
         status: "suggested",
+        relevance_reason: c.relevance_reason,
+        suggested_approach: c.suggested_approach,
+        enrichment: {
+          city: c.city,
+          linkedin_url: c.linkedin_url,
+          inferred_email: c.inferred_email,
+          email_confidence: c.email_confidence,
+          role_signal: c.role_signal,
+          tenure_signal: c.tenure_signal,
+        },
       }));
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase.from("outreach_contacts") as any).insert(rows);
+      const insertResult = await (supabase.from("outreach_contacts") as any).insert(rich);
+
+      if (insertResult.error) {
+        // Most likely cause: enrichment column / relevance_reason column missing.
+        // Retry with the minimal legacy shape.
+        const legacy = contacts.map((c) => ({
+          user_id: user.id,
+          name: c.name,
+          title: c.title,
+          company: c.company,
+          status: "suggested",
+        }));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.from("outreach_contacts") as any).insert(legacy);
+      }
     } catch (dbErr) {
       console.warn("[outreach.scout] DB insert failed (non-fatal):", dbErr);
     }

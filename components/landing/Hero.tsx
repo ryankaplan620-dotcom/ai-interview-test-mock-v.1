@@ -45,7 +45,7 @@ export function Hero() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
           </span>
-          Voice-first interview practice
+          Live interview simulation
         </span>
 
         {/* Headline — oversized, cinematic */}
@@ -53,8 +53,8 @@ export function Hero() {
           className="mt-7 max-w-[15ch] animate-fade-up text-balance font-display font-semibold leading-[0.98] tracking-[-0.045em] text-text-primary opacity-0 motion-reduce:opacity-100"
           style={{ fontSize: "clamp(46px, 8vw, 104px)", animationDelay: "80ms" }}
         >
-          Practice interviews that feel{" "}
-          <em className="font-serif font-normal italic text-accent">real</em>. Get hired.
+          The interview{" "}
+          <em className="font-serif font-normal italic text-accent">before</em> the interview.
         </h1>
 
         {/* Sub-copy */}
