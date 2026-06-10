@@ -53,7 +53,7 @@ export function Nav({ onDark = false }: { onDark?: boolean }) {
           className="flex items-center gap-2.5 transition-opacity duration-200 hover:opacity-70"
           aria-label="Folio home"
         >
-          <FolioMark className="h-7 w-7" color="#00DC82" />
+          <FolioMark className="h-7 w-7" color="#63D88A" />
           <span
             className={clsx(
               "font-display text-[18px] font-semibold tracking-[-0.025em]",

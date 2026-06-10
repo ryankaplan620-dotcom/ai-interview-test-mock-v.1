@@ -9,70 +9,77 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // ------ Brand accent: Electric Emerald ------
+        // ------ Brand accent: Folio Mint (sampled from brand deck) ------
         accent: {
-          DEFAULT: "#00F590",
-          deep: "#00D478",
-          mid: "#00E685",
-          soft: "#C8FAE1",
-          highlight: "#33FAA6",
+          DEFAULT: "#63D88A",
+          deep: "#41B06C",
+          mid: "#57CB81",
+          soft: "#D9F6E5",
+          highlight: "#82E8A5",
         },
-        // ------ Marketing brand emerald (light surfaces) ------
-        // Calibrated for white backgrounds — slightly deeper than `accent`
+        // ------ Marketing brand mint (light surfaces) ------
+        // Calibrated for white backgrounds — deeper than `accent`
         // so it holds contrast and pairs with near-black ink text.
         brand: {
-          50: "#ECFDF5",
-          100: "#D1FAE5",
-          200: "#A7F3D0",
-          300: "#6EE7B7",
-          400: "#34D399",
-          500: "#00DC82",
-          600: "#00C574",
-          700: "#00A862",
-          800: "#047857",
-          900: "#064E3B",
-          DEFAULT: "#00DC82",
-          ink: "#04140D", // near-black text for use on top of brand fills
+          50: "#EFFBF4",
+          100: "#D9F6E5",
+          200: "#B5ECCD",
+          300: "#8AE0B0",
+          400: "#63D88A",
+          500: "#3FC579",
+          600: "#2FA563",
+          700: "#268751",
+          800: "#1E6B41",
+          900: "#174F31",
+          DEFAULT: "#3FC579",
+          ink: "#07140C", // near-black text for use on top of brand fills
         },
-        // ------ Warm premium canvas (page background) + white cards ------
+        // ------ Secondary accent: Intelligence Violet (brand deck) ------
+        violet: {
+          DEFAULT: "#885DEB",
+          deep: "#5B3DB8",
+          dim: "#352A5A",
+          soft: "#EDE6FC",
+        },
+        // ------ Cover canvas: Cosmos indigo (brand deck p.1) ------
+        cosmos: {
+          DEFAULT: "#0D042B",
+          deep: "#070217",
+          soft: "#1A0F45",
+        },
+        // ------ Cool premium canvas (page background) + white cards ------
         canvas: {
-          DEFAULT: "#FAF8F4",
-          tint: "#F0EDE6",
+          DEFAULT: "#F7F8FA",
+          tint: "#EDEFF3",
         },
-        // ------ Canvas: Ink-navy dark ------
+        // ------ Canvas: Ink dark (brand deck interior) ------
         ink: {
-          DEFAULT: "#0D1117",
-          deeper: "#07090C",
-          surface: "#161B22",
-          raised: "#1C2128",
-          border: "#2A3139",
+          DEFAULT: "#0E1116",
+          deeper: "#08090D",
+          surface: "#151923",
+          raised: "#1B2029",
+          border: "#2A3039",
         },
         // ------ Canvas: Paper light ------
         paper: {
-          DEFAULT: "#FAFAF7",
+          DEFAULT: "#FAFBFC",
           elevated: "#FFFFFF",
         },
         // ------ Text hierarchy ------
         text: {
-          primary: "#F0F6FC",
-          secondary: "#A8B0BA",
-          tertiary: "#6E7681",
-          onLight: "#1A1F24",
-          onAccent: "#0D1117",
+          primary: "#F2F4F8",
+          secondary: "#A6ADBB",
+          tertiary: "#6E7480",
+          onLight: "#15181E",
+          onAccent: "#07140C",
         },
       },
       fontFamily: {
-        display: ["var(--font-sans)", "Instrument Sans", "system-ui", "sans-serif"],
-        sans: ["var(--font-sans)", "Instrument Sans", "system-ui", "sans-serif"],
-        serif: ["var(--font-serif)", "Instrument Serif", "Georgia", "serif"],
+        display: ["var(--font-display)", "Open Sauce Two", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "Open Sauce One", "system-ui", "sans-serif"],
+        // Brand voice has no serif — italic accents render in Open Sauce One italic.
+        serif: ["var(--font-sans)", "Open Sauce One", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains-mono)", "'JetBrains Mono'", "Consolas", "monospace"],
-        // Wordmark-style serifs for the proof row
-        wordmark: {
-          cinzel: ["var(--font-cinzel)", "Georgia", "serif"],
-          playfair: ["var(--font-playfair)", "Georgia", "serif"],
-          spectral: ["var(--font-spectral)", "Georgia", "serif"],
-          crimson: ["var(--font-crimson)", "Georgia", "serif"],
-        } as never,
       },
       letterSpacing: {
         display: "-0.035em",
@@ -93,19 +100,22 @@ const config: Config = {
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
       },
       backgroundImage: {
-        "ambient-glow": "radial-gradient(circle at 78% 32%, rgba(0,245,144,0.12) 0%, rgba(0,245,144,0.04) 40%, transparent 80%)",
-        "depth-glow": "radial-gradient(circle at 15% 85%, rgba(0,245,144,0.05) 0%, transparent 50%)",
-        "cta-gradient": "linear-gradient(180deg, #33FAA6 0%, #00F590 100%)",
+        "ambient-glow": "radial-gradient(circle at 78% 32%, rgba(99,216,138,0.12) 0%, rgba(99,216,138,0.04) 40%, transparent 80%)",
+        "depth-glow": "radial-gradient(circle at 15% 85%, rgba(99,216,138,0.05) 0%, transparent 50%)",
+        "cta-gradient": "linear-gradient(180deg, #82E8A5 0%, #63D88A 100%)",
+        // Wordmark treatment from the brand deck — mint fading into the dark
+        "wordmark-fade": "linear-gradient(180deg, #82E8A5 0%, #51AF77 55%, rgba(81,175,119,0.0) 130%)",
+        "violet-statement": "linear-gradient(180deg, #352A5A 0%, #885DEB 100%)",
       },
       boxShadow: {
-        "accent-glow": "0 0 40px 0 rgba(0,245,144,0.15)",
-        "accent-glow-lg": "0 0 80px 0 rgba(0,245,144,0.20)",
+        "accent-glow": "0 0 40px 0 rgba(99,216,138,0.15)",
+        "accent-glow-lg": "0 0 80px 0 rgba(99,216,138,0.22)",
         // ------ Light/marketing elevation system ------
         card: "0 1px 2px 0 rgba(16,24,40,0.04), 0 1px 3px 0 rgba(16,24,40,0.05)",
         "card-hover": "0 18px 40px -16px rgba(16,24,40,0.20)",
         elevated: "0 24px 64px -24px rgba(16,24,40,0.24)",
         frame: "0 32px 80px -32px rgba(16,24,40,0.28)",
-        "brand-glow": "0 10px 34px -10px rgba(0,220,130,0.45)",
+        "brand-glow": "0 10px 34px -10px rgba(63,197,121,0.45)",
       },
       animation: {
         "pulse-ring": "pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",

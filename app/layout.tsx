@@ -1,24 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { CookieBanner } from "@/components/legal/cookie-banner";
 import "./globals.css";
 
 // ==========================================
-// Font loading — all brand fonts via next/font
+// Font loading — Open Sauce (self-hosted, OFL)
+// One = text/UI · Two = display headlines
 // ==========================================
-const instrumentSans = Instrument_Sans({
-  subsets: ["latin"],
+const openSauceOne = localFont({
+  src: [
+    { path: "./fonts/OpenSauceOne-Regular.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/OpenSauceOne-Italic.ttf", weight: "400", style: "italic" },
+    { path: "./fonts/OpenSauceOne-Medium.ttf", weight: "500", style: "normal" },
+    { path: "./fonts/OpenSauceOne-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/OpenSauceOne-Bold.ttf", weight: "700", style: "normal" },
+  ],
   display: "swap",
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
+const openSauceTwo = localFont({
+  src: [
+    { path: "./fonts/OpenSauceTwo-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/OpenSauceTwo-Bold.ttf", weight: "700", style: "normal" },
+    { path: "./fonts/OpenSauceTwo-ExtraBold.ttf", weight: "800", style: "normal" },
+    { path: "./fonts/OpenSauceTwo-Black.ttf", weight: "900", style: "normal" },
+  ],
   display: "swap",
-  variable: "--font-serif",
-  weight: ["400"],
-  style: ["normal", "italic"],
+  variable: "--font-display",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -103,8 +113,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const fontVariables = [
-    instrumentSans.variable,
-    instrumentSerif.variable,
+    openSauceOne.variable,
+    openSauceTwo.variable,
     jetbrainsMono.variable,
   ].join(" ");
 

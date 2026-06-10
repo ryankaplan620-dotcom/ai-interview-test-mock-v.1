@@ -1,11 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container, ArrowRight } from "@/components/marketing/ui";
 
-const avatars = [
-  "from-emerald-400 to-emerald-600",
-  "from-sky-400 to-blue-600",
-  "from-amber-400 to-orange-500",
-  "from-violet-400 to-purple-600",
+const agents = [
+  { name: "Sarah", version: "v.2", src: "/images/agents/sarah.png" },
+  { name: "Gemma", version: "v.3", src: "/images/agents/gemma.png" },
+  { name: "Luke", version: "v.1", src: "/images/agents/luke.png" },
 ];
 
 export function Hero() {
@@ -48,13 +48,12 @@ export function Hero() {
           Live interview simulation
         </span>
 
-        {/* Headline — oversized, cinematic */}
+        {/* Headline — oversized, cinematic, Open Sauce Two display */}
         <h1
-          className="mt-7 max-w-[15ch] animate-fade-up text-balance font-display font-semibold leading-[0.98] tracking-[-0.045em] text-text-primary opacity-0 motion-reduce:opacity-100"
-          style={{ fontSize: "clamp(46px, 8vw, 104px)", animationDelay: "80ms" }}
+          className="mt-7 max-w-[15ch] animate-fade-up text-balance font-display font-extrabold leading-[1.02] tracking-[-0.04em] text-text-primary opacity-0 motion-reduce:opacity-100"
+          style={{ fontSize: "clamp(44px, 7.5vw, 96px)", animationDelay: "80ms" }}
         >
-          The interview{" "}
-          <em className="font-serif font-normal italic text-accent">before</em> the interview.
+          The interview <span className="text-gradient-mint">before</span> the interview.
         </h1>
 
         {/* Sub-copy */}
@@ -87,23 +86,30 @@ export function Hero() {
           </Link>
         </div>
 
-        {/* Social proof */}
+        {/* Agent roster — the Folio Labs interviewers */}
         <div
-          className="mt-12 flex animate-fade-up items-center gap-3.5 opacity-0 motion-reduce:opacity-100"
+          className="mt-12 flex animate-fade-up flex-wrap items-center justify-center gap-x-4 gap-y-3 opacity-0 motion-reduce:opacity-100"
           style={{ animationDelay: "320ms" }}
         >
-          <div className="flex -space-x-2.5">
-            {avatars.map((g, i) => (
-              <span
-                key={i}
-                className={`h-8 w-8 rounded-full bg-gradient-to-br ${g} ring-2 ring-ink`}
-                aria-hidden
+          {agents.map((a) => (
+            <span
+              key={a.name}
+              className="inline-flex items-center gap-2.5 rounded-full border border-ink-border/60 bg-ink-surface/50 py-1.5 pl-1.5 pr-4 backdrop-blur"
+            >
+              <Image
+                src={a.src}
+                alt={`${a.name}, a Folio interview agent`}
+                width={28}
+                height={28}
+                className="h-7 w-7 rounded-full object-cover ring-1 ring-accent/50"
               />
-            ))}
-          </div>
-          <p className="text-[14px] text-text-tertiary">
-            Join <span className="font-semibold text-text-primary">2,000+</span> professionals
-            practicing with Folio
+              <span className="text-[13px] font-medium text-text-secondary">
+                {a.name} <span className="font-mono text-[10.5px] text-accent">{a.version}</span>
+              </span>
+            </span>
+          ))}
+          <p className="w-full text-center text-[13.5px] text-text-tertiary sm:ml-2 sm:w-auto sm:text-left">
+            Agents calibrated to your target role
           </p>
         </div>
       </Container>
