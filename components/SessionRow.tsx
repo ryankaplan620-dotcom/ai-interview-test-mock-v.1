@@ -166,9 +166,8 @@ function scoreColorClass(v: number): string {
 
 function personaLabel(p: PersonaId): string {
   const map: Record<PersonaId, string> = {
-    priya: "Priya Patel",
-    marcus: "Marcus Hale",
     sarah: "Sarah Chen",
+    gemma: "Gemma Brooks",
   };
   return map[p] ?? p;
 }

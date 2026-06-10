@@ -57,7 +57,7 @@ export default async function MemorySettingsPage() {
     byPersona.set(m.persona, list);
   }
 
-  const personaOrder: PersonaId[] = ["priya", "marcus", "sarah"];
+  const personaOrder: PersonaId[] = ["sarah", "gemma"];
 
   return (
     <div className="mx-auto max-w-[840px] px-6 py-12 sm:px-10">

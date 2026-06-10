@@ -22,7 +22,7 @@ export type VerificationStatus = "pending" | "verified" | "rejected" | "expired"
 
 export type SessionStatus = "scheduled" | "in_progress" | "completed" | "abandoned" | "failed";
 
-export type PersonaId = "priya" | "marcus" | "sarah";
+export type PersonaId = "sarah" | "gemma";
 
 export type InterviewType =
   | "behavioral"
@@ -38,7 +38,7 @@ export type BillingCycle = "monthly" | "yearly";
 // Engine 2 — Practice drills (migration 0005)
 // ==========================================================================
 
-export type DrillType = "story_polishing" | "pitch_60s" | "pause_drill" | "pushback_drill";
+export type DrillType = "pitch_60s" | "pause_drill" | "pushback_drill";
 
 export type DrillStatus = "in_progress" | "completed" | "abandoned";
 

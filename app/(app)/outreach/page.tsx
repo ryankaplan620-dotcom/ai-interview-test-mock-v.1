@@ -4,6 +4,15 @@ import { requireUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { OutreachClient } from "./outreach-client";
 
+interface ContactEnrichment {
+  city?: string | null;
+  linkedin_url?: string | null;
+  inferred_email?: string | null;
+  email_confidence?: "guessed" | "verified" | "unknown" | null;
+  role_signal?: string | null;
+  tenure_signal?: string | null;
+}
+
 interface OutreachContact {
   id: string;
   name: string;
@@ -13,6 +22,7 @@ interface OutreachContact {
   status: string;
   relevance_reason: string | null;
   suggested_approach: string | null;
+  enrichment?: ContactEnrichment | null;
   created_at: string;
 }
 

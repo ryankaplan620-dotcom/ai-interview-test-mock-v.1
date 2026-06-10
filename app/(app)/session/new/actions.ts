@@ -14,7 +14,7 @@ import type { InterviewMode } from "@/lib/personas/types";
 // --------------------------------------------------------------------------
 
 const StartSessionInput = z.object({
-  personaId: z.enum(["priya", "marcus", "sarah"]),
+  personaId: z.enum(["sarah", "gemma"]),
   interviewType: z.enum([
     "behavioral",
     "case",

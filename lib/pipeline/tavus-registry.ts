@@ -25,14 +25,20 @@ import type { PersonaId } from "@/types/supabase";
 // These are guesses at sensible matches; verify in the Tavus Developer Portal
 // against who you actually want as each persona.
 const STOCK_REPLICA_DEFAULTS: Record<PersonaId, string> = {
-  priya: "r3f427f43c9d", // Gloria - Warm (phoenix-4)
-  marcus: "r72f7f7f7c8b", // Daniel - Office (phoenix-4)
   sarah: "r12d3eb75ec2", // Helen - Casual (phoenix-4)
+  gemma: "r5dc7c7d0bcb", // Gemma Brooks — her real replica (face)
+};
+
+// Tavus persona IDs created on Tavus's side (POST /v2/personas). An env var
+// overrides the default; the default lets a persona work out of the box.
+const TAVUS_PERSONA_DEFAULTS: Record<PersonaId, string | null> = {
+  sarah: null,
+  gemma: "p2e9f033911b",
 };
 
 export function getTavusPersonaId(personaId: PersonaId): string | null {
   const envKey = `TAVUS_PERSONA_ID_${personaId.toUpperCase()}`;
-  return process.env[envKey] ?? null;
+  return process.env[envKey] ?? TAVUS_PERSONA_DEFAULTS[personaId] ?? null;
 }
 
 export function getTavusReplicaId(personaId: PersonaId): string {

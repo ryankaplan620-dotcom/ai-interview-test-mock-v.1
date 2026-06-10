@@ -19,6 +19,8 @@ export interface PracticeViewDrill {
   targetAttempts: number;
   maxAttemptSeconds: number;
   whatItsLookingFor: string | null;
+  /** For pushback drills: the follow-up challenge to deliver after the initial answer. */
+  pushback: string | null;
 }
 
 export interface PracticeViewAttempt {
@@ -258,11 +260,24 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
       {/* Header */}
       <header>
         <p className="font-mono text-[11px] tracking-label text-accent">
-          STORY POLISHING · ATTEMPT {Math.min(nextAttemptNumber, drill.targetAttempts)} / {drill.targetAttempts}
+          {drillTypeLabel(drill.drillType)}
+          {drill.targetAttempts > 1
+            ? ` · ATTEMPT ${Math.min(nextAttemptNumber, drill.targetAttempts)} / ${drill.targetAttempts}`
+            : ""}
         </p>
         <h1 className="mt-2 font-display text-[26px] font-semibold leading-[1.2] text-text-primary sm:text-[32px]">
           {drill.promptText}
         </h1>
+        {drill.pushback && (
+          <div className="mt-5 rounded-lg border border-amber-300/30 bg-amber-300/5 px-4 py-3">
+            <p className="font-mono text-[10px] tracking-label text-amber-300/80">
+              THEN THE INTERVIEWER PUSHES BACK
+            </p>
+            <p className="mt-1.5 font-serif text-[15px] italic leading-[1.5] text-text-primary">
+              &ldquo;{drill.pushback}&rdquo;
+            </p>
+          </div>
+        )}
       </header>
 
       {/* Progress pips */}
@@ -357,11 +372,10 @@ function IntroPhase({
       <div className="mt-8 rounded-2xl border border-accent/20 bg-gradient-to-br from-ink-surface to-ink-raised px-6 py-8">
         <p className="font-mono text-[10px] tracking-label text-accent">READY?</p>
         <p className="mt-2 font-display text-[20px] font-semibold text-text-primary">
-          You'll answer this question five times.
+          {introHeadline(drill)}
         </p>
         <p className="mt-2 font-sans text-[14px] leading-[1.6] text-text-secondary">
-          Between each rep, you'll get specific feedback. By attempt five, your answer should land cleanly without thinking.
-          Up to {Math.floor(drill.maxAttemptSeconds / 60)}:{(drill.maxAttemptSeconds % 60).toString().padStart(2, "0")} per attempt.
+          {introBody(drill)}
         </p>
 
         <div className="mt-6">
@@ -754,6 +768,35 @@ function ListCard({
 // ==========================================================================
 // Utility
 // ==========================================================================
+
+function drillTypeLabel(t: DrillType): string {
+  switch (t) {
+    case "pitch_60s":
+      return "60-SECOND PITCH";
+    case "pushback_drill":
+      return "PUSHBACK";
+    case "pause_drill":
+      return "PAUSE DRILL";
+  }
+}
+
+function introHeadline(drill: PracticeViewDrill): string {
+  if (drill.drillType === "pitch_60s") return "One shot. Sixty seconds.";
+  if (drill.drillType === "pushback_drill") return "Answer, then take the hit.";
+  if (drill.targetAttempts > 1) return `You'll answer this question ${drill.targetAttempts} times.`;
+  return "One attempt.";
+}
+
+function introBody(drill: PracticeViewDrill): string {
+  const max = `Up to ${Math.floor(drill.maxAttemptSeconds / 60)}:${(drill.maxAttemptSeconds % 60).toString().padStart(2, "0")}.`;
+  if (drill.drillType === "pitch_60s") {
+    return `Deliver a clean hook, a clear through-line, and a confident landing — all inside the minute. ${max}`;
+  }
+  if (drill.drillType === "pushback_drill") {
+    return `Answer the opening question first. Then deliver your recovery to the pushback line shown above — back-to-back, in one recording. ${max}`;
+  }
+  return `Between each rep, you'll get specific feedback. ${max}`;
+}
 
 function scoreColorClass(v: number): string {
   if (v >= 85) return "text-accent";

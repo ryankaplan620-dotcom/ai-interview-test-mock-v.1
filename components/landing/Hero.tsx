@@ -25,9 +25,9 @@ export function Hero() {
 
           {/* Massive heading */}
           <h1 className="mt-6 font-bold leading-[1.05] tracking-[-0.03em] text-gray-900" style={{ fontSize: "clamp(44px, 7vw, 80px)" }}>
-            Practice interviews that feel{" "}
-            <span className="bg-gradient-to-r from-[#00DC82] to-emerald-400 bg-clip-text text-transparent">real</span>.
-            Get hired.
+            The interview{" "}
+            <span className="bg-gradient-to-r from-[#00DC82] to-emerald-400 bg-clip-text text-transparent">before</span>{" "}
+            the interview.
           </h1>
 
           {/* Sub-copy */}

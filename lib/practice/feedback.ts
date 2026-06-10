@@ -1,21 +1,22 @@
 /**
  * Drill feedback generator.
  *
- * Takes a transcript from a single drill attempt + drill context, returns
- * structured feedback. Similar architecture to interview feedback but with
- * drill-specific rubrics — story polishing cares about structure, specificity,
- * and tightness; pitch_60s cares about time usage; etc.
+ * Each drill type ships with its own rubric — pitch_60s scores hook, arc,
+ * time discipline, and landing; pushback_drill scores composure, concession,
+ * specifics, and commit. The DB shape is shared (overall_score + sub_scores +
+ * summary + strengths + improvements) so the existing UI keeps working.
  *
- * For MVP, only story_polishing is implemented. Other drill types stubbed.
+ * Mechanical metrics (filler words, WPM) are computed deterministically from
+ * the transcript, outside of Claude.
  *
- * Also computes filler word counts + pace purely mechanically from the
- * transcript, outside of Claude. These are deterministic metrics that don't
- * need LLM judgment.
+ * Note: a global scoring redesign (verdict / moments / leveling, no 0-100) is
+ * planned. Until that lands, drill scores remain 0-100 — but the sub-score
+ * dimensions are drill-specific, not generic.
  */
 
 import Anthropic from "@anthropic-ai/sdk";
 import { env, shouldMock } from "@/lib/pipeline/env";
-import { getStoryPolishingPrompt } from "./drills";
+import { getPitch60sPrompt, getPushbackPrompt } from "./drills";
 import type { DrillType } from "@/types/supabase";
 
 // --------------------------------------------------------------------------
@@ -28,7 +29,6 @@ export interface DrillAttemptFeedback {
   summary: string;
   strengths: string[];
   improvements: string[];
-  /** Mechanical — detected from transcript, not LLM-generated. */
   filler_words: Record<string, number>;
   filler_count: number;
   words_per_minute: number;
@@ -41,7 +41,6 @@ export interface GenerateDrillFeedbackInput {
   transcript: string;
   durationSeconds: number;
   attemptNumber: number;
-  /** Prior attempts' feedback — Claude uses these to detect progression. */
   priorAttempts: Array<{
     attempt_number: number;
     transcript: string;
@@ -57,7 +56,6 @@ export interface GenerateDrillFeedbackInput {
 export async function generateDrillFeedback(
   input: GenerateDrillFeedbackInput,
 ): Promise<DrillAttemptFeedback> {
-  // Mechanical metrics — always computed from transcript, regardless of mock/real
   const fillerWords = countFillerWords(input.transcript);
   const fillerCount = Object.values(fillerWords).reduce((a, b) => a + b, 0);
   const wpm = calculateWPM(input.transcript, input.durationSeconds);
@@ -100,17 +98,13 @@ const FILLER_WORDS = [
 ];
 
 function countFillerWords(transcript: string): Record<string, number> {
-  // Lowercase + strip punctuation, but keep word boundaries
   const normalized = transcript.toLowerCase().replace(/[^\w\s]/g, " ");
 
   const counts: Record<string, number> = {};
   for (const filler of FILLER_WORDS) {
-    // Match on word boundaries — don't count "um" inside "umbrella"
-    // For multi-word fillers like "you know", use full phrase boundary
     const pattern = new RegExp(`\\b${filler.replace(/\s+/g, "\\s+")}\\b`, "g");
     const matches = normalized.match(pattern);
     if (matches && matches.length > 0) {
-      // Key in snake_case for clean JSON
       const key = filler.replace(/\s+/g, "_");
       counts[key] = matches.length;
     }
@@ -126,13 +120,13 @@ function calculateWPM(transcript: string, durationSeconds: number): number {
 }
 
 // --------------------------------------------------------------------------
-// Claude tool-use for story polishing
+// Per-drill tool definitions
 // --------------------------------------------------------------------------
 
-const STORY_POLISHING_TOOL = {
+const PITCH_60S_TOOL = {
   name: "provide_drill_feedback",
   description:
-    "Submit your feedback analysis for this story polishing drill attempt. Use this tool exactly once.",
+    "Submit your feedback analysis for this 60-second pitch attempt. Use this tool exactly once.",
   input_schema: {
     type: "object" as const,
     properties: {
@@ -141,40 +135,40 @@ const STORY_POLISHING_TOOL = {
         minimum: 0,
         maximum: 100,
         description:
-          "Holistic 0-100 score for this attempt. Not an average of sub-scores. In a 5-attempt drill, scores should generally improve across attempts — if this one regressed, reflect that.",
+          "Holistic 0-100 score for the pitch. Calibrate against what a strong candidate would deliver: a clean hook, a coherent arc, confident landing, all inside 60 seconds.",
       },
-      structure_score: {
+      hook_score: {
         type: "integer" as const,
         minimum: 0,
         maximum: 100,
         description:
-          "Did they open with the headline, then provide supporting detail? STAR structure (Situation, Task, Action, Result) is the most common framework. Did they signpost clearly?",
+          "Did the first sentence earn the next 50? A strong hook gives the listener an identity claim or specific signal in under 10 seconds. Weak hooks open with throat-clearing ('so, um, basically I'm Ryan and...').",
       },
-      specificity_score: {
+      arc_score: {
         type: "integer" as const,
         minimum: 0,
         maximum: 100,
         description:
-          "Concrete nouns, numbers, names vs generic claims. 'We improved performance' is weak. 'Cut p99 latency from 400ms to 60ms' is strong.",
+          "Is there a coherent through-line across the minute? Three beats minimum: where they are, what brought them here, why this matters now. Or another structure — but it has to be deliberate, not a chronological list.",
       },
-      tightness_score: {
+      time_score: {
         type: "integer" as const,
         minimum: 0,
         maximum: 100,
         description:
-          "Did they say the important things and stop? Long-winded answers lose interviewers. A tight 75-second answer usually beats a sprawling 3-minute one.",
+          "How well did they use the 60 seconds? Penalize both ends — under 35s wastes the airtime, over 75s lost discipline. Sweet spot: 50-65s, with the landing intentional rather than panicked.",
       },
       landing_score: {
         type: "integer" as const,
         minimum: 0,
         maximum: 100,
         description:
-          "Did the answer end cleanly or trail off? Strong candidates finish with a clear takeaway. Weak ones drift or repeat themselves.",
+          "Did the pitch end cleanly with a clear takeaway, or did it trail off? Strong candidates close with a sentence the interviewer remembers. Weak ones say 'yeah, so that's me' or run out of time mid-thought.",
       },
       summary: {
         type: "string" as const,
         description:
-          "2 sentences. First: the headline read on this attempt. Second: the single most useful thing to change for the next attempt. In attempt 5, say whether this version is ready to use in a real interview.",
+          "Two sentences. First: the headline read on this pitch. Second: the single most useful change for the next take. Quote the candidate's words where possible.",
       },
       strengths: {
         type: "array" as const,
@@ -182,7 +176,7 @@ const STORY_POLISHING_TOOL = {
         minItems: 2,
         maxItems: 3,
         description:
-          "2-3 specific things they did well. Quote words they actually used when possible. Short — one sentence each.",
+          "2-3 specific things they did well. Quote their actual words. One sentence each.",
       },
       improvements: {
         type: "array" as const,
@@ -190,14 +184,14 @@ const STORY_POLISHING_TOOL = {
         minItems: 2,
         maxItems: 3,
         description:
-          "2-3 specific things to fix in the next attempt. Actionable: 'cut the opening so-um-yeah — lead with the headline' beats 'reduce filler'.",
+          "2-3 specific, actionable fixes. 'Cut the so-um opening — lead with the strongest identity claim' beats 'reduce filler.'",
       },
     },
     required: [
       "overall_score",
-      "structure_score",
-      "specificity_score",
-      "tightness_score",
+      "hook_score",
+      "arc_score",
+      "time_score",
       "landing_score",
       "summary",
       "strengths",
@@ -206,11 +200,106 @@ const STORY_POLISHING_TOOL = {
   },
 };
 
+const PUSHBACK_TOOL = {
+  name: "provide_drill_feedback",
+  description:
+    "Submit your feedback analysis for this pushback drill attempt. Use this tool exactly once.",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      overall_score: {
+        type: "integer" as const,
+        minimum: 0,
+        maximum: 100,
+        description:
+          "Holistic 0-100 score across the full exchange — the initial answer AND the recovery. Pushback drills are won or lost in the recovery, so weight it heavily.",
+      },
+      composure_score: {
+        type: "integer" as const,
+        minimum: 0,
+        maximum: 100,
+        description:
+          "Did they hold steady under the challenge or get rattled? Look for pace breakdown, voice tightening, defensive language ('well actually', 'no but'). Strong candidates pause, then answer; weak ones rush.",
+      },
+      concession_score: {
+        type: "integer" as const,
+        minimum: 0,
+        maximum: 100,
+        description:
+          "Did they engage with the actual critique or deflect from it? Strong candidates acknowledge what the interviewer noticed before defending or revising. Weak ones repeat the original answer louder.",
+      },
+      specifics_score: {
+        type: "integer" as const,
+        minimum: 0,
+        maximum: 100,
+        description:
+          "Did the recovery contain new, concrete content — names, numbers, decisions — or just rephrasing? The interviewer is asking for substance. Bringing forward specifics they hadn't yet shared is the strongest move.",
+      },
+      commit_score: {
+        type: "integer" as const,
+        minimum: 0,
+        maximum: 100,
+        description:
+          "Did they land on a clear updated position or hedge across both? Pushback drills test whether you can update under pressure without folding entirely. End on commitment — adjusted or held — not on 'I see your point.'",
+      },
+      summary: {
+        type: "string" as const,
+        description:
+          "Two sentences. First: what their pushback recovery looked like. Second: the single thing that would have moved this from 'survived' to 'gained ground.'",
+      },
+      strengths: {
+        type: "array" as const,
+        items: { type: "string" as const },
+        minItems: 2,
+        maxItems: 3,
+        description: "2-3 specific moves that landed. Quote their actual words. One sentence each.",
+      },
+      improvements: {
+        type: "array" as const,
+        items: { type: "string" as const },
+        minItems: 2,
+        maxItems: 3,
+        description:
+          "2-3 specific, actionable fixes. Point to what the recovery is missing, not generic advice.",
+      },
+    },
+    required: [
+      "overall_score",
+      "composure_score",
+      "concession_score",
+      "specifics_score",
+      "commit_score",
+      "summary",
+      "strengths",
+      "improvements",
+    ],
+  },
+};
+
+function toolFor(drillType: DrillType) {
+  if (drillType === "pitch_60s") return PITCH_60S_TOOL;
+  if (drillType === "pushback_drill") return PUSHBACK_TOOL;
+  return null;
+}
+
+function subScoreKeys(drillType: DrillType): string[] {
+  if (drillType === "pitch_60s") return ["hook", "arc", "time", "landing"];
+  if (drillType === "pushback_drill") return ["composure", "concession", "specifics", "commit"];
+  return [];
+}
+
+// --------------------------------------------------------------------------
+// Real Claude path
+// --------------------------------------------------------------------------
+
 async function realClaudeFeedback(
   input: GenerateDrillFeedbackInput,
 ): Promise<Omit<DrillAttemptFeedback, "filler_words" | "filler_count" | "words_per_minute">> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("anthropic_not_configured");
+
+  const tool = toolFor(input.drillType);
+  if (!tool) throw new Error("drill_type_not_supported");
 
   const client = new Anthropic({ apiKey });
 
@@ -221,7 +310,7 @@ async function realClaudeFeedback(
     model: env.feedbackModel(),
     max_tokens: 2048,
     system: systemPrompt,
-    tools: [STORY_POLISHING_TOOL],
+    tools: [tool],
     tool_choice: { type: "tool", name: "provide_drill_feedback" },
     messages: [{ role: "user", content: userPrompt }],
   });
@@ -238,70 +327,111 @@ async function realClaudeFeedback(
   const strings = (arr: unknown): string[] =>
     Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string" && x.length > 0) : [];
 
+  const sub: Record<string, number> = {};
+  for (const key of subScoreKeys(input.drillType)) {
+    sub[key] = clamp(raw[`${key}_score`]);
+  }
+
   return {
     overall_score: clamp(raw.overall_score),
-    sub_scores: {
-      structure: clamp(raw.structure_score),
-      specificity: clamp(raw.specificity_score),
-      tightness: clamp(raw.tightness_score),
-      landing: clamp(raw.landing_score),
-    },
+    sub_scores: sub,
     summary: String(raw.summary ?? "").trim(),
     strengths: strings(raw.strengths).slice(0, 3),
     improvements: strings(raw.improvements).slice(0, 3),
   };
 }
 
+// --------------------------------------------------------------------------
+// System + user prompts
+// --------------------------------------------------------------------------
+
 function buildDrillSystemPrompt(input: GenerateDrillFeedbackInput): string {
-  if (input.drillType !== "story_polishing") {
-    // MVP only ships story_polishing — defensive for when other drill types
-    // are added later
-    return `You are an interview coach evaluating a practice drill.`;
-  }
+  if (input.drillType === "pitch_60s") {
+    return `You are an interview coach evaluating a 60-second pitch.
 
-  return `You are an interview coach running a story-polishing drill with a candidate.
-
-The candidate is rehearsing ONE question five times in a row, with your feedback between each attempt. The goal across the five attempts is convergence: by the fifth rep, their answer should land cleanly and automatically in a real interview.
+The candidate had one shot to deliver a tight, memorable pitch in under a minute. You're scoring how well they used the constraint — not whether their content is impressive in the abstract, but whether the 60-second version of it would actually land in a real interview.
 
 ## What you're evaluating
-- **Structure**: did they open with the headline, then give supporting detail? STAR is the most common framework but not the only one.
-- **Specificity**: concrete nouns, numbers, and names vs generic claims. "We improved it" is weak; "cut churn from 8% to 2.3%" is strong.
-- **Tightness**: did they stop when they were done? Most candidates answer for way too long.
-- **Landing**: did the answer end cleanly or trail off?
+- **Hook**: Does the first sentence earn the next 50 seconds? Strong hooks make an identity claim or drop a specific signal fast. Weak ones open with filler ("so, um, basically").
+- **Arc**: Is there a coherent through-line? Three beats minimum (where they are, what brought them here, why this matters now) — or another deliberate structure. NOT a chronological list of jobs.
+- **Time discipline**: Did they use the minute well? Penalize both ends — under 35s wastes airtime, over 75s lost discipline. Sweet spot: 50-65s with an intentional close.
+- **Landing**: Did it end cleanly with a memorable takeaway, or trail off?
 
 ## Scoring calibration
-- 90-100: Real-interview ready. Strong on every dimension.
-- 80-89: Solid, with specific fixable gaps.
-- 65-79: Developing. The structure is there but something clear is wrong.
-- 50-64: Early drafts — content exists but needs significant shape.
-- <50: Answers where the core issue is they don't have the story yet, not that they told it poorly.
+- 90-100: Interview-ready. Tight hook, clear arc, lands inside the minute with a memorable close.
+- 80-89: Solid pitch with a specific fixable gap.
+- 65-79: Developing. The content is there but the compression isn't working yet.
+- 50-64: Early. Wandering, no clear hook, or over the time budget.
+- <50: The pitch isn't built yet — content scattered, no narrative shape.
 
 ## Style rules
-- Be specific. Quote their actual words when giving feedback.
-- No generic advice. "Reduce filler" is weaker than "cut the 'so yeah' at 00:03 — lead with the headline."
-- Calibrate against the attempt number. Attempt 1 feedback is about laying foundations. Attempt 5 feedback is about the final polish.
-- No flattery, no sandbagging. Land where the evidence lands.
+- Be specific. Quote the candidate's actual words.
+- Avoid generic advice. "Cut the 'so yeah I'm Ryan' opener — lead with what you do" beats "improve your hook."
+- No flattery, no sandbagging.
 
 ## Format
 Use the provide_drill_feedback tool exactly once. Populate every field.`;
+  }
+
+  if (input.drillType === "pushback_drill") {
+    return `You are an interview coach evaluating a pushback drill.
+
+The candidate practiced a two-stage exchange in one recording: they answered an opening question, then received a pushback and delivered a recovery. You are scoring the full exchange, but the recovery carries most of the weight — pushback drills exist to train what happens AFTER the first answer.
+
+## What you're evaluating
+- **Composure**: Did they hold steady under the challenge? Look for pace breakdown, voice tightening, or defensive language ('well actually', 'no but'). Strong candidates pause briefly, then answer.
+- **Concession**: Did they engage with the actual critique or deflect from it? Strong candidates explicitly acknowledge what the interviewer noticed before defending or revising. Weak ones repeat the original answer at higher volume.
+- **Specifics**: Did the recovery introduce new, concrete content — names, numbers, decisions — or just rephrasing? Bringing forward unshared specifics is the strongest move.
+- **Commit**: Did they land on a clear updated position, or hedge across both? End on commitment — adjusted or held — not on 'I see your point.'
+
+## Scoring calibration
+- 90-100: Composed, conceded the critique, brought new specifics, committed. Gained ground from the pushback.
+- 80-89: Solid recovery with a specific gap (often: didn't fully concede, or didn't bring new specifics).
+- 65-79: Survived without folding, but the recovery sounds like the original answer at higher volume.
+- 50-64: Defensive or evasive. Repeated original points, didn't engage the critique.
+- <50: Folded or got rattled. The pushback won.
+
+## Style rules
+- Be specific. Quote the candidate's actual words.
+- Distinguish what they did in the initial answer vs. the recovery — they're scored together but read separately.
+- Avoid generic advice. "Concede the 'team did most of it' point at the start of the recovery, then name your specific calls" beats "be less defensive."
+- No flattery, no sandbagging.
+
+## Format
+Use the provide_drill_feedback tool exactly once. Populate every field.`;
+  }
+
+  return "You are an interview coach evaluating a practice drill.";
 }
 
 function buildDrillUserPrompt(input: GenerateDrillFeedbackInput): string {
   const lines: string[] = [];
 
   lines.push(`## Drill context`);
-  lines.push(`Question being practiced: ${input.promptText}`);
 
-  const promptMeta = getStoryPolishingPrompt(input.promptId);
-  if (promptMeta) {
-    lines.push(``);
-    lines.push(`What good answers to this question do well:`);
-    lines.push(promptMeta.whatItsLookingFor);
+  if (input.drillType === "pitch_60s") {
+    lines.push(`Drill: 60-second pitch`);
+    lines.push(`Prompt: ${input.promptText}`);
+    const meta = getPitch60sPrompt(input.promptId);
+    if (meta) {
+      lines.push(``);
+      lines.push(`What strong answers do well:`);
+      lines.push(meta.whatItsLookingFor);
+    }
+  } else if (input.drillType === "pushback_drill") {
+    lines.push(`Drill: pushback`);
+    const meta = getPushbackPrompt(input.promptId);
+    lines.push(`Initial question: ${input.promptText}`);
+    if (meta) {
+      lines.push(`Pushback line delivered after the candidate's answer: "${meta.pushback}"`);
+      lines.push(``);
+      lines.push(`What strong recoveries do:`);
+      lines.push(meta.whatItsLookingFor);
+    }
   }
 
   lines.push(``);
   lines.push(`## This attempt`);
-  lines.push(`Attempt number: ${input.attemptNumber} of 5`);
   lines.push(`Duration: ${Math.round(input.durationSeconds)}s`);
   lines.push(``);
   lines.push(`Transcript:`);
@@ -309,73 +439,59 @@ function buildDrillUserPrompt(input: GenerateDrillFeedbackInput): string {
   lines.push(input.transcript);
   lines.push(`"""`);
 
-  if (input.priorAttempts.length > 0) {
-    lines.push(``);
-    lines.push(`## Prior attempts in this drill`);
-    for (const prior of input.priorAttempts) {
-      lines.push(``);
-      lines.push(`**Attempt ${prior.attempt_number}** (score: ${prior.overall_score ?? "—"})`);
-      if (prior.summary) lines.push(`Your feedback: ${prior.summary}`);
-      lines.push(`Transcript: "${prior.transcript.slice(0, 400)}${prior.transcript.length > 400 ? "..." : ""}"`);
-    }
-    lines.push(``);
-    lines.push(
-      `Consider what's improved and what's still stuck. Your feedback should build on the prior coaching, not repeat it.`,
-    );
-  }
-
   lines.push(``);
   lines.push(`## Your task`);
-  lines.push(
-    `Score this attempt and give feedback via the provide_drill_feedback tool. Be specific and useful for the next rep.`,
-  );
+  lines.push(`Score this attempt and give feedback via the provide_drill_feedback tool. Be specific and useful.`);
 
   return lines.join("\n");
 }
 
 // --------------------------------------------------------------------------
-// Mock feedback — deterministic per (drillId, attemptNumber)
+// Mock feedback
 // --------------------------------------------------------------------------
 
 function mockClaudeFeedback(
   input: GenerateDrillFeedbackInput,
 ): Omit<DrillAttemptFeedback, "filler_words" | "filler_count" | "words_per_minute"> {
-  // Scores climb across attempts — mimics real coaching progression
-  const basePerAttempt = [60, 67, 74, 81, 86];
-  const overall = basePerAttempt[Math.min(input.attemptNumber - 1, 4)] ?? 70;
-  const jitter = (input.attemptNumber * 7) % 8;
+  if (input.drillType === "pitch_60s") {
+    return {
+      overall_score: 76,
+      sub_scores: { hook: 70, arc: 78, time: 82, landing: 72 },
+      summary:
+        "The arc holds together and you land roughly on time, but the opening eats the first 8 seconds before the listener knows who you are. Lead with the identity claim and the rest tightens automatically.",
+      strengths: [
+        "Specific number in the middle beat — 'cut churn from 8% to 2.3%' — gives the pitch weight.",
+        "The transition from current role to why-this-role is clean — listener tracks the move.",
+      ],
+      improvements: [
+        "Cut the 'so, basically' opener. Open with what you do: 'I run growth at a Series B fintech.'",
+        "The close trails off into a half-sentence. End on a single concrete takeaway, not 'and yeah, that's pretty much me.'",
+      ],
+    };
+  }
 
-  const isFirst = input.attemptNumber === 1;
-  const isLast = input.attemptNumber >= 5;
+  if (input.drillType === "pushback_drill") {
+    return {
+      overall_score: 68,
+      sub_scores: { composure: 75, concession: 60, specifics: 65, commit: 72 },
+      summary:
+        "You held composure when the pushback came, but the recovery sounded a lot like the initial answer at higher volume. Conceding the critique first — even briefly — would let the new specifics land.",
+      strengths: [
+        "You paused before responding to the pushback instead of rushing — exactly the right move.",
+        "The commit at the end is clear: 'I'd still make that call, but I'd add a checkpoint at month two.' Holds ground without rigidity.",
+      ],
+      improvements: [
+        "Open the recovery with the concession: 'You're right that the original framing didn't make this clear...' Then pivot to new content.",
+        "Bring forward a specific you haven't said yet — a name, a number, a decision. Repeating the same points louder isn't a recovery.",
+      ],
+    };
+  }
 
   return {
-    overall_score: overall,
-    sub_scores: {
-      structure: Math.min(95, overall - 2 + jitter),
-      specificity: Math.min(95, overall - 4 + ((jitter * 3) % 7)),
-      tightness: Math.min(95, overall + 1 + (jitter % 5)),
-      landing: Math.min(95, overall - 3 + ((jitter * 5) % 9)),
-    },
-    summary: isFirst
-      ? "A solid first draft — the core story is there, but the opening wanders before you land on what the question is really asking. For the next attempt, lead with the headline."
-      : isLast
-        ? "This version is tight and specific. The opening lands in the first ten seconds, you hit the key numbers, and the close is clean. This one is ready for a real interview."
-        : `Clear improvement over attempt ${input.attemptNumber - 1} — the opening is sharper and you're quoting specifics now. The middle still has room to trim.`,
-    strengths: [
-      "You opened with a concrete setup (team, timeline, stakes) instead of background context.",
-      "Specific number in the outcome — 'cut response time by 40%' — gives the answer weight.",
-      ...(isLast
-        ? ["You stopped cleanly without the usual 'and yeah, so that's pretty much it.'"]
-        : []),
-    ].slice(0, 3),
-    improvements: [
-      isFirst
-        ? "Cut the 'so, um, yeah' opening. Lead with the answer: 'The hardest team situation was...'"
-        : "Trim the middle — the detail about the meeting schedule is texture, not substance.",
-      isFirst
-        ? "Name the specific conflict instead of 'there were some tensions.'"
-        : "The 'in hindsight' reflection is good but should be one sentence, not three.",
-      ...(isLast ? [] : ["Bring the landing up — finish with what you learned, not with what happened."]),
-    ].slice(0, 3),
+    overall_score: 70,
+    sub_scores: {},
+    summary: "Drill type not supported by mock feedback.",
+    strengths: [],
+    improvements: [],
   };
 }

@@ -1,10 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+interface ContactEnrichment {
+  city?: string | null;
+  linkedin_url?: string | null;
+  inferred_email?: string | null;
+  email_confidence?: "guessed" | "verified" | "unknown" | null;
+  role_signal?: string | null;
+  tenure_signal?: string | null;
+}
 
 interface OutreachContact {
   id: string;
@@ -15,7 +24,22 @@ interface OutreachContact {
   status: string;
   relevance_reason: string | null;
   suggested_approach: string | null;
+  enrichment?: ContactEnrichment | null;
   created_at: string;
+}
+
+interface ScoutContact {
+  name: string;
+  title: string;
+  company: string;
+  city: string;
+  linkedin_url: string | null;
+  inferred_email: string | null;
+  email_confidence: "guessed" | "verified" | "unknown";
+  role_signal: string | null;
+  tenure_signal: string | null;
+  relevance_reason: string;
+  suggested_approach: string;
 }
 
 interface OutreachDraft {
@@ -52,7 +76,7 @@ export function OutreachClient({
   const [targetCity, setTargetCity] = useState("");
   const [scouting, setScouting] = useState(false);
   const [scoutError, setScoutError] = useState<string | null>(null);
-  const [scoutResults, setScoutResults] = useState<Array<{name:string;title:string;company:string;city:string;relevanceReason:string;suggestedApproach:string}>>([]);
+  const [scoutResults, setScoutResults] = useState<ScoutContact[]>([]);
 
   // Draft generation state
   const [draftingContactId, setDraftingContactId] = useState<string | null>(null);
@@ -272,7 +296,7 @@ function ScoutTab({
   onDraftEmail,
 }: {
   contacts: OutreachContact[];
-  scoutResults: Array<{name:string;title:string;company:string;city:string;relevanceReason:string;suggestedApproach:string}>;
+  scoutResults: ScoutContact[];
   targetCompany: string;
   targetRole: string;
   targetCity: string;
@@ -366,21 +390,20 @@ function ScoutTab({
             SUGGESTED CONTACTS ({scoutResults.length})
           </h3>
           {scoutResults.map((c, i) => (
-            <div key={i} className="rounded-xl border border-ink-border bg-ink-surface p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-display text-[15px] font-semibold text-text-primary">{c.name}</p>
-                  <p className="mt-0.5 font-sans text-[13px] text-text-secondary">{c.title} · {c.company}</p>
-                  {c.city && <p className="mt-0.5 font-mono text-[11px] text-text-tertiary">{c.city}</p>}
-                </div>
-              </div>
-              <p className="mt-3 font-sans text-[13px] leading-relaxed text-text-secondary">
-                <span className="font-medium text-accent">Why: </span>{c.relevanceReason}
-              </p>
-              <p className="mt-1.5 font-sans text-[13px] leading-relaxed text-text-secondary">
-                <span className="font-medium text-text-primary">Approach: </span>{c.suggestedApproach}
-              </p>
-            </div>
+            <MiniProfile
+              key={i}
+              name={c.name}
+              title={c.title}
+              company={c.company}
+              city={c.city || null}
+              linkedinUrl={c.linkedin_url}
+              email={c.inferred_email}
+              emailConfidence={c.email_confidence}
+              roleSignal={c.role_signal}
+              tenureSignal={c.tenure_signal}
+              relevanceReason={c.relevance_reason}
+              suggestedApproach={c.suggested_approach}
+            />
           ))}
         </div>
       )}
@@ -392,29 +415,20 @@ function ScoutTab({
             SCOUTED CONTACTS
           </h3>
           {contacts.map((contact) => (
-            <div
+            <MiniProfile
               key={contact.id}
-              className="rounded-xl border border-ink-border bg-ink-surface p-5 transition-colors hover:border-ink-border/80"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-display text-[15px] font-semibold text-text-primary">
-                    {contact.name}
-                  </h4>
-                  <p className="mt-0.5 font-sans text-[13px] text-text-secondary">
-                    {contact.title} at {contact.company}
-                  </p>
-                  {contact.relevance_reason && (
-                    <p className="mt-2 font-sans text-[13px] leading-relaxed text-text-tertiary">
-                      {contact.relevance_reason}
-                    </p>
-                  )}
-                  {contact.suggested_approach && (
-                    <p className="mt-1.5 font-serif text-[13px] italic text-text-secondary">
-                      {contact.suggested_approach}
-                    </p>
-                  )}
-                </div>
+              name={contact.name}
+              title={contact.title}
+              company={contact.company}
+              city={contact.enrichment?.city ?? null}
+              linkedinUrl={contact.enrichment?.linkedin_url ?? null}
+              email={contact.enrichment?.inferred_email ?? null}
+              emailConfidence={contact.enrichment?.email_confidence ?? "unknown"}
+              roleSignal={contact.enrichment?.role_signal ?? null}
+              tenureSignal={contact.enrichment?.tenure_signal ?? null}
+              relevanceReason={contact.relevance_reason ?? ""}
+              suggestedApproach={contact.suggested_approach ?? ""}
+              action={
                 <button
                   onClick={() => onDraftEmail(contact.id)}
                   disabled={draftingContactId === contact.id}
@@ -422,13 +436,171 @@ function ScoutTab({
                 >
                   {draftingContactId === contact.id ? "Drafting..." : "Draft email \u2192"}
                 </button>
-              </div>
-            </div>
+              }
+            />
           ))}
         </div>
       )}
     </div>
   );
+}
+
+// ===========================================================================
+// Mini-profile card
+// ===========================================================================
+
+function MiniProfile({
+  name,
+  title,
+  company,
+  city,
+  linkedinUrl,
+  email,
+  emailConfidence,
+  roleSignal,
+  tenureSignal,
+  relevanceReason,
+  suggestedApproach,
+  action,
+}: {
+  name: string;
+  title: string;
+  company: string;
+  city: string | null;
+  linkedinUrl: string | null;
+  email: string | null;
+  emailConfidence: "guessed" | "verified" | "unknown";
+  roleSignal: string | null;
+  tenureSignal: string | null;
+  relevanceReason: string;
+  suggestedApproach: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-ink-border bg-ink-surface p-5 transition-colors hover:border-ink-border/80">
+      <div className="flex items-start gap-4">
+        <div
+          aria-hidden
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent/25 to-accent/5 font-display text-[14px] font-semibold text-text-primary"
+        >
+          {initials(name)}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h4 className="font-display text-[15px] font-semibold text-text-primary">{name}</h4>
+          <p className="mt-0.5 font-sans text-[13px] text-text-secondary">
+            {title}
+            {company ? (
+              <>
+                {" · "}
+                <span className="text-text-primary">{company}</span>
+              </>
+            ) : null}
+          </p>
+          {(city || roleSignal) && (
+            <p className="mt-0.5 font-mono text-[11px] text-text-tertiary">
+              {[city, roleSignal].filter(Boolean).join(" · ")}
+            </p>
+          )}
+        </div>
+
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
+
+      {(linkedinUrl || email) && (
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-ink-border pt-3">
+          {linkedinUrl && (
+            <a
+              href={linkedinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-sans text-[12.5px] text-accent transition-opacity hover:opacity-80"
+            >
+              <LinkedInGlyph />
+              View LinkedIn
+            </a>
+          )}
+          {email && <EmailChip email={email} confidence={emailConfidence} />}
+        </div>
+      )}
+
+      {tenureSignal && (
+        <div className="mt-4 rounded-lg border border-ink-border bg-ink-raised/40 px-3.5 py-2.5">
+          <p className="font-mono text-[10px] tracking-label text-text-tertiary">PUBLIC SIGNAL</p>
+          <p className="mt-1 font-serif text-[13px] italic leading-[1.5] text-text-primary">
+            {tenureSignal}
+          </p>
+        </div>
+      )}
+
+      {(relevanceReason || suggestedApproach) && (
+        <div className="mt-3 space-y-1.5">
+          {relevanceReason && (
+            <p className="font-sans text-[13px] leading-relaxed text-text-secondary">
+              <span className="font-medium text-accent">Why: </span>
+              {relevanceReason}
+            </p>
+          )}
+          {suggestedApproach && (
+            <p className="font-sans text-[13px] leading-relaxed text-text-secondary">
+              <span className="font-medium text-text-primary">Approach: </span>
+              {suggestedApproach}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EmailChip({
+  email,
+  confidence,
+}: {
+  email: string;
+  confidence: "guessed" | "verified" | "unknown";
+}) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    } catch {
+      // clipboard write can fail (older browsers, denied permissions) — fall silent
+    }
+  };
+
+  const isGuessed = confidence !== "verified";
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="group inline-flex items-center gap-1.5 rounded-md border border-ink-border bg-ink-raised/40 px-2.5 py-1 font-mono text-[11.5px] text-text-primary transition-colors hover:border-accent/60"
+    >
+      <span>{copied ? "Copied" : email}</span>
+      {isGuessed && (
+        <span className="rounded-sm bg-amber-300/15 px-1 py-0.5 text-[9.5px] uppercase tracking-wider text-amber-300/90">
+          {confidence === "guessed" ? "guessed" : "?"}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function LinkedInGlyph() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.61 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z" />
+    </svg>
+  );
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
 }
 
 // ===========================================================================

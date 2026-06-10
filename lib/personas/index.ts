@@ -20,25 +20,15 @@ import type {
 } from "./types";
 
 import {
-  PRIYA_CORE_IDENTITY,
-  PRIYA_SELF_INTRODUCTION_TEMPLATE,
-  PRIYA_TURN_TAKING_AND_VOICE_HYGIENE,
-  PRIYA_END_OF_INTERVIEW_QA,
-  PRIYA_CLOSING,
-  PRIYA_DIFFICULTY_OVERLAYS,
-  PRIYA_SESSION_MEMORY_HOOK,
-  PRIYA_MID_SESSION_RECALIBRATION,
-} from "./prompts/priya";
-import {
-  MARCUS_CORE_IDENTITY,
-  MARCUS_SELF_INTRODUCTION_TEMPLATE,
-  MARCUS_TURN_TAKING_AND_VOICE_HYGIENE,
-  MARCUS_END_OF_INTERVIEW_QA,
-  MARCUS_CLOSING,
-  MARCUS_DIFFICULTY_OVERLAYS,
-  MARCUS_SESSION_MEMORY_HOOK,
-  MARCUS_MID_SESSION_RECALIBRATION,
-} from "./prompts/marcus";
+  GEMMA_CORE_IDENTITY,
+  GEMMA_SELF_INTRODUCTION_TEMPLATE,
+  GEMMA_TURN_TAKING_AND_VOICE_HYGIENE,
+  GEMMA_END_OF_INTERVIEW_QA,
+  GEMMA_CLOSING,
+  GEMMA_DIFFICULTY_OVERLAYS,
+  GEMMA_SESSION_MEMORY_HOOK,
+  GEMMA_MID_SESSION_RECALIBRATION,
+} from "./prompts/gemma";
 import {
   SARAH_CORE_IDENTITY,
   SARAH_SELF_INTRODUCTION_TEMPLATE,
@@ -56,23 +46,17 @@ function composeBase(core: string, turnTaking: string, endQa: string, closing: s
   return [core, turnTaking, endQa, memoryHook, recalibration, closing].join("\n\n");
 }
 
-const PRIYA_BASE_PROMPT = composeBase(PRIYA_CORE_IDENTITY, PRIYA_TURN_TAKING_AND_VOICE_HYGIENE, PRIYA_END_OF_INTERVIEW_QA, PRIYA_CLOSING, PRIYA_SESSION_MEMORY_HOOK, PRIYA_MID_SESSION_RECALIBRATION);
-const PRIYA_EASY_OVERLAY = PRIYA_DIFFICULTY_OVERLAYS.easy;
-const PRIYA_HARD_OVERLAY = PRIYA_DIFFICULTY_OVERLAYS.hard;
-const PRIYA_OPENING = PRIYA_SELF_INTRODUCTION_TEMPLATE;
-
-const MARCUS_BASE_PROMPT = composeBase(MARCUS_CORE_IDENTITY, MARCUS_TURN_TAKING_AND_VOICE_HYGIENE, MARCUS_END_OF_INTERVIEW_QA, MARCUS_CLOSING, MARCUS_SESSION_MEMORY_HOOK, MARCUS_MID_SESSION_RECALIBRATION);
-const MARCUS_EASY_OVERLAY = MARCUS_DIFFICULTY_OVERLAYS.easy;
-const MARCUS_HARD_OVERLAY = MARCUS_DIFFICULTY_OVERLAYS.hard;
-const MARCUS_OPENING = MARCUS_SELF_INTRODUCTION_TEMPLATE;
-
 const SARAH_BASE_PROMPT = composeBase(SARAH_CORE_IDENTITY, SARAH_TURN_TAKING_AND_VOICE_HYGIENE, SARAH_END_OF_INTERVIEW_QA, SARAH_CLOSING, SARAH_SESSION_MEMORY_HOOK, SARAH_MID_SESSION_RECALIBRATION);
 const SARAH_EASY_OVERLAY = SARAH_DIFFICULTY_OVERLAYS.easy;
 const SARAH_HARD_OVERLAY = SARAH_DIFFICULTY_OVERLAYS.hard;
 const SARAH_OPENING = SARAH_SELF_INTRODUCTION_TEMPLATE;
+
+const GEMMA_BASE_PROMPT = composeBase(GEMMA_CORE_IDENTITY, GEMMA_TURN_TAKING_AND_VOICE_HYGIENE, GEMMA_END_OF_INTERVIEW_QA, GEMMA_CLOSING, GEMMA_SESSION_MEMORY_HOOK, GEMMA_MID_SESSION_RECALIBRATION);
+const GEMMA_EASY_OVERLAY = GEMMA_DIFFICULTY_OVERLAYS.easy;
+const GEMMA_HARD_OVERLAY = GEMMA_DIFFICULTY_OVERLAYS.hard;
+const GEMMA_OPENING = GEMMA_SELF_INTRODUCTION_TEMPLATE;
 import { BEHAVIORAL_BANK } from "./questions/behavioral";
 import { CONSULTING_CASE_BANK } from "./questions/consulting-case";
-import { BANKING_BANK } from "./questions/banking";
 import { TECH_BANK } from "./questions/technical";
 
 // --------------------------------------------------------------------------
@@ -80,18 +64,18 @@ import { TECH_BANK } from "./questions/technical";
 // --------------------------------------------------------------------------
 
 export const PERSONAS: Record<PersonaId, PersonaConfig> = {
-  priya: {
-    id: "priya",
-    name: "Priya Patel",
-    firstName: "Priya",
-    firm: "Folio",
-    title: "Senior Recruiter",
-    tagline: "Warm, curious, tests baseline when comfortable.",
-    supportedInterviewTypes: ["behavioral", "case", "technical", "product_sense", "superday", "hard_mode"],
-    defaultDurationMinutes: 30,
+  gemma: {
+    id: "gemma",
+    name: "Gemma Brooks",
+    firstName: "Gemma",
+    firm: "Marcus & Millichap",
+    title: "SVP & Regional Manager",
+    tagline: "Warm, sharp, direct. Screens interns for drive, grit, and sales instinct.",
+    supportedInterviewTypes: ["behavioral", "case", "product_sense", "superday", "hard_mode"],
+    defaultDurationMinutes: 25,
     env: {
-      tavusReplicaId: "TAVUS_REPLICA_ID_PRIYA",
-      elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_PRIYA",
+      tavusReplicaId: "TAVUS_REPLICA_ID_GEMMA",
+      elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_GEMMA",
     },
     voiceSettings: {
       stability: 0.55,
@@ -99,34 +83,10 @@ export const PERSONAS: Record<PersonaId, PersonaConfig> = {
       style: 0.35,
       speakerBoost: true,
     },
-    basePrompt: PRIYA_BASE_PROMPT,
-    easyModeOverlay: PRIYA_EASY_OVERLAY,
-    hardModeOverlay: PRIYA_HARD_OVERLAY,
-    openingInstruction: PRIYA_OPENING,
-  },
-  marcus: {
-    id: "marcus",
-    name: "Marcus Hale",
-    firstName: "Marcus",
-    firm: "Folio",
-    title: "Hiring Manager",
-    tagline: "Direct, efficient, tests clarity under pressure.",
-    supportedInterviewTypes: ["behavioral", "case", "technical", "product_sense", "superday", "hard_mode"],
-    defaultDurationMinutes: 30,
-    env: {
-      tavusReplicaId: "TAVUS_REPLICA_ID_MARCUS",
-      elevenLabsVoiceId: "ELEVENLABS_VOICE_ID_MARCUS",
-    },
-    voiceSettings: {
-      stability: 0.6,
-      similarityBoost: 0.8,
-      style: 0.2,
-      speakerBoost: true,
-    },
-    basePrompt: MARCUS_BASE_PROMPT,
-    easyModeOverlay: MARCUS_EASY_OVERLAY,
-    hardModeOverlay: MARCUS_HARD_OVERLAY,
-    openingInstruction: MARCUS_OPENING,
+    basePrompt: GEMMA_BASE_PROMPT,
+    easyModeOverlay: GEMMA_EASY_OVERLAY,
+    hardModeOverlay: GEMMA_HARD_OVERLAY,
+    openingInstruction: GEMMA_OPENING,
   },
   sarah: {
     id: "sarah",
@@ -174,12 +134,10 @@ export function getQuestionBanksFor(
   }
 
   if (interviewType === "case") {
-    if (personaId === "priya") banks.push(CONSULTING_CASE_BANK);
+    if (personaId === "gemma") banks.push(CONSULTING_CASE_BANK);
   }
 
   if (interviewType === "technical") {
-    if (personaId === "marcus")
-      banks.push(filterByCategory(BANKING_BANK, "banking_technical"), filterByCategory(BANKING_BANK, "banking_fit"));
     if (personaId === "sarah")
       banks.push(
         filterByCategory(TECH_BANK, "tech_coding"),
@@ -190,8 +148,7 @@ export function getQuestionBanksFor(
   // Superday + hard_mode draw from everything the persona supports
   if (interviewType === "superday" || interviewType === "hard_mode") {
     banks.push(BEHAVIORAL_BANK);
-    if (personaId === "priya") banks.push(CONSULTING_CASE_BANK);
-    if (personaId === "marcus") banks.push(BANKING_BANK);
+    if (personaId === "gemma") banks.push(CONSULTING_CASE_BANK);
     if (personaId === "sarah") banks.push(TECH_BANK);
   }
 

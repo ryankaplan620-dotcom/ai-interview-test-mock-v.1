@@ -1,9 +1,13 @@
 /**
  * Tavus persona bootstrap.
  *
- * One-time setup: creates the 3 Folio personas (Priya, Marcus, Sarah)
- * on Tavus using their system prompts from lib/personas. Prints the
- * resulting persona IDs as env var assignments you can paste into .env.local.
+ * One-time setup: creates the Folio personas (Sarah, Gemma) on Tavus using
+ * their system prompts from lib/personas. Prints the resulting persona IDs as
+ * env var assignments you can paste into .env.local.
+ *
+ * NOTE: Gemma already exists on Tavus as p2e9f033911b (wired as her default in
+ * lib/pipeline/tavus-registry.ts). Re-creating her here makes a DUPLICATE —
+ * only run this for a persona that doesn't have a persona ID yet.
  *
  * Usage:
  *   TAVUS_API_KEY=... npx tsx scripts/bootstrap-tavus-personas.ts
@@ -78,7 +82,7 @@ async function main() {
   console.log("Creating Folio personas on Tavus...\n");
 
   const ids: Record<PersonaId, string> = {} as Record<PersonaId, string>;
-  const personaIds: PersonaId[] = ["priya", "marcus", "sarah"];
+  const personaIds: PersonaId[] = ["sarah", "gemma"];
 
   for (const pid of personaIds) {
     try {
