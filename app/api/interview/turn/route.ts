@@ -18,6 +18,7 @@ export const dynamic = "force-dynamic";
 const TurnInput = z.object({
   sessionId: z.string().uuid(),
   isOpening: z.boolean().default(false),
+  elapsedMs: z.number().int().nonnegative().optional(),
   history: z
     .array(
       z.object({
@@ -82,6 +83,63 @@ export async function POST(req: NextRequest) {
   const firstName =
     (profile as { full_name: string | null } | null)?.full_name?.split(" ")[0] ?? null;
 
+  const history = parsed.data.history as ConversationTurn[];
+  const isOpening = parsed.data.isOpening;
+  const elapsedMs = parsed.data.elapsedMs;
+  const turnStartedAtMs = Date.now();
+
+  // Cross-session memory (non-fatal — requires service role key). Loaded
+  // every turn so the system prompt stays consistent; surfaced-count is only
+  // bumped on the opening turn.
+  let memorySummary: string | null = null;
+  try {
+    const { loadMemoriesForSession, formatMemoriesForContext, markMemoriesSurfaced } =
+      await import("@/lib/pipeline/memory");
+    const memories = await loadMemoriesForSession({
+      userId: user.id,
+      personaId: session.persona,
+    });
+    if (memories.length > 0) {
+      const persona = (await import("@/lib/personas")).PERSONAS[session.persona];
+      memorySummary = formatMemoriesForContext(memories, persona.firstName);
+      if (isOpening) {
+        await markMemoriesSurfaced(memories.map((m) => m.id));
+      }
+    }
+  } catch (err) {
+    console.warn(
+      "[interview.turn] memory load failed (non-fatal):",
+      err instanceof Error ? err.message : err,
+    );
+  }
+
+  // Company intelligence (non-fatal). The opening turn warms the intel cache
+  // with a generous timeout; later turns use a short one so a cache miss never
+  // stalls a live conversation.
+  let companyIntelBlock: string | null = null;
+  if (session.target_firm) {
+    try {
+      const { fetchCompanyIntel } = await import("@/lib/intel/pipeline/fetch-company");
+      const { composePromptBlock } = await import("@/lib/intel/injector/compose-prompt-block");
+      const intel = await fetchCompanyIntel(
+        session.target_firm,
+        `session-${session.id}`,
+        isOpening ? 3000 : 750,
+      );
+      companyIntelBlock = composePromptBlock(intel, {
+        interviewType: session.interview_type,
+        role: session.target_role ?? "",
+        level: "mid",
+        difficulty: session.mode,
+      });
+    } catch (err) {
+      console.warn(
+        "[interview.turn] company intel load failed (non-fatal):",
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
   const ctx: ConversationContext = {
     sessionId: session.id,
     personaId: session.persona,
@@ -91,11 +149,9 @@ export async function POST(req: NextRequest) {
     targetRole: session.target_role,
     candidateFirstName: firstName,
     targetDurationMinutes: Math.round(session.duration_seconds / 60),
+    sessionMemorySummary: memorySummary,
+    companyIntelSummary: companyIntelBlock,
   };
-
-  const history = parsed.data.history as ConversationTurn[];
-  const isOpening = parsed.data.isOpening;
-  const turnStartedAtMs = Date.now();
 
   // --------------------------------------------------------------------
   // SSE stream
@@ -119,6 +175,7 @@ export async function POST(req: NextRequest) {
             isOpening,
             emit,
             turnStartedAtMs,
+            elapsedMs,
             signal: req.signal,
           });
         }

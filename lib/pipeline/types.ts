@@ -40,6 +40,16 @@ export interface ConversationContext {
   candidateFirstName?: string | null;
   /** Target duration in minutes — the persona paces against this. */
   targetDurationMinutes: number;
+  /**
+   * Compressed cross-session memory for this (user, persona) pair.
+   * Server-derived in the turn route; never trusted from the client.
+   */
+  sessionMemorySummary?: string | null;
+  /**
+   * Company intelligence digest for the target firm (Pro+ calibration).
+   * Server-derived in the turn route; never trusted from the client.
+   */
+  companyIntelSummary?: string | null;
 }
 
 // --------------------------------------------------------------------------
@@ -55,6 +65,11 @@ export interface TurnRequestPayload {
    * History should be empty when this is true.
    */
   isOpening?: boolean;
+  /**
+   * Milliseconds since call start when this turn was requested. Drives the
+   * silent time-check stage notes that let the persona pace the session.
+   */
+  elapsedMs?: number;
 }
 
 // --------------------------------------------------------------------------

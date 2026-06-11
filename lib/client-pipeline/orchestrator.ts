@@ -76,6 +76,9 @@ class Orchestrator implements OrchestratorHandle {
   private turnAbortController: AbortController | null = null;
   private ended = false;
 
+  /** True while the current interviewer turn is being cut off by the candidate. */
+  private bargedIn = false;
+
   /** Accumulated user turn while we wait for utterance_end. */
   private pendingUserTurn: { text: string; startedAtMs: number; endedAtMs: number } | null = null;
 
@@ -92,6 +95,8 @@ class Orchestrator implements OrchestratorHandle {
       // Buffer the final text — we commit it when utterance_end fires
       this.pendingUserTurn = event;
       this.setState({ currentUserInterim: event.text });
+      // Candidate talking over the interviewer? Real people stop.
+      this.maybeBargeIn(event.text);
     });
     this.stt.onUtteranceEnd(() => {
       this.handleUserUtteranceEnd();
@@ -195,6 +200,7 @@ class Orchestrator implements OrchestratorHandle {
 
   private async runInterviewerTurn(opts: { isOpening: boolean }): Promise<void> {
     if (this.ended) return;
+    this.bargedIn = false;
     this.setState({ phase: "thinking", currentInterviewerLine: "" });
 
     this.avatar.setSpeakingState(false);
@@ -210,9 +216,10 @@ class Orchestrator implements OrchestratorHandle {
         ctx: this.config.ctx,
         history: this.state.transcript,
         isOpening: opts.isOpening,
+        elapsedMs: this.elapsed(),
         signal: this.turnAbortController.signal,
       })) {
-        if (this.ended) break;
+        if (this.ended || this.bargedIn) break;
         await this.handleStreamEvent(event, {
           onText: (delta) => {
             this.setState({
@@ -237,10 +244,13 @@ class Orchestrator implements OrchestratorHandle {
         });
       }
 
-      if (this.ended) return;
+      if (this.ended || this.bargedIn) return;
 
-      // Wait for all audio to finish
-      await Promise.all(speakingTasks);
+      // Wait for all audio to finish. allSettled: a cancelled TTS task must
+      // not be treated as a turn failure (barge-in cancels mid-playback).
+      await Promise.allSettled(speakingTasks);
+
+      if (this.ended || this.bargedIn) return;
 
       this.avatar.setSpeakingState(false);
 
@@ -258,9 +268,43 @@ class Orchestrator implements OrchestratorHandle {
         currentInterviewerLine: null,
       });
     } catch (err) {
-      if (this.ended) return;
+      if (this.ended || this.bargedIn) return;
       this.fail(err instanceof Error ? err.message : "turn_failed");
     }
+  }
+
+  /**
+   * Candidate started talking while the interviewer was mid-turn. If it's
+   * substantive speech (not a backchannel like "yeah" / "got it"), cut the
+   * interviewer off the way a person stops when talked over: kill audio,
+   * abort the stream, commit what was actually said with a "—" cut marker
+   * (the persona prompt knows what that marker means), and go to listening.
+   */
+  private maybeBargeIn(text: string): void {
+    if (this.ended || this.bargedIn) return;
+    if (this.state.phase !== "speaking") return;
+    if (!isSubstantiveSpeech(text)) return;
+
+    this.bargedIn = true;
+    this.turnAbortController?.abort();
+    this.tts.cancel();
+    this.avatar.setSpeakingState(false);
+
+    const spoken = (this.state.currentInterviewerLine ?? "").trim();
+    if (spoken.length > 0) {
+      const now = this.elapsed();
+      this.commitTurn({
+        role: "assistant",
+        content: `${spoken} —`,
+        startedAtMs: now - 100,
+        endedAtMs: now,
+      });
+    }
+
+    this.setState({
+      phase: "listening",
+      currentInterviewerLine: null,
+    });
   }
 
   private async handleStreamEvent(
@@ -333,6 +377,20 @@ class Orchestrator implements OrchestratorHandle {
     this.state = { ...this.state, ...patch };
     this.subscribers.forEach((cb) => cb(this.state));
   }
+}
+
+/**
+ * Distinguish a real interruption from a listener backchannel. Echo from the
+ * interviewer's own TTS audio and "mhm" / "yeah, that makes sense" style
+ * acknowledgments must not cut the turn — require several words of speech.
+ */
+function isSubstantiveSpeech(text: string): boolean {
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z' ]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+  return words.length >= 4;
 }
 
 // --------------------------------------------------------------------------

@@ -16,6 +16,8 @@ export interface TurnStreamOptions {
   ctx: ConversationContext;
   history: ConversationTurn[];
   isOpening: boolean;
+  /** Ms since call start — lets the persona pace against the session clock. */
+  elapsedMs?: number;
   signal?: AbortSignal;
 }
 
@@ -30,6 +32,7 @@ export async function* streamInterviewTurn(opts: TurnStreamOptions): AsyncGenera
       sessionId: opts.sessionId,
       isOpening: opts.isOpening,
       history: opts.history,
+      elapsedMs: opts.elapsedMs,
     }),
     signal: opts.signal,
   });

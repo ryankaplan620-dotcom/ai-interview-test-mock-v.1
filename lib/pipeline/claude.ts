@@ -30,7 +30,12 @@ function getClient(): Anthropic {
 /**
  * Build the persona system prompt + history messages for a Claude call.
  */
-function buildMessages(ctx: ConversationContext, history: ConversationTurn[], isOpening: boolean) {
+function buildMessages(
+  ctx: ConversationContext,
+  history: ConversationTurn[],
+  isOpening: boolean,
+  elapsedMs?: number,
+) {
   const persona = PERSONAS[ctx.personaId];
   const runtimeCtx: PersonaRuntimeContext = {
     mode: ctx.mode,
@@ -39,6 +44,9 @@ function buildMessages(ctx: ConversationContext, history: ConversationTurn[], is
     targetFirm: ctx.targetFirm ?? undefined,
     targetRole: ctx.targetRole ?? undefined,
     targetDurationMinutes: ctx.targetDurationMinutes,
+    sessionSeed: ctx.sessionId,
+    sessionMemorySummary: ctx.sessionMemorySummary ?? undefined,
+    companyIntelSummary: ctx.companyIntelSummary ?? undefined,
   };
   const composed = composeSystemPrompt(persona, runtimeCtx);
 
@@ -61,9 +69,38 @@ function buildMessages(ctx: ConversationContext, history: ConversationTurn[], is
     for (const turn of history) {
       messages.push({ role: turn.role, content: turn.content });
     }
+
+    // Silent clock for the persona — appended to the latest candidate turn so
+    // pacing decisions (digging in vs. landing the plane) happen like a real
+    // interviewer's. Never persisted; rebuilt fresh each turn.
+    const timeNote = buildTimeNote(elapsedMs, ctx.targetDurationMinutes);
+    if (timeNote && messages.length > 0 && messages[messages.length - 1].role === "user") {
+      messages[messages.length - 1] = {
+        role: "user",
+        content: `${messages[messages.length - 1].content}\n\n${timeNote}`,
+      };
+    }
   }
 
   return { system: composed.systemPrompt, messages };
+}
+
+function buildTimeNote(elapsedMs: number | undefined, targetMinutes: number): string | null {
+  if (elapsedMs === undefined || elapsedMs < 0 || targetMinutes <= 0) return null;
+  const elapsedMin = elapsedMs / 60_000;
+  const remainingMin = targetMinutes - elapsedMin;
+
+  // Round elapsed to the nearest minute the way a person glancing at a clock would
+  const shown = Math.max(1, Math.round(elapsedMin));
+
+  if (remainingMin <= 2) {
+    return `[Stage note, silent: about ${shown} of ${targetMinutes} minutes elapsed. Time is up — close warmly within your next turn or two. If candidate questions haven't happened, fold a brief version into the close.]`;
+  }
+  // Wrap-up nudge: ~5 min out on a full-length session, ~3 min on a short one
+  if (remainingMin <= Math.min(5, Math.max(3, targetMinutes * 0.2))) {
+    return `[Stage note, silent: about ${shown} of ${targetMinutes} minutes elapsed. Start landing the plane — wrap the current thread and move toward the candidate's questions.]`;
+  }
+  return `[Stage note, silent: about ${shown} of ${targetMinutes} minutes elapsed.]`;
 }
 
 /**
@@ -79,13 +116,15 @@ export async function streamClaudeTurn(opts: {
   emit: (event: StreamEvent) => void;
   /** Wall-clock ms since call start when this turn began. */
   turnStartedAtMs: number;
+  /** Ms since call start as reported by the client — drives time stage notes. */
+  elapsedMs?: number;
   signal?: AbortSignal;
 }): Promise<string> {
-  const { ctx, history, isOpening, emit, turnStartedAtMs, signal } = opts;
+  const { ctx, history, isOpening, emit, turnStartedAtMs, elapsedMs, signal } = opts;
 
   emit({ type: "start", turnStartedAtMs });
 
-  const { system, messages } = buildMessages(ctx, history, isOpening);
+  const { system, messages } = buildMessages(ctx, history, isOpening, elapsedMs);
 
   const stream = await getClient().messages.stream(
     {

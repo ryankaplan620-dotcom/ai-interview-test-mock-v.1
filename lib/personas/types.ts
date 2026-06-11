@@ -26,6 +26,19 @@ export interface PersonaRuntimeContext {
   /** Interview format for this session. */
   interviewType: InterviewType;
 
+  /**
+   * Stable per-session seed for question sampling. Pass the session id so the
+   * persona's private question reserve is identical on every turn — without it
+   * the system prompt churns each turn and busts the prompt cache.
+   */
+  sessionSeed?: string;
+
+  /**
+   * Company intelligence digest for the target firm (Pro+ firm calibration).
+   * Composed upstream by lib/intel; substituted into the persona's intel hook.
+   */
+  companyIntelSummary?: string;
+
   /** Candidate-facing name (from profile) — the interviewer addresses them directly. */
   candidateFirstName?: string;
 
@@ -110,6 +123,30 @@ export interface PersonaConfig {
 
   /** Easy-mode overlay — gentler framing for first-time candidates. */
   easyModeOverlay: string;
+
+  /** Standard-mode overlay — the persona's explicit default register. */
+  standardModeOverlay?: string;
+
+  /** Stacked on top for the deliberate hard_mode interview format. */
+  trueHardOverlay?: string;
+
+  /**
+   * Persona-authored guidance per interview format. When present for the
+   * session's type it replaces the generic one-line type guidance.
+   */
+  interviewTypeModules?: Partial<Record<InterviewType, string>>;
+
+  /**
+   * Cross-session memory hook. Must contain a trailing {{SESSION_MEMORY}}
+   * placeholder; injected only when a memory summary exists.
+   */
+  sessionMemoryHook?: string;
+
+  /**
+   * Company intelligence hook. Must contain a trailing {{COMPANY_INTEL}}
+   * placeholder; injected only when an intel digest exists.
+   */
+  companyIntelHook?: string;
 
   /** Opening move — persona-specific instruction for how the call begins. */
   openingInstruction: string;
