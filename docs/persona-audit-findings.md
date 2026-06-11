@@ -1,3 +1,5 @@
+> **Historical document (roster has since changed).** This audit covers personas including David and Jennifer, which were later removed; the current roster is Sarah + Gemma. Kept for the reasoning behind persona-quality decisions.
+
 # Persona Audit — Side-by-side comparison + findings
 
 **Context:** Early testing observation — Sarah's persona feels the most coherent (voice, face, conversation flow). The rest feel less polished. This audit was commissioned to find the measurable differences between Sarah and the others, and fix them where the fix is obviously correct.

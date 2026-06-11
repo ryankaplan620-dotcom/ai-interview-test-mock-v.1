@@ -14,17 +14,17 @@ Before starting, confirm you have:
 
 1. **A Stripe account in test mode.** Dashboard top-left should say "Test mode."
 2. **Three test-mode products created** matching Folio's three tiers:
-   - Cycle — $49 every 90 days (or quarterly / custom — the invoice interval)
+   - Basic — $49 every 90 days (or quarterly / custom — the invoice interval)
    - Pro — $149 every 365 days
    - Max — $249 every 365 days
-   Each should have `tier` as a price metadata key (Cycle: `tier=cycle`, etc.)
+   Each should have `tier` as a price metadata key (Basic: `tier=basic`, etc.)
 3. **Stripe CLI installed** — `brew install stripe/stripe-cli/stripe` or equivalent.
 4. **Local dev server running** on `http://localhost:3000`.
 5. **`.env.local` populated** with:
    ```
    STRIPE_SECRET_KEY=sk_test_...
    STRIPE_WEBHOOK_SECRET=whsec_... (from stripe listen output, see below)
-   STRIPE_PRICE_CYCLE=price_test_... (the Cycle tier price ID)
+   STRIPE_PRICE_BASIC=price_test_... (the Basic tier price ID)
    STRIPE_PRICE_PRO=price_test_...
    STRIPE_PRICE_MAX=price_test_...
    ```
@@ -56,7 +56,7 @@ The first line of output will be:
 
 **What you're testing:** a user starts a 15-day trial; the `subscriptions` row gets created with `status=trialing`, `cycle_end=trial_end`, counters at 0.
 
-1. In your app, click through a full signup flow for the Cycle tier.
+1. In your app, click through a full signup flow for the Basic tier.
 2. Watch `stripe listen` output — you should see (in order):
    - `checkout.session.completed` → 200
    - `customer.subscription.created` → 200
@@ -64,7 +64,7 @@ The first line of output will be:
 
 **Expected row state:**
 ```
-tier:                          cycle
+tier:                          basic
 status:                        trialing
 cycle_start:                   today
 cycle_end:                     today + 15 days (trial end)
@@ -103,12 +103,12 @@ Stripe will fire:
 ```
 status:                        active
 cycle_start:                   today (end of trial = now)
-cycle_end:                     today + 90 days (Cycle) OR + 365 days (Pro/Max)
+cycle_end:                     today + 90 days (Basic) OR + 365 days (Pro/Max)
 sessions_used_this_cycle:      0  (reset by invoice.paid)
 trial_end:                     still set (historical record)
 ```
 
-**If `cycle_end` is wrong:** your Stripe product's billing interval doesn't match the tier's expected cycle length. Cycle tier must bill every 90 days (or "custom 3 months"), Pro and Max every year.
+**If `cycle_end` is wrong:** your Stripe product's billing interval doesn't match the tier's expected cycle length. Basic tier must bill every 90 days (or "custom 3 months"), Pro and Max every year.
 
 **If `invoice.paid` returns 500:** the `stripe.subscriptions.retrieve` call inside `handleInvoicePaid` failed. Most common cause: `STRIPE_SECRET_KEY` is wrong or missing from `.env.local`. The dispatcher uses it to re-fetch the subscription for the new period window.
 
@@ -118,7 +118,7 @@ trial_end:                     still set (historical record)
 
 **What you're testing:** a user consumes their included sessions, starts an overage session, the `payment_intent.succeeded` event fires, `overage_purchases` row is created.
 
-1. Manually set `sessions_used_this_cycle` to the tier's included count in Supabase (3 for Cycle, 8 for Pro, 24 for Max) to simulate a user who's used all included sessions:
+1. Manually set `sessions_used_this_cycle` to the tier's included count in Supabase (3 for Basic, 8 for Pro, 24 for Max) to simulate a user who's used all included sessions:
    ```sql
    update subscriptions
    set sessions_used_this_cycle = 3
@@ -139,7 +139,7 @@ trial_end:                     still set (historical record)
 
 ---
 
-## Step 5 — Cycle renewal
+## Step 5 — Basic renewal
 
 **What you're testing:** end of cycle, Stripe bills again, `invoice.paid` fires, counters reset.
 
@@ -257,7 +257,7 @@ export const config = {
 - [ ] Trial signup creates a `subscriptions` row with `status=trialing`, counters at 0
 - [ ] Trial conversion flips status to `active` and resets counters
 - [ ] Overage purchase creates an `overage_purchases` row; counter bumps from the session-creation path
-- [ ] Cycle renewal resets counters and slides cycle window forward
+- [ ] Basic renewal resets counters and slides cycle window forward
 - [ ] Payment failure sets `status=past_due` without touching counters
 - [ ] Cancellation (two stages) handled correctly
 - [ ] Replay of any event is idempotent

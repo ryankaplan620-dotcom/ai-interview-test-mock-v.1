@@ -13,6 +13,8 @@ import { PERSONAS } from "@/lib/personas";
 import { env, shouldMock } from "./env";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 import type { FeedbackPayload, FeedbackQuote } from "./feedback-types";
+import { formatSeconds } from "@/lib/utils/time";
+import { formatInterviewType } from "@/lib/utils/session-labels";
 
 // --------------------------------------------------------------------------
 // Input
@@ -249,7 +251,7 @@ function buildFeedbackUserPrompt(input: GenerateFeedbackInput, interviewerFirstN
 
   lines.push(`## Session context`);
   lines.push(`Interviewer: ${interviewerFirstName}`);
-  lines.push(`Format: ${humanInterviewType(input.interviewType)}`);
+  lines.push(`Format: ${formatInterviewType(input.interviewType)}`);
   lines.push(`Difficulty: ${input.mode}`);
   if (input.targetFirm) lines.push(`Target firm: ${input.targetFirm}`);
   if (input.targetRole) lines.push(`Target role: ${input.targetRole}`);
@@ -265,7 +267,7 @@ function buildFeedbackUserPrompt(input: GenerateFeedbackInput, interviewerFirstN
   for (const turn of input.turns) {
     const label = turn.role === "user" ? "CANDIDATE" : interviewerFirstName.toUpperCase();
     const t = Math.round(turn.startedAtMs / 1000);
-    lines.push(`[${formatTime(t)}] ${label}: ${turn.content}`);
+    lines.push(`[${formatSeconds(t)}] ${label}: ${turn.content}`);
   }
 
   lines.push("");
@@ -275,24 +277,6 @@ function buildFeedbackUserPrompt(input: GenerateFeedbackInput, interviewerFirstN
   );
 
   return lines.join("\n");
-}
-
-function humanInterviewType(t: InterviewType): string {
-  const map: Record<InterviewType, string> = {
-    behavioral: "Behavioral",
-    case: "Case",
-    technical: "Technical",
-    product_sense: "Product sense",
-    superday: "Superday",
-    hard_mode: "Hard mode",
-  };
-  return map[t];
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 // --------------------------------------------------------------------------

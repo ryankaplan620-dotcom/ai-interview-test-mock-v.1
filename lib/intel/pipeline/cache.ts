@@ -150,6 +150,7 @@ async function getSupabaseClient(): Promise<any | null> {
     const { createServerClient } = await import("@/lib/db/server");
     // The intel tables aren't in the generated Database type yet, so we
     // return `any` to access them until types are regenerated.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return createServerClient() as any;
   } catch {
     console.warn(

@@ -21,6 +21,8 @@ import type {
   NotableMoment,
   TranscriptTurn,
 } from "@/types/supabase";
+import { formatSeconds } from "@/lib/utils/time";
+import { formatInterviewType, formatSessionMode } from "@/lib/utils/session-labels";
 
 // --------------------------------------------------------------------------
 // Types
@@ -128,7 +130,7 @@ export default async function SessionInsightsPage({ params, searchParams }: Page
           {persona.firstName} at {persona.firm}
         </h1>
         <p className="mt-2 font-sans text-[14px] text-text-secondary">
-          {humanInterviewType(session.interview_type)} · {humanMode(session.mode)}
+          {formatInterviewType(session.interview_type)} · {formatSessionMode(session.mode)}
           {session.target_firm ? ` · targeting ${session.target_firm}` : ""}
           {session.actual_duration_seconds !== null
             ? ` · ${Math.round(session.actual_duration_seconds / 60)} min`
@@ -415,7 +417,7 @@ function PerceptionTab({ analytics }: { analytics: SessionAnalytics | null }) {
                     {moment.type.toUpperCase()}
                   </span>
                   <span className="font-mono text-[11px] text-text-tertiary">
-                    {formatTimestamp(moment.timestamp_seconds)}
+                    {formatSeconds(moment.timestamp_seconds)}
                   </span>
                 </div>
                 <p className="mt-2 font-sans text-[13px] text-text-primary">
@@ -462,7 +464,7 @@ function TranscriptTab({
         >
           <div className="w-20 flex-shrink-0 pt-0.5">
             <p className="font-mono text-[11px] text-text-tertiary">
-              {formatTimestamp(turn.started_at_seconds)}
+              {formatSeconds(turn.started_at_seconds)}
             </p>
             <p
               className={[
@@ -652,7 +654,7 @@ function NetworkTab({ analytics }: { analytics: SessionAnalytics | null }) {
                     {activity.activity}
                   </span>
                   <span className="font-mono text-[11px] text-text-tertiary">
-                    {formatTimestamp(activity.timestamp_seconds)}
+                    {formatSeconds(activity.timestamp_seconds)}
                   </span>
                 </div>
                 {activity.description && (
@@ -713,7 +715,7 @@ function EmotionRow({ state }: { state: EmotionalState }) {
         <div className="flex items-center gap-2">
           {state.timestamp_seconds !== undefined && (
             <span className="font-mono text-[10px] text-text-tertiary">
-              {formatTimestamp(state.timestamp_seconds)}
+              {formatSeconds(state.timestamp_seconds)}
             </span>
           )}
           <span className="font-mono text-[11px] tabular-nums text-text-secondary">{pct}%</span>
@@ -761,7 +763,7 @@ function ToneShiftItem({ shift }: { shift: ToneShift }) {
         {shift.to}
       </span>
       <span className="ml-auto font-mono text-[11px] text-text-tertiary">
-        {formatTimestamp(shift.at_seconds)}
+        {formatSeconds(shift.at_seconds)}
       </span>
     </div>
   );
@@ -803,33 +805,6 @@ function DiscussionPointRow({ point }: { point: KeyDiscussionPoint }) {
 
 function isValidTab(tab: string | undefined): tab is TabId {
   return tab === "perception" || tab === "transcript" || tab === "emotional" || tab === "network";
-}
-
-function formatTimestamp(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-function humanInterviewType(t: InterviewType): string {
-  const map: Record<InterviewType, string> = {
-    behavioral: "Behavioral",
-    case: "Case",
-    technical: "Technical",
-    product_sense: "Product sense",
-    superday: "Superday",
-    hard_mode: "Hard mode",
-  };
-  return map[t];
-}
-
-function humanMode(m: SessionMode): string {
-  const map: Record<SessionMode, string> = {
-    easy: "Easy",
-    standard: "Standard",
-    hard: "Hard",
-  };
-  return map[m];
 }
 
 function connectionQualityStyle(quality: string): string {

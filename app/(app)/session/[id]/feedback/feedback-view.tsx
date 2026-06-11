@@ -4,6 +4,8 @@ import Link from "next/link";
 import type { FeedbackPayload, FeedbackQuote } from "@/lib/pipeline/feedback-types";
 import type { InterviewType, SessionMode } from "@/types/supabase";
 import { QaFeedbackPanel } from "./qa-panel";
+import { formatSeconds } from "@/lib/utils/time";
+import { formatInterviewType, formatSessionMode } from "@/lib/utils/session-labels";
 
 export interface SessionMeta {
   id: string;
@@ -48,7 +50,7 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
           {sessionMeta.personaFirstName} at {sessionMeta.personaFirm}
         </h1>
         <p className="mt-3 font-sans text-[14px] text-text-secondary">
-          {humanInterviewType(sessionMeta.interviewType)} · {humanMode(sessionMeta.mode)}
+          {formatInterviewType(sessionMeta.interviewType)} · {formatSessionMode(sessionMeta.mode)}
           {sessionMeta.targetFirm ? ` · targeting ${sessionMeta.targetFirm}` : ""}
           {sessionMeta.actualDurationSeconds !== null
             ? ` · ${Math.round(sessionMeta.actualDurationSeconds / 60)} min`
@@ -240,7 +242,7 @@ function QuoteCard({ quote }: { quote: FeedbackQuote }) {
           </span>
           {typeof quote.timestamp_seconds === "number" && (
             <span className="font-mono text-[10px] tracking-label text-text-tertiary">
-              {formatTimestamp(quote.timestamp_seconds)}
+              {formatSeconds(quote.timestamp_seconds)}
             </span>
           )}
         </div>
@@ -296,29 +298,3 @@ function scoreLabel(v: number): string {
   return "Needs work";
 }
 
-function humanInterviewType(t: InterviewType): string {
-  const map: Record<InterviewType, string> = {
-    behavioral: "Behavioral",
-    case: "Case",
-    technical: "Technical",
-    product_sense: "Product sense",
-    superday: "Superday",
-    hard_mode: "Hard mode",
-  };
-  return map[t];
-}
-
-function humanMode(m: SessionMode): string {
-  const map: Record<SessionMode, string> = {
-    easy: "Easy",
-    standard: "Standard",
-    hard: "Hard",
-  };
-  return map[m];
-}
-
-function formatTimestamp(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}

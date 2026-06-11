@@ -87,7 +87,7 @@ folio-web/
 - `RESEND_AUDIENCE_ID` — Resend audience ID for the waitlist
 - `WAITLIST_NOTIFY_EMAIL` — email address to notify of new signups
 
-See `FOLIO-SETUP-PLAN.md` for the complete environment variable list that Phase 1 codebase adds.
+See `.env.example` for the complete annotated environment variable list.
 
 ---
 
@@ -104,7 +104,7 @@ vercel link
 vercel --prod
 ```
 
-Point folio.io DNS to Vercel per the instructions in `FOLIO-SETUP-PLAN.md` Phase 6.
+Point folio.io DNS to Vercel (Project Settings → Domains).
 
 ---
 

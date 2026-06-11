@@ -16,6 +16,7 @@ import { ElevenLabsTTSClient } from "@/lib/client-pipeline/elevenlabs-tts";
 import { TavusAvatarClient } from "@/lib/client-pipeline/tavus-avatar";
 import { createAudioSink, type AudioSink } from "@/lib/client-pipeline/audio-sink";
 import type { STTClient, TTSClient, AvatarClient } from "@/lib/client-pipeline/types";
+import { formatInterviewType, formatSessionMode } from "@/lib/utils/session-labels";
 
 // --------------------------------------------------------------------------
 // Prop types (all client-safe — no prompts, no env IDs)
@@ -512,7 +513,7 @@ function PreCallScreen({
             <div className="border-t border-white/[0.08] pt-4">
               <p className="font-mono text-[10px] tracking-label text-text-tertiary">FORMAT</p>
               <p className="mt-1 font-sans text-[14px] text-text-primary">
-                {formatLabel(session.interview_type)} · {modeLabel(session.mode)}
+                {formatInterviewType(session.interview_type)} · {formatSessionMode(session.mode)}
               </p>
             </div>
 
@@ -614,7 +615,7 @@ function LiveCallScreen({
         <div className="flex items-center gap-3">
           <FolioMark className="h-5 w-5 text-accent" />
           <span className="font-mono text-[11px] tracking-label text-text-tertiary">
-            {session.interview_type.replace(/_/g, " ").toUpperCase()} · {modeLabel(session.mode).toUpperCase()}
+            {session.interview_type.replace(/_/g, " ").toUpperCase()} · {formatSessionMode(session.mode).toUpperCase()}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -1113,24 +1114,8 @@ function formatElapsed(seconds: number): string {
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
-function formatLabel(t: InterviewType): string {
-  const map: Record<InterviewType, string> = {
-    behavioral: "Behavioral",
-    case: "Case",
-    technical: "Technical",
-    product_sense: "Product sense",
-    superday: "Superday",
-    hard_mode: "Hard mode",
-  };
-  return map[t];
-}
-
-function modeLabel(mode: SessionMode): string {
-  return mode === "easy" ? "Easy" : mode === "hard" ? "Hard" : "Standard";
-}
-
 function interviewPitchLine(persona: SessionViewPersona, session: SessionViewSession): string {
-  const format = formatLabel(session.interview_type).toLowerCase();
+  const format = formatInterviewType(session.interview_type).toLowerCase();
   return `${persona.firstName} is running a ${format} interview. Keep it real — that's where the value is.`;
 }
 

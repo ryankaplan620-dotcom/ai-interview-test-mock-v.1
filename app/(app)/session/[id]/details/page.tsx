@@ -14,6 +14,8 @@ import type {
   ToneShift,
   KeyDiscussionPoint,
 } from "@/types/supabase";
+import { formatSeconds } from "@/lib/utils/time";
+import { formatInterviewType, formatSessionMode } from "@/lib/utils/session-labels";
 
 interface PageProps {
   params: { id: string };
@@ -111,7 +113,7 @@ export default async function SessionDetailsPage({ params }: PageProps) {
           {persona.firstName} at {persona.firm}
         </h1>
         <p className="mt-2 font-sans text-[14px] text-text-secondary">
-          {humanInterviewType(session.interview_type)} · {humanMode(session.mode)}
+          {formatInterviewType(session.interview_type)} · {formatSessionMode(session.mode)}
           {session.target_firm ? ` · targeting ${session.target_firm}` : ""}
           {session.actual_duration_seconds !== null
             ? ` · ${Math.round(session.actual_duration_seconds / 60)} min`
@@ -259,8 +261,8 @@ export default async function SessionDetailsPage({ params }: PageProps) {
             <dl className="mt-3 space-y-3">
               <MetaRow label="Persona" value={persona.name} />
               <MetaRow label="Firm" value={persona.firm} />
-              <MetaRow label="Interview type" value={humanInterviewType(session.interview_type)} />
-              <MetaRow label="Mode" value={humanMode(session.mode)} />
+              <MetaRow label="Interview type" value={formatInterviewType(session.interview_type)} />
+              <MetaRow label="Mode" value={formatSessionMode(session.mode)} />
               {session.actual_duration_seconds !== null && (
                 <MetaRow
                   label="Duration"
@@ -361,7 +363,7 @@ function EmotionPill({ state }: { state: EmotionalState }) {
       </span>
       {state.timestamp_seconds !== undefined && (
         <span className="text-text-tertiary">
-          {formatTimestamp(state.timestamp_seconds)}
+          {formatSeconds(state.timestamp_seconds)}
         </span>
       )}
     </span>
@@ -375,7 +377,7 @@ function ToneShiftRow({ shift }: { shift: ToneShift }) {
       <span className="text-text-tertiary">→</span>
       <span className="text-text-primary">{shift.to}</span>
       <span className="ml-auto font-mono text-[10px] text-text-tertiary">
-        {formatTimestamp(shift.at_seconds)}
+        {formatSeconds(shift.at_seconds)}
       </span>
     </li>
   );
@@ -424,29 +426,3 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 // Formatting helpers
 // ==========================================================================
 
-function humanInterviewType(t: InterviewType): string {
-  const map: Record<InterviewType, string> = {
-    behavioral: "Behavioral",
-    case: "Case",
-    technical: "Technical",
-    product_sense: "Product sense",
-    superday: "Superday",
-    hard_mode: "Hard mode",
-  };
-  return map[t];
-}
-
-function humanMode(m: SessionMode): string {
-  const map: Record<SessionMode, string> = {
-    easy: "Easy",
-    standard: "Standard",
-    hard: "Hard",
-  };
-  return map[m];
-}
-
-function formatTimestamp(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}

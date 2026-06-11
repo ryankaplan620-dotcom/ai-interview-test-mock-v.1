@@ -5,7 +5,7 @@
  * them back into future sessions with the same persona. Memory is per-user
  * AND per-persona: each interviewer builds an independent read of the
  * candidate across their sessions with that candidate. Marcus does not see
- * what Priya noted, and vice versa.
+ * what Gemma noted, and vice versa.
  *
  * Flow:
  *   1. After feedback is persisted in /api/feedback/generate, we call
@@ -34,6 +34,7 @@ import { PERSONAS } from "@/lib/personas";
 import { env, shouldMock } from "./env";
 import { createServiceClient } from "@/lib/db/service";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
+import { formatInterviewType } from "@/lib/utils/session-labels";
 
 // --------------------------------------------------------------------------
 // Tunables
@@ -359,7 +360,7 @@ function buildMemoryUserPrompt(input: MemoryExtractionInput, firstName: string):
 
   lines.push(`## Session context`);
   lines.push(`Interviewer: ${firstName} (you)`);
-  lines.push(`Format: ${humanInterviewType(input.interviewType)}`);
+  lines.push(`Format: ${formatInterviewType(input.interviewType)}`);
   lines.push(`Difficulty: ${input.mode}`);
   if (input.targetFirm) lines.push(`Candidate is targeting: ${input.targetFirm}`);
   if (input.targetRole) lines.push(`For role: ${input.targetRole}`);
@@ -390,14 +391,3 @@ function buildMemoryUserPrompt(input: MemoryExtractionInput, firstName: string):
   return lines.join("\n");
 }
 
-function humanInterviewType(t: InterviewType): string {
-  const map: Record<InterviewType, string> = {
-    behavioral: "Behavioral",
-    case: "Case",
-    technical: "Technical",
-    product_sense: "Product sense",
-    superday: "Superday",
-    hard_mode: "Hard mode",
-  };
-  return map[t];
-}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { endSession } from "./actions";
 import type { InterviewType, SessionMode, PersonaId } from "@/types/supabase";
+import { formatSeconds } from "@/lib/utils/time";
 
 // --------------------------------------------------------------------------
 // Agent portraits — product roster is Sarah (v.2) and Gemma (v.3) only.
@@ -345,7 +346,7 @@ function LiveScreen({
         </div>
         <div className="flex items-center gap-4">
           <p className="font-mono text-[13px] tabular-nums text-text-primary">
-            {formatTime(elapsedSeconds)}
+            {formatSeconds(elapsedSeconds)}
           </p>
           <button
             onClick={onEnd}
@@ -410,8 +411,3 @@ function humanMode(m: SessionMode): string {
   return { easy: "Easy", standard: "Standard", hard: "Hard" }[m];
 }
 
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SessionStatus, PersonaId, InterviewType } from "@/types/supabase";
 import { scoreColorClass } from "@/lib/utils/score-color";
+import { formatInterviewType } from "@/lib/utils/session-labels";
 
 // ==========================================================================
 // Types
@@ -193,18 +194,6 @@ function personaVersion(p: PersonaId): string | null {
     gemma: "v.3",
   };
   return map[p] ?? null;
-}
-
-function formatInterviewType(t: InterviewType): string {
-  const map: Record<InterviewType, string> = {
-    behavioral: "Behavioral",
-    case: "Case",
-    technical: "Technical",
-    product_sense: "Product sense",
-    superday: "Superday",
-    hard_mode: "Hard mode",
-  };
-  return map[t];
 }
 
 function formatDuration(session: SessionRowData): string {

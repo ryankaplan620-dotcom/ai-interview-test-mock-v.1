@@ -7,8 +7,8 @@
  * For Phase G.1 we use stock replicas and create the three Folio personas
  * programmatically on first use. The resulting IDs are stored in env vars:
  *
- *   TAVUS_PERSONA_ID_PRIYA=p...
- *   TAVUS_REPLICA_ID_PRIYA=r...  (which stock replica face)
+ *   TAVUS_PERSONA_ID_SARAH=p...
+ *   TAVUS_REPLICA_ID_SARAH=r...  (which stock replica face)
  *   ... for each of the three personas
  *
  * Phase G.2 will migrate to custom-trained replicas per persona.

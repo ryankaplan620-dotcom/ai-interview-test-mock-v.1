@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { DrillType, DrillStatus } from "@/types/supabase";
 import { abandonDrill } from "../actions";
-import { scoreColorClass } from "@/lib/utils/score-color";
+import { scoreColorClass, scoreColorBarClass } from "@/lib/utils/score-color";
+import { formatSeconds } from "@/lib/utils/time";
 
 // ==========================================================================
 // Props
@@ -295,7 +296,7 @@ export function PracticeView({ drill, attempts: initialAttempts, mockMode }: Pro
               className={[
                 "h-1.5 flex-1 rounded-full transition-colors",
                 attempt
-                  ? scoreColorBg(attempt.overall_score ?? 0)
+                  ? scoreColorBarClass(attempt.overall_score ?? 0)
                   : isActive
                     ? "bg-accent/40"
                     : "bg-ink-border/40",
@@ -474,7 +475,7 @@ function RecordingPhase({
       </div>
       <p className="mt-6 font-mono text-[11px] tracking-label text-accent">RECORDING</p>
       <p className="mt-2 font-display text-[42px] font-bold tracking-[-0.03em] tabular-nums text-text-primary">
-        {formatTime(elapsedSeconds)}
+        {formatSeconds(elapsedSeconds)}
       </p>
       <p
         className={[
@@ -482,7 +483,7 @@ function RecordingPhase({
           approaching ? "text-amber-300/90" : "text-text-tertiary",
         ].join(" ")}
       >
-        {formatTime(remaining)} REMAINING
+        {formatSeconds(remaining)} REMAINING
       </p>
 
       <button
@@ -805,25 +806,12 @@ function introBody(drill: PracticeViewDrill): string {
   return `Between each rep, you'll get specific feedback. ${max}`;
 }
 
-function scoreColorBg(v: number): string {
-  if (v >= 85) return "bg-accent";
-  if (v >= 70) return "bg-text-primary/50";
-  if (v >= 55) return "bg-amber-300/70";
-  return "bg-rose-300/70";
-}
-
 function paceLabel(wpm: number): string {
   if (wpm === 0) return "—";
   if (wpm < 110) return "Slow — could be intentional or unsure";
   if (wpm <= 160) return "Well-paced for interview speech";
   if (wpm <= 180) return "Fast — still clear";
   return "Too fast — rushing";
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 function pickMimeType(): string | null {

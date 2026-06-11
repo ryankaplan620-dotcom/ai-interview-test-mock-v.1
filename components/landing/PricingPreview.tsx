@@ -13,7 +13,7 @@ const tiers = [
     preamble: null as string | null,
     features: [
       "1 interview session (10 min)",
-      "Single persona (Priya)",
+      "All interviewer personas",
       "Folio Score with basic feedback",
       "Limited session replay",
     ],
