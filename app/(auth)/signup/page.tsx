@@ -69,10 +69,10 @@ export default function SignupPage() {
     <div className="w-full max-w-[400px]">
       <div className="rounded-2xl border border-ink-border bg-ink-surface p-8 sm:p-10">
         <h1 className="font-display text-[26px] font-bold tracking-heading text-text-primary">
-          Start your free trial
+          Create your account
         </h1>
         <p className="mt-2 font-sans text-[14px] text-text-secondary">
-          15 days, all features, no credit card.
+          First session free. Paid plans include a 15-day trial.
         </p>
 
         <form onSubmit={handleSignup} className="mt-8 space-y-5">
