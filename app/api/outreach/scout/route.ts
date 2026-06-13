@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
     // Persist. Try the rich shape first (enrichment JSONB column). If that
     // column doesn't exist yet (migration 0013 not applied), fall back to the
     // legacy shape so we still keep contact rows.
+    // Return persisted rows (with IDs) so the client can update its state
+    // immediately without requiring a page refresh.
+    let savedContacts: unknown[] = [];
     try {
       const supabase = createServerClient();
 
@@ -56,7 +59,9 @@ export async function POST(req: NextRequest) {
       }));
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const insertResult = await (supabase.from("outreach_contacts") as any).insert(rich);
+      const insertResult = await (supabase.from("outreach_contacts") as any)
+        .insert(rich)
+        .select("id, name, title, company, status, relevance_reason, suggested_approach, enrichment, created_at");
 
       if (insertResult.error) {
         // Most likely cause: enrichment column / relevance_reason column missing.
@@ -69,13 +74,18 @@ export async function POST(req: NextRequest) {
           status: "suggested",
         }));
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase.from("outreach_contacts") as any).insert(legacy);
+        const legacyResult = await (supabase.from("outreach_contacts") as any)
+          .insert(legacy)
+          .select("id, name, title, company, status, created_at");
+        savedContacts = legacyResult.data ?? [];
+      } else {
+        savedContacts = insertResult.data ?? [];
       }
     } catch (dbErr) {
       console.warn("[outreach.scout] DB insert failed (non-fatal):", dbErr);
     }
 
-    return NextResponse.json({ contacts });
+    return NextResponse.json({ contacts, savedContacts });
   } catch (err) {
     console.error("[outreach.scout] error:", err);
     return NextResponse.json({ error: "scout_failed" }, { status: 500 });

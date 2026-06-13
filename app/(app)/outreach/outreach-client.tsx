@@ -103,8 +103,15 @@ export function OutreachClient({
         body: JSON.stringify({ targetCompany: targetCompany.trim(), targetRole: targetRole.trim(), targetCity: targetCity.trim() || undefined }),
       });
       if (!res.ok) throw new Error("Scout request failed");
-      const { contacts: newContacts } = await res.json();
-      setScoutResults(newContacts);
+      const { contacts: rawContacts, savedContacts } = await res.json();
+      if (savedContacts && savedContacts.length > 0) {
+        // Contacts persisted — prepend with IDs so "Draft email" is available immediately.
+        setContacts((prev) => [...(savedContacts as OutreachContact[]), ...prev]);
+        setScoutResults([]);
+      } else {
+        // DB insert failed; show raw results as a read-only fallback.
+        setScoutResults(rawContacts ?? []);
+      }
     } catch {
       setScoutError("Failed to find contacts. Please try again.");
     } finally {

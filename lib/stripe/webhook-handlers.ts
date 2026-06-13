@@ -25,7 +25,7 @@
 import type Stripe from "stripe";
 import { TIERS } from "@/lib/tiers";
 import type { SubscriptionTier, SubscriptionStatus } from "@/types/supabase";
-import { sendTrialEndingEmail } from "@/lib/email/client";
+import { sendTrialEndingEmail, sendPaymentFailedEmail } from "@/lib/email/client";
 
 // --------------------------------------------------------------------------
 // Dependencies — injected so the handlers can be tested
@@ -302,10 +302,31 @@ export async function handlePaymentFailed(
   if (!invoice.subscription) return;
   const subId =
     typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription.id;
+
   await supabase
     .from("subscriptions")
     .update({ status: "past_due" })
     .eq("stripe_subscription_id", subId);
+
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("user_id")
+    .eq("stripe_subscription_id", subId)
+    .maybeSingle();
+
+  const userId = (sub as { user_id?: string } | null)?.user_id;
+  if (!userId) return;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const email = (profile as { email?: string } | null)?.email;
+  if (!email) return;
+
+  await sendPaymentFailedEmail({ to: email });
 }
 
 // --------------------------------------------------------------------------
