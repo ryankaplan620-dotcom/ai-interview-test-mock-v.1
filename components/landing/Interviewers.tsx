@@ -57,10 +57,10 @@ export function Interviewers() {
 
               <div className="p-6">
                 <div className="flex items-center gap-2.5">
-                  <p className="font-display text-[20px] font-bold tracking-[-0.02em] text-gray-900">
+                  <p className={["font-display text-[20px] font-bold tracking-[-0.02em]", agent.alpha ? "text-gray-400" : "text-gray-900"].join(" ")}>
                     {agent.name}
                   </p>
-                  <span className="inline-flex items-center rounded-full bg-accent px-2 py-0.5 font-mono text-[10px] font-semibold leading-[1.6] text-ink">
+                  <span className={["inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold leading-[1.6]", agent.alpha ? "bg-gray-100 text-gray-400" : "bg-accent text-ink"].join(" ")}>
                     {agent.version}
                   </span>
                 </div>

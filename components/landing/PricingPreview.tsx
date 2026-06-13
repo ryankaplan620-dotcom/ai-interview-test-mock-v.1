@@ -163,7 +163,7 @@ export function PricingPreview() {
 
       <ScrollReveal className="mt-10 text-center">
         <p className="text-[13px] text-gray-400">
-          First interview is free. Paid plans include a 15-day trial.
+          First session is free. Every paid plan includes a 15-day trial, no card required.
         </p>
         <ArrowLink href="/pricing" className="mt-3 justify-center">
           See full comparison
