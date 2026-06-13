@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const stats = [
   { value: "200+", label: "Companies" },
   { value: "3", label: "Interviewer personas" },
-  { value: "4", label: "Score dimensions" },
+  { value: "3", label: "Score dimensions" },
   { value: "90s", label: "To first score" },
 ];
 

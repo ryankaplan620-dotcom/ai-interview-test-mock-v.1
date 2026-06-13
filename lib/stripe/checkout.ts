@@ -29,16 +29,20 @@ export async function createSubscriptionCheckout({
   const stripe = requireStripe();
   const tierConfig = TIERS[tier];
 
-  // Basic tier requires verified-student status
+  // Basic tier requires verified-student status.
+  // Check student_verifications directly — user_tiers only includes users
+  // who already have an active subscription, so it would always miss first-time buyers.
   if (tierConfig.requiresStudentVerification) {
     const supabase = createServiceRoleClient();
-    const { data: tierView } = await supabase
-      .from("user_tiers")
-      .select("is_verified_student")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: verification } = await (supabase.from("student_verifications") as any)
+      .select("id")
       .eq("user_id", userId)
+      .eq("status", "verified")
+      .or("expires_at.is.null,expires_at.gt.now()")
       .maybeSingle();
 
-    if (!tierView?.is_verified_student) {
+    if (!verification) {
       throw new Error(
         `${tierConfig.label} plan requires verified enrollment. Complete student verification first.`,
       );
