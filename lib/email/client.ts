@@ -148,7 +148,7 @@ export async function sendSessionSummaryEmail(to: string, name: string, sessionI
     headingItalic: `${score}`,
     body: `
       <p>Hi ${name},</p>
-      <p>Your latest session has been scored. You received a Folio Score of <strong style="color:#00F590;">${score}</strong> across four dimensions.</p>
+      <p>Your latest session has been scored. You received a Folio Score of <strong style="color:#00F590;">${score}</strong> across three dimensions.</p>
       <p>View your full feedback — including quote-level breakdowns, improvement areas, and interviewer notes — on the session detail page.</p>
     `,
     ctaText: "View full feedback →",
