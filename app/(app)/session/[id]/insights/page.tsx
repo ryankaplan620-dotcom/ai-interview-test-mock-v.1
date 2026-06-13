@@ -106,19 +106,19 @@ export default async function SessionInsightsPage({ params, searchParams }: Page
       <div className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-1">
         <Link
           href="/dashboard"
-          className="font-sans text-[12px] text-text-secondary transition-colors hover:text-text-primary"
+          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary"
         >
-          Dashboard
+          ← Dashboard
         </Link>
-        <span className="font-mono text-[10px] text-text-secondary">/</span>
+        <span className="font-mono text-[10px] text-text-tertiary">·</span>
         <Link
           href={`/session/${session.id}/feedback`}
-          className="font-sans text-[12px] text-text-secondary transition-colors hover:text-text-primary"
+          className="font-sans text-[12px] text-text-tertiary transition-colors hover:text-text-secondary"
         >
           Feedback
         </Link>
-        <span className="font-mono text-[10px] text-text-secondary">/</span>
-        <span className="font-mono text-[11px] tracking-label text-text-secondary">INSIGHTS</span>
+        <span className="font-mono text-[10px] text-text-tertiary">·</span>
+        <span className="font-mono text-[11px] tracking-label text-text-tertiary">INSIGHTS</span>
       </div>
 
       {/* Header */}

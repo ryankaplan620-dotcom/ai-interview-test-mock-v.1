@@ -25,6 +25,7 @@
 import type Stripe from "stripe";
 import { TIERS } from "@/lib/tiers";
 import type { SubscriptionTier, SubscriptionStatus } from "@/types/supabase";
+import { sendTrialEndingEmail } from "@/lib/email/client";
 
 // --------------------------------------------------------------------------
 // Dependencies — injected so the handlers can be tested
@@ -107,7 +108,7 @@ export async function dispatchWebhookEvent(
       await handleSubscriptionDeleted(event.data.object as Stripe.Subscription, deps);
       break;
     case "customer.subscription.trial_will_end":
-      await handleTrialWillEnd(event.data.object as Stripe.Subscription);
+      await handleTrialWillEnd(event.data.object as Stripe.Subscription, deps);
       break;
     case "invoice.paid":
       await handleInvoicePaid(event.data.object as Stripe.Invoice, deps);
@@ -258,9 +259,36 @@ export async function handleSubscriptionDeleted(
 // handleTrialWillEnd — hook for day-10 email
 // --------------------------------------------------------------------------
 
-export async function handleTrialWillEnd(subscription: Stripe.Subscription): Promise<void> {
-  console.log(`[Stripe Webhook] Trial ending for subscription ${subscription.id}`);
-  // TODO: integrate with Resend to send renewal-warning email
+export async function handleTrialWillEnd(
+  subscription: Stripe.Subscription,
+  { supabase }: WebhookDeps,
+): Promise<void> {
+  const userId = subscription.metadata?.user_id;
+  if (!userId) {
+    console.warn("[Stripe Webhook] trial_will_end: missing user_id on subscription", subscription.id);
+    return;
+  }
+
+  const trialEnd = subscription.trial_end;
+  const daysLeft = trialEnd
+    ? Math.max(1, Math.ceil((trialEnd * 1000 - Date.now()) / 86_400_000))
+    : 3;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const email = (profile as { email?: string; full_name?: string } | null)?.email;
+  const name = (profile as { email?: string; full_name?: string } | null)?.full_name ?? "there";
+
+  if (!email) {
+    console.warn("[Stripe Webhook] trial_will_end: no email found for user", userId);
+    return;
+  }
+
+  await sendTrialEndingEmail(email, name.split(" ")[0], daysLeft);
 }
 
 // --------------------------------------------------------------------------

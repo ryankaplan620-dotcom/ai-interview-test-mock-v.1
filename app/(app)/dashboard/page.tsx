@@ -134,7 +134,7 @@ export default async function DashboardPage() {
               <h3 className="font-display text-[20px] font-bold tracking-heading text-text-primary">
                 Recent sessions
               </h3>
-              {sessions.length >= 10 && (
+              {sessions.length > 0 && (
                 <Link
                   href="/sessions"
                   className="rounded-full font-sans text-[13px] font-medium text-text-secondary transition-colors hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
@@ -242,10 +242,10 @@ export default async function DashboardPage() {
             )}
 
             <Link
-              href="/pricing"
+              href={!tier || tier.effective_tier === "free" || tier.effective_tier === "basic" ? "/pricing" : "/settings"}
               className="mt-5 block rounded-full text-center font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
-              {!tier || tier.effective_tier === "basic" ? "Upgrade plan →" : "Manage plan →"}
+              {!tier || tier.effective_tier === "free" || tier.effective_tier === "basic" ? "Upgrade plan →" : "Manage plan →"}
             </Link>
           </div>
 

@@ -2,10 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { Container, ArrowRight } from "@/components/marketing/ui";
 
-const agents = [
+const agents: { name: string; version: string; src: string; soon?: boolean }[] = [
   { name: "Sarah", version: "v.2", src: "/images/agents/sarah.png" },
   { name: "Gemma", version: "v.3", src: "/images/agents/gemma.png" },
-  { name: "Luke", version: "v.1", src: "/images/agents/luke.png" },
+  { name: "Luke", version: "v.1", src: "/images/agents/luke.png", soon: true },
 ];
 
 export function Hero() {
@@ -94,17 +94,30 @@ export function Hero() {
           {agents.map((a) => (
             <span
               key={a.name}
-              className="inline-flex items-center gap-2.5 rounded-full border border-ink-border/60 bg-ink-surface/50 py-1.5 pl-1.5 pr-4 backdrop-blur"
+              className={[
+                "inline-flex items-center gap-2.5 rounded-full border py-1.5 pl-1.5 pr-4 backdrop-blur",
+                a.soon
+                  ? "border-ink-border/40 bg-ink-surface/30 opacity-60"
+                  : "border-ink-border/60 bg-ink-surface/50",
+              ].join(" ")}
             >
               <Image
                 src={a.src}
                 alt={`${a.name}, a Folio interview agent`}
                 width={28}
                 height={28}
-                className="h-7 w-7 rounded-full object-cover ring-1 ring-accent/50"
+                className={[
+                  "h-7 w-7 rounded-full object-cover ring-1",
+                  a.soon ? "grayscale ring-white/20" : "ring-accent/50",
+                ].join(" ")}
               />
               <span className="text-[13px] font-medium text-text-secondary">
-                {a.name} <span className="font-mono text-[10.5px] text-accent">{a.version}</span>
+                {a.name}{" "}
+                {a.soon ? (
+                  <span className="font-mono text-[10px] text-text-tertiary">SOON</span>
+                ) : (
+                  <span className="font-mono text-[10.5px] text-accent">{a.version}</span>
+                )}
               </span>
             </span>
           ))}

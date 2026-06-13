@@ -134,19 +134,19 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
           so we don't need a conditional wrapper here. */}
       <QaFeedbackPanel sessionId={sessionMeta.id} />
 
-      {/* Full analytics link */}
+      {/* Deep analytics links */}
       <section className="mt-10 flex flex-col items-center gap-3">
         <Link
           href={`/session/${sessionMeta.id}/insights`}
           className="inline-flex items-center gap-1 font-sans text-[13px] font-medium text-accent transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
-          View detailed insights →
+          View transcript &amp; perception analysis →
         </Link>
         <Link
           href={`/session/${sessionMeta.id}/details`}
           className="inline-flex items-center gap-1 font-sans text-[12px] text-text-tertiary transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
-          View full analytics →
+          Session info &amp; recording →
         </Link>
       </section>
 
