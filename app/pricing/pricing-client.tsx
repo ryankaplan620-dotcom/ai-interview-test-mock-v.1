@@ -36,6 +36,11 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
   async function handlePurchase(tier: SubscriptionTier) {
     setError(null);
 
+    if (tier === "free") {
+      router.push(isSignedIn ? "/dashboard" : "/signup");
+      return;
+    }
+
     if (!isSignedIn) {
       router.push(`/signup?redirect=/pricing`);
       return;
@@ -94,7 +99,7 @@ export function PricingClient({ currentTier, isSignedIn, isVerifiedStudent }: Pr
                 }`}
               >
                 {isRecommended && (
-                  <span className="absolute -top-3 left-6 rounded-full bg-brand-ink px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-white">
+                  <span className="absolute -top-3 left-6 rounded-full bg-brand-ink px-3 py-1 font-mono text-[10px] font-semibold tracking-[0.12em] text-accent">
                     MOST POPULAR
                   </span>
                 )}
@@ -252,6 +257,7 @@ function getButtonLabel(args: {
 }): string {
   if (args.isLoading) return "Loading...";
   if (args.isCurrent) return "Current plan";
+  if (args.tierId === "free") return "Start free →";
   if (args.requiresVerification && !args.isVerifiedStudent) return "Verify to continue →";
   return "Start free trial →";
 }

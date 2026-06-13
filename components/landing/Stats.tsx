@@ -4,7 +4,7 @@ import { Section } from "@/components/marketing/ui";
 const stats: { value: string; label: string; highlight?: boolean }[] = [
   { value: "200+", label: "Companies covered" },
   { value: "3", label: "Interviewer personas" },
-  { value: "4", label: "Score dimensions" },
+  { value: "3", label: "Score dimensions" },
   { value: "90s", label: "To your first score", highlight: true },
 ];
 
