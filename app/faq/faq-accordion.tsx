@@ -48,7 +48,7 @@ export function FaqAccordion({ categories }: { categories: FaqCategory[] }) {
                   </button>
                   <div
                     className="overflow-hidden transition-all duration-300 ease-out"
-                    style={{ maxHeight: isOpen ? "460px" : "0px", opacity: isOpen ? 1 : 0 }}
+                    style={{ maxHeight: isOpen ? "1200px" : "0px", opacity: isOpen ? 1 : 0 }}
                   >
                     <p className="px-6 pb-6 pr-14 text-[14.5px] leading-relaxed text-gray-600">{item.a}</p>
                   </div>

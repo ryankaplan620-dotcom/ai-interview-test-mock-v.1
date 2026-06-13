@@ -18,7 +18,7 @@ const faqs = [
   {
     question: "Is there a free trial?",
     answer:
-      "Yes. Every plan includes a 15-day free trial with no credit card required. You can run sessions, get feedback, and see your Folio Score before deciding.",
+      "Your first interview is free — no credit card. Every paid plan also includes a 15-day trial before you're charged, so you can run sessions and see your Folio Score before committing.",
   },
   {
     question: "How is this different from practicing with a chatbot?",
