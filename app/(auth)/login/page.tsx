@@ -14,6 +14,17 @@ export default function LoginPage() {
   );
 }
 
+function describeUrlError(code: string | null): string | null {
+  switch (code) {
+    case "missing_code":
+      return "The link is missing a verification code. Try requesting a new one.";
+    case "auth_failed":
+      return "The confirmation link has expired or is invalid. Request a new one below.";
+    default:
+      return null;
+  }
+}
+
 function LoginSkeleton() {
   return (
     <div className="w-full max-w-[400px] text-center">
@@ -29,6 +40,8 @@ function LoginForm() {
   const rawRedirect = searchParams.get("redirect") ?? "";
   // Only allow local paths (must start with /) to prevent open redirect
   const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/dashboard";
+
+  const urlError = describeUrlError(searchParams.get("error"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,6 +75,12 @@ function LoginForm() {
         <p className="mt-2 font-sans text-[14px] text-text-secondary">
           Pick up where you left off.
         </p>
+
+        {urlError && (
+          <p className="mt-4 font-sans text-[13px] text-rose-400" role="alert">
+            {urlError}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>
