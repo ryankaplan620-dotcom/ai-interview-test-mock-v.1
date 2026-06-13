@@ -15,7 +15,7 @@ const agents = [
   {
     name: "Gemma",
     version: "v.3",
-    role: "SVP, sales & client-facing screens",
+    role: "SVP & Regional Manager — real estate & finance",
     image: "/images/agents/gemma.png",
     alpha: false,
   },

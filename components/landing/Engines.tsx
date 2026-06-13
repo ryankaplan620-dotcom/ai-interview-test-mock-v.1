@@ -61,7 +61,7 @@ const bands: Band[] = [
     body: "Folio doesn’t just score you. It pulls your weakest sentences, shows you a better version, and tracks your growth over time.",
     features: [
       "Quote-based feedback",
-      "Four score dimensions",
+      "Three score dimensions",
       "Daily communication drills",
       "Before / after trajectory",
     ],

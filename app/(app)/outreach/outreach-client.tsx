@@ -786,7 +786,7 @@ function DraftsTab({
                     onClick={() => onSend(draft.id)}
                     className="rounded-full bg-accent px-3.5 py-1.5 font-sans text-[12px] font-semibold text-ink transition-all hover:bg-accent-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   >
-                    Send
+                    Mark as sent
                   </button>
                   <button
                     onClick={() => onDelete(draft.id)}
@@ -820,7 +820,7 @@ function SentTab({
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-dark p-12 text-center">
         <p className="font-mono text-[10px] tracking-label text-text-tertiary">SENT</p>
         <p className="mt-3 font-sans text-[14px] text-text-secondary">
-          No sent emails yet. Draft and send your first outreach above.
+          Nothing marked as sent yet. Draft a message above, then mark it sent once you&apos;ve sent it.
         </p>
       </div>
     );
