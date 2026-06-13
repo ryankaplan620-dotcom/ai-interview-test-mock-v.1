@@ -28,7 +28,7 @@ export default async function SettingsPage() {
           <Row label="Email" value={profile?.email ?? "—"} />
           <Row
             label="Student verified"
-            value={tier?.is_verified_student ? "Yes · verified through SheerID" : "No"}
+            value={tier?.is_verified_student ? "Yes · verified" : "No"}
           />
         </Panel>
 
