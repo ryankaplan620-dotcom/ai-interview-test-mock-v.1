@@ -36,7 +36,7 @@ export const getProfile = cache(async (): Promise<UserProfile | null> => {
   if (!user) return null;
 
   const supabase = createServerClient();
-  const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).single();
+  const { data } = await supabase.from("users").select("*").eq("id", user.id).single();
 
   return data;
 });
@@ -69,8 +69,8 @@ export const getUserTier = cache(async (): Promise<UserTier | null> => {
       cycle_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
       sessions_used_this_cycle: 0,
       overages_used_this_cycle: 0,
-      included_sessions: 40,
-      sessions_remaining_this_cycle: 40,
+      included_sessions: 9999,
+      sessions_remaining_this_cycle: 9999,
       auto_renew: true,
     } satisfies UserTier;
   }

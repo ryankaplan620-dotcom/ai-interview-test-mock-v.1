@@ -275,7 +275,7 @@ export async function handleTrialWillEnd(
     : 3;
 
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("users")
     .select("email, full_name")
     .eq("id", userId)
     .maybeSingle();
@@ -318,7 +318,7 @@ export async function handlePaymentFailed(
   if (!userId) return;
 
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("users")
     .select("email")
     .eq("id", userId)
     .maybeSingle();
