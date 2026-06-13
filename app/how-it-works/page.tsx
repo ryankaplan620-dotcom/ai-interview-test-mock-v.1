@@ -27,7 +27,7 @@ const steps = [
   {
     n: "03",
     title: "Get the verdict",
-    body: "The moment you finish, Folio scores you across four dimensions and pulls the exact sentences that cost you the round — each paired with a stronger version.",
+    body: "The moment you finish, Folio scores you across three dimensions and pulls the exact sentences that cost you the round — each paired with a stronger version.",
     points: ["A single Folio Score", "Quote-level feedback", "Strengths, gaps, next steps"],
   },
   {

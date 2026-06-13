@@ -148,7 +148,7 @@ export default function SignupPage() {
             disabled={loading}
             className="h-12 w-full rounded-full bg-cta-gradient font-sans text-[14px] font-semibold text-text-onAccent transition-all duration-200 ease-brand hover:shadow-accent-glow disabled:cursor-wait disabled:opacity-60"
           >
-            {loading ? "Creating account..." : "Start free trial"}
+            {loading ? "Creating account..." : "Create account"}
           </button>
 
           <p className="text-center font-sans text-[12px] leading-relaxed text-text-tertiary">
