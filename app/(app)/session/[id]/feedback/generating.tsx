@@ -26,9 +26,10 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
   const [feedback, setFeedback] = useState<FeedbackPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [stageIdx, setStageIdx] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
   const startedRef = useRef(false);
 
-  // Trigger generation once on mount
+  // Trigger generation on mount and on explicit retry
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
@@ -80,7 +81,7 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [sessionId]);
+  }, [sessionId, retryCount]);
 
   // Cycle through stage labels while generating
   useEffect(() => {
@@ -112,7 +113,7 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
               setError(null);
               setPhase("generating");
               setStageIdx(0);
-              router.refresh();
+              setRetryCount((c) => c + 1);
             }}
             className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-brand-ink transition-all hover:bg-accent-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >

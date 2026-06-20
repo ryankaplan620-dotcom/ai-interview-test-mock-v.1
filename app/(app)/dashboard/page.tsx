@@ -134,7 +134,7 @@ export default async function DashboardPage() {
               <h3 className="font-display text-[20px] font-bold tracking-heading text-text-primary">
                 Recent sessions
               </h3>
-              {sessions.length >= 10 && (
+              {sessions.length > 0 && (
                 <Link
                   href="/sessions"
                   className="rounded-full font-sans text-[13px] font-medium text-text-secondary transition-colors hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"

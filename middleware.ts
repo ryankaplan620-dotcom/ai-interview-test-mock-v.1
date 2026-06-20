@@ -12,7 +12,7 @@ const PROTECTED_ROUTES = ["/dashboard", "/session", "/settings", "/account", "/o
  * Routes that should only be shown to unauthenticated users.
  * Authenticated users visiting these are redirected to /dashboard.
  */
-const AUTH_ONLY_ROUTES = ["/login", "/signup"];
+const AUTH_ONLY_ROUTES = ["/login", "/signup", "/forgot-password"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
