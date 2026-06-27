@@ -203,9 +203,12 @@ export async function POST(req: NextRequest) {
   // --------------------------------------------------------------------
   if (attemptNumber >= drillConfig.targetAttempts) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from("drills") as any)
+    const { error: drillUpdateError } = await (supabase.from("drills") as any)
       .update({ status: "completed", ended_at: new Date().toISOString() })
       .eq("id", drill.id);
+    if (drillUpdateError) {
+      console.error("[practice.attempt] drill completion update failed:", drillUpdateError);
+    }
   }
 
   return NextResponse.json({ attempt: inserted, cached: false });

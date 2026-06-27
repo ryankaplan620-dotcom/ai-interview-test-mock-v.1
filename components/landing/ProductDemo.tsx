@@ -83,7 +83,7 @@ export function ProductDemo() {
                   </div>
 
                   <h3 className="mt-4 font-display text-[17px] font-bold tracking-[-0.02em] text-text-primary">Sarah Chen</h3>
-                  <p className="mt-0.5 text-[13px] text-text-secondary">Senior Recruiter</p>
+                  <p className="mt-0.5 text-[13px] text-text-secondary">Engineering Manager</p>
                   <span className="mt-2.5 inline-flex items-center rounded-full border border-ink-border bg-ink-raised px-2.5 py-1 font-mono text-[10px] tracking-[0.08em] text-accent">
                     Sarah v.2
                   </span>

@@ -43,6 +43,7 @@ export default async function SessionPage({ params }: PageProps) {
 
   // ---- 4. Build client-safe persona view
   const persona = PERSONAS[session.persona];
+  if (!persona) notFound();
   const personaView: SessionViewPersona = {
     id: persona.id,
     name: persona.name,

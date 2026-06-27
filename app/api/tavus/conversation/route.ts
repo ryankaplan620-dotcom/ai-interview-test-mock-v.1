@@ -179,7 +179,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase.from("sessions") as any)
+  const { error: updateError } = await (supabase.from("sessions") as any)
     .update({
       tavus_conversation_id: tavusRes.conversation_id,
       tavus_conversation_url: tavusRes.conversation_url,
@@ -188,8 +188,17 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
     })
     .eq("id", session.id);
 
+  if (updateError) {
+    console.error("[tavus.conversation] session update failed:", updateError);
+    return NextResponse.json({ error: "session_update_failed" }, { status: 500 });
+  }
+
   if (memories.length > 0) {
-    await markMemoriesSurfaced(memories.map((m) => m.id));
+    try {
+      await markMemoriesSurfaced(memories.map((m) => m.id));
+    } catch (err) {
+      console.error("[tavus.conversation] markMemoriesSurfaced failed (non-fatal):", err);
+    }
   }
 
   return NextResponse.json({

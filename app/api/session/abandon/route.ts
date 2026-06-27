@@ -57,9 +57,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true }); // already finalized
   }
 
-  await sessions
+  const { error: updateError } = await sessions
     .update({ status: "abandoned", ended_at: new Date().toISOString() })
     .eq("id", sessionId);
+
+  if (updateError) {
+    console.error("[session.abandon] update failed:", updateError);
+    // Still ack — Tavus shutdown webhook will reconcile.
+  }
 
   return NextResponse.json({ ok: true });
 }

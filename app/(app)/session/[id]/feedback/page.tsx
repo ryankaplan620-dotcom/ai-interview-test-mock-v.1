@@ -52,6 +52,7 @@ export default async function FeedbackPage({ params }: PageProps) {
   }
 
   const persona = PERSONAS[session.persona];
+  if (!persona) notFound();
 
   // Abandoned or failed sessions have no feedback
   if (session.status !== "completed") {
