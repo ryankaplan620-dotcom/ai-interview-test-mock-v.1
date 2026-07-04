@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_APP_URL: https://folio.io
+
+      - name: Persona prompt audit
+        run: npx tsx scripts/stress-personas.ts
+
+      - name: Prompt composition audit
+        run: npx tsx scripts/check-prompt-composition.ts
+
+      - name: Cookie consent audit
+        run: npx tsx scripts/stress-cookie-consent.ts
+
+      - name: Rate limit audit
+        run: npx tsx scripts/stress-rate-limit.ts
+
+      - name: Session memory smoke test
+        run: npx tsx scripts/smoke-memory.ts
+
+      - name: Q&A feedback smoke test
+        run: npx tsx scripts/smoke-qa.ts
+
+      - name: Stripe webhook stress test
+        run: npx tsx scripts/stress-stripe-webhook.ts
