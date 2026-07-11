@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
+import { endTavusConversation } from "@/lib/pipeline/tavus-client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
   const sessions = supabase.from("sessions") as any;
 
   const { data: existing } = await sessions
-    .select("id, user_id, status")
+    .select("id, user_id, status, tavus_conversation_id")
     .eq("id", sessionId)
     .single();
 
@@ -60,6 +61,14 @@ export async function POST(req: NextRequest) {
   await sessions
     .update({ status: "abandoned", ended_at: new Date().toISOString() })
     .eq("id", sessionId);
+
+  if (existing.tavus_conversation_id) {
+    try {
+      await endTavusConversation(existing.tavus_conversation_id);
+    } catch (err) {
+      console.error("[session.abandon] failed to end Tavus conversation (non-fatal):", err);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

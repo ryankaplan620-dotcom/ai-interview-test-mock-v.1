@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { generateDraft } from "@/lib/outreach/draft";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,10 +29,7 @@ const DeleteInput = z.object({
  * Loads a contact from outreach_contacts, generates a personalized outreach
  * email via Claude, and persists the draft to outreach_drafts.
  */
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function postHandler(req: NextRequest, { user }: { user: { id: string } }) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
@@ -50,13 +49,13 @@ export async function POST(req: NextRequest) {
 
   // 2. Load user profile for personalization
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase.from("user_profiles") as any)
-    .select("full_name, target_role, target_firms")
+  const { data: profile } = await (supabase.from("profiles") as any)
+    .select("full_name, email, target_role, target_firms")
     .eq("id", user.id)
     .single();
 
   const userProfile = {
-    name: profile?.full_name ?? user.email?.split("@")[0] ?? "Candidate",
+    name: profile?.full_name ?? profile?.email?.split("@")[0] ?? "Candidate",
     background: profile?.target_role
       ? `Targeting ${profile.target_role} roles`
       : "Career professional",
@@ -98,6 +97,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "draft_failed" }, { status: 500 });
   }
 }
+
+export const POST = withRateLimit(RATE_LIMITS.outreach_draft, postHandler);
 
 export async function PATCH(req: NextRequest) {
   const user = await getUser();

@@ -64,6 +64,46 @@ export const RATE_LIMITS = {
     short: { max: 20, windowSeconds: 600 }, // 20 per 10 minutes
     daily: { max: 100, windowSeconds: 86_400 }, // 100 per 24 hours
   },
+
+  // Outreach scout makes up to 6 Anthropic web_search calls per request —
+  // the most expensive per-call route outside Tavus. Bounded accordingly.
+  outreach_scout: {
+    name: "outreach_scout",
+    short: { max: 5, windowSeconds: 600 }, // 5 per 10 minutes
+    daily: { max: 30, windowSeconds: 86_400 }, // 30 per day
+  },
+  // One Claude call per draft.
+  outreach_draft: {
+    name: "outreach_draft",
+    short: { max: 15, windowSeconds: 600 }, // 15 per 10 minutes
+    daily: { max: 60, windowSeconds: 86_400 }, // 60 per day
+  },
+  // Deepgram transcription + a Claude analysis call per attempt.
+  practice_attempt: {
+    name: "practice_attempt",
+    short: { max: 15, windowSeconds: 600 }, // 15 per 10 minutes
+    daily: { max: 60, windowSeconds: 86_400 }, // 60 per day
+  },
+  // Called once (or a handful of times on reconnect) per live session —
+  // looser than conversation creation but still bounded.
+  deepgram_token: {
+    name: "deepgram_token",
+    short: { max: 10, windowSeconds: 600 }, // 10 per 10 minutes
+    daily: { max: 50, windowSeconds: 86_400 }, // 50 per day
+  },
+  // Called once per interviewer turn — a real session can have dozens.
+  // Generous windows; still bounds a scripted loop against Claude.
+  interview_turn: {
+    name: "interview_turn",
+    short: { max: 60, windowSeconds: 600 }, // 60 per 10 minutes
+    daily: { max: 500, windowSeconds: 86_400 }, // 500 per day
+  },
+  // Called once per spoken line — same shape as interview_turn.
+  tts_stream: {
+    name: "tts_stream",
+    short: { max: 60, windowSeconds: 600 }, // 60 per 10 minutes
+    daily: { max: 500, windowSeconds: 86_400 }, // 500 per day
+  },
 } as const satisfies Record<string, RateLimitConfig>;
 
 export type RateLimitName = keyof typeof RATE_LIMITS;
@@ -298,13 +338,24 @@ export async function checkRateLimit(args: {
 // Error message builder — actionable, not just "rate limited"
 // --------------------------------------------------------------------------
 
+const RATE_LIMIT_ACTION_LABELS: Record<RateLimitName, string> = {
+  tavus_conversation: "started a session",
+  feedback_generate: "requested feedback",
+  outreach_scout: "scouted contacts",
+  outreach_draft: "drafted an outreach email",
+  practice_attempt: "submitted a drill attempt",
+  deepgram_token: "started a transcription session",
+  interview_turn: "sent a message",
+  tts_stream: "requested audio",
+};
+
 function buildMessage(
   config: RateLimitConfig,
   window: "short" | "daily",
   retryAfterSeconds: number,
 ): string {
   const w = config[window];
-  const action = config.name === "tavus_conversation" ? "started a session" : "requested feedback";
+  const action = RATE_LIMIT_ACTION_LABELS[config.name as RateLimitName] ?? "made this request";
   const windowLabel = humanWindow(w.windowSeconds);
   const retryLabel = humanDuration(retryAfterSeconds);
   return `You've ${action} ${w.max} times in the last ${windowLabel}. Try again in ${retryLabel}.`;

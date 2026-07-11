@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
-import { getUser } from "@/lib/auth/server";
+import { NextRequest, NextResponse } from "next/server";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,12 +41,7 @@ async function getProjectId(apiKey: string): Promise<string> {
   return projectId;
 }
 
-export async function POST() {
-  const user = await getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-
+async function handler(_req: NextRequest, { user }: { user: { id: string } }) {
   const apiKey = process.env.DEEPGRAM_API_KEY;
   if (!apiKey) {
     // Caller should only hit this route when the server advertises Deepgram
@@ -95,3 +91,5 @@ export async function POST() {
     return NextResponse.json({ error: "deepgram_unavailable" }, { status: 502 });
   }
 }
+
+export const POST = withRateLimit(RATE_LIMITS.deepgram_token, handler);

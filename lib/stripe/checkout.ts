@@ -115,6 +115,13 @@ export async function createOverageCheckout({
 
   const { customerId } = await getOrCreateStripeCustomer({ userId, email });
 
+  const overageMetadata = {
+    user_id: userId,
+    session_id: sessionId,
+    product_type: "overage_session",
+    tier,
+  };
+
   const checkoutSession = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "payment",
@@ -122,12 +129,13 @@ export async function createOverageCheckout({
     success_url: `${APP_URL}/session/${sessionId}?overage=paid`,
     cancel_url: `${APP_URL}/session/new?overage=canceled`,
     automatic_tax: { enabled: false },
-    metadata: {
-      user_id: userId,
-      session_id: sessionId,
-      product_type: "overage_session",
-      tier,
+    // Checkout Session metadata does NOT propagate to the PaymentIntent Stripe
+    // creates behind the scenes — payment_intent_data.metadata is the field
+    // handlePaymentIntentSucceeded (webhook-handlers.ts) actually reads.
+    payment_intent_data: {
+      metadata: overageMetadata,
     },
+    metadata: overageMetadata,
   });
 
   if (!checkoutSession.url) {

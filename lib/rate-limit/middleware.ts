@@ -26,15 +26,18 @@ export interface AuthedContext {
   user: { id: string };
 }
 
+// Response, not NextResponse: some wrapped handlers stream raw audio (tts/stream)
+// or SSE (interview/turn) via a plain Response — NextResponse is a Response, so
+// returning one still satisfies this.
 export type AuthedHandler = (
   req: NextRequest,
   ctx: AuthedContext,
-) => Promise<NextResponse>;
+) => Promise<Response>;
 
 export function withRateLimit(
   config: RateLimitConfig,
   handler: AuthedHandler,
-): (req: NextRequest) => Promise<NextResponse> {
+): (req: NextRequest) => Promise<Response> {
   return async (req: NextRequest) => {
     const user = await getUser();
     if (!user) {

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createServerClient } from "@/lib/db/server";
 import { getUser } from "@/lib/auth/server";
+import { endTavusConversation } from "@/lib/pipeline/tavus-client";
 
 // --------------------------------------------------------------------------
 // Supabase casting helper.
@@ -88,11 +89,13 @@ export async function endSession(input: z.infer<typeof EndSessionInput>) {
   const sessions = supabase.from("sessions") as any;
 
   const { data: existing } = await sessions
-    .select("id, user_id, status")
+    .select("id, user_id, status, tavus_conversation_id")
     .eq("id", sessionId)
     .single();
 
-  const row = existing as { id: string; user_id: string; status: string } | null;
+  const row = existing as
+    | { id: string; user_id: string; status: string; tavus_conversation_id: string | null }
+    | null;
   if (!row || row.user_id !== user.id) {
     return { ok: false as const, error: "not_found" };
   }
@@ -112,6 +115,17 @@ export async function endSession(input: z.infer<typeof EndSessionInput>) {
     console.error("[endSession] update failed:", error);
     return { ok: false as const, error: "Failed to end session" };
   }
+
+  // Explicitly end the remote Tavus room — without this it keeps running
+  // (and billing) until Tavus's own idle/max-duration timeout fires.
+  if (row.tavus_conversation_id) {
+    try {
+      await endTavusConversation(row.tavus_conversation_id);
+    } catch (err) {
+      console.error("[endSession] failed to end Tavus conversation (non-fatal):", err);
+    }
+  }
+
   return { ok: true as const, alreadyEnded: false };
 }
 

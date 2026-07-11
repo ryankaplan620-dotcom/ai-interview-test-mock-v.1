@@ -78,7 +78,7 @@ create index if not exists intel_sources_company_idx
 
 create table if not exists public.intel_user_contributions (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.user_profiles(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
   company_name text not null,
   company_name_normalized text not null,
   question_text text not null,

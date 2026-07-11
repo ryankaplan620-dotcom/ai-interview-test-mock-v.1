@@ -509,6 +509,10 @@ export type Database = {
     };
     Functions: {
       increment_subscription_counter: {
+        Args: { p_user_id: string; p_field: string; p_max?: number | null };
+        Returns: boolean;
+      };
+      decrement_subscription_counter: {
         Args: { p_user_id: string; p_field: string };
         Returns: void;
       };

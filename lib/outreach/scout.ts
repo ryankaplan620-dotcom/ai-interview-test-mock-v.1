@@ -208,7 +208,7 @@ Use the suggest_contacts tool exactly once at the end.`;
     );
     const reason: MockReason =
       status === 401 ? "invalid_key" : status === 429 ? "rate_limited" : "api_error";
-    return mockContacts(params, reason, msg);
+    return mockContacts(params, reason);
   }
 }
 
@@ -260,7 +260,6 @@ type MockReason =
 function mockContacts(
   params: ScoutParams,
   reason: MockReason,
-  detail?: string,
 ): ScoutedContact[] {
   const city = params.targetCity || "—";
 
@@ -280,9 +279,9 @@ function mockContacts(
     },
     api_error: {
       headline: "The Claude API call failed.",
-      hint: detail
-        ? `Server log: ${detail.slice(0, 200)}. Check the dev server output for the full stack.`
-        : "Check the dev server output for the full error.",
+      // Raw SDK error text is logged server-side above (console.error) but never
+      // surfaced to the client/DB — it can contain internal request details.
+      hint: "Check the server logs for the full error.",
     },
     no_tool_block: {
       headline: "Claude responded without calling suggest_contacts.",

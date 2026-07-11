@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { scoutContacts } from "@/lib/outreach/scout";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,10 +14,7 @@ const Input = z.object({
   targetCity: z.string().max(100).optional(),
 });
 
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
@@ -81,3 +79,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "scout_failed" }, { status: 500 });
   }
 }
+
+export const POST = withRateLimit(RATE_LIMITS.outreach_scout, handler);

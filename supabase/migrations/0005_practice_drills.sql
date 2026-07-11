@@ -17,7 +17,7 @@ create extension if not exists "uuid-ossp" with schema extensions;
 
 create table public.drills (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.user_profiles(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
 
   -- Drill classification
   drill_type text not null,     -- e.g. 'story_polishing', 'pitch_60s'

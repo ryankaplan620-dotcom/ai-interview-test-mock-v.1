@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { shouldMock } from "@/lib/pipeline/env";
 import { streamClaudeTurn } from "@/lib/pipeline/claude";
 import { mockClaudeResponse, streamMockChunks } from "@/lib/pipeline/mock-claude";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 import type { StreamEvent, ConversationContext, ConversationTurn } from "@/lib/pipeline/types";
 import type { PersonaId, InterviewType, SessionMode } from "@/types/supabase";
 
@@ -23,11 +24,12 @@ const TurnInput = z.object({
     .array(
       z.object({
         role: z.enum(["user", "assistant"]),
-        content: z.string(),
+        content: z.string().max(8000),
         startedAtMs: z.number().int().nonnegative(),
         endedAtMs: z.number().int().nullable(),
       }),
     )
+    .max(300)
     .default([]),
 });
 
@@ -35,10 +37,7 @@ const TurnInput = z.object({
 // Route — POST streams SSE back
 // --------------------------------------------------------------------------
 
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return new Response("unauthorized", { status: 401 });
-
+async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const json = await req.json().catch(() => null);
   const parsed = TurnInput.safeParse(json);
   if (!parsed.success) return new Response("bad_request", { status: 400 });
@@ -76,7 +75,7 @@ export async function POST(req: NextRequest) {
 
   // Fetch profile for candidate first name
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase.from("user_profiles") as any)
+  const { data: profile } = await (supabase.from("profiles") as any)
     .select("full_name")
     .eq("id", user.id)
     .single();
@@ -196,6 +195,8 @@ export async function POST(req: NextRequest) {
     },
   });
 }
+
+export const POST = withRateLimit(RATE_LIMITS.interview_turn, handler);
 
 // --------------------------------------------------------------------------
 // Mock driver

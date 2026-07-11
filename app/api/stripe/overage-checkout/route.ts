@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser, getUserTier } from "@/lib/auth/server";
 import { createOverageCheckout } from "@/lib/stripe/checkout";
+import { createServerClient } from "@/lib/db/server";
 
 const Input = z.object({
   sessionId: z.string().uuid(),
@@ -43,6 +44,17 @@ export async function POST(request: Request) {
         { error: "No active subscription — can't purchase overage without a base plan." },
         { status: 400 },
       );
+    }
+
+    const supabase = createServerClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: session } = await (supabase.from("sessions") as any)
+      .select("id, user_id")
+      .eq("id", parsed.data.sessionId)
+      .single();
+
+    if (!session || session.user_id !== user.id) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
     const result = await createOverageCheckout({

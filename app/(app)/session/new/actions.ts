@@ -6,6 +6,7 @@ import { createServerClient } from "@/lib/db/server";
 import { getUser, getUserTier } from "@/lib/auth/server";
 import { PERSONAS, isValidCombo } from "@/lib/personas";
 import { checkSessionStart } from "@/lib/gates/session";
+import { TIERS } from "@/lib/tiers";
 import type { PersonaId, InterviewType } from "@/types/supabase";
 import type { InterviewMode } from "@/lib/personas/types";
 
@@ -140,8 +141,44 @@ export async function startSession(
     };
   }
 
-  // ---- 6. Insert the session row
+  // ---- 6. Atomically claim a quota slot before inserting anything.
+  // Closes the TOCTOU window where two concurrent requests both read
+  // "under quota" from the same cached tier snapshot and both pass the gate
+  // above. In dev mode there's no subscription row to increment, so skip.
   const supabase = createServerClient();
+  const counterField = req.overageAccepted
+    ? "overages_used_this_cycle"
+    : "sessions_used_this_cycle";
+
+  if (!isDev) {
+    const includedSessions = TIERS[effectiveTier].allotments.interviewSessions;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: claimed, error: claimError } = await (supabase.rpc as any)(
+      "increment_subscription_counter",
+      {
+        p_user_id: user.id,
+        p_field: counterField,
+        // Overage purchases aren't capped by the included-sessions ceiling.
+        p_max: req.overageAccepted ? null : includedSessions,
+      },
+    );
+
+    if (claimError) {
+      console.error("[startSession] quota claim failed:", claimError);
+      return { ok: false, error: "Couldn't start the session. Try again.", code: "quota_claim_failed" };
+    }
+    if (!claimed) {
+      return {
+        ok: false,
+        error: "You've used your included sessions for this cycle. Upgrade to get more.",
+        code: "session_quota_exceeded",
+        overageAvailable: !!TIERS[effectiveTier].overage.stripeEnvKey,
+        overagePrice: TIERS[effectiveTier].overage.sessionPriceUsd,
+      };
+    }
+  }
+
+  // ---- 7. Insert the session row
   const persona = PERSONAS[req.personaId];
   const durationSeconds = persona.defaultDurationMinutes * 60;
 
@@ -175,32 +212,20 @@ export async function startSession(
   if (insertError || !inserted) {
     console.error("[startSession] insert failed:", insertError);
     console.error("[startSession] payload was:", JSON.stringify(insertPayload, null, 2));
+    // The quota slot was already claimed above — release it since no session
+    // actually came of it, or the next legitimate attempt would be short one.
+    if (!isDev) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.rpc as any)("decrement_subscription_counter", {
+        p_user_id: user.id,
+        p_field: counterField,
+      }).catch((err: unknown) => console.warn("[startSession] quota release failed:", err));
+    }
     return {
       ok: false,
       error: "Couldn't create the session. Try again.",
       code: "insert_failed",
     };
-  }
-
-  // ---- 7. Increment session-usage counter on the subscription row
-  // Within-quota: bump sessions_used_this_cycle
-  // Overage: bump overages_used_this_cycle (overage charge happens separately
-  // via /api/stripe/overage-checkout before redirect, not tracked here)
-  const counterField = req.overageAccepted
-    ? "overages_used_this_cycle"
-    : "sessions_used_this_cycle";
-
-  // In dev mode, skip the counter increment (no subscription row exists)
-  if (!isDev) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase.rpc as any)("increment_subscription_counter", {
-        p_user_id: user.id,
-        p_field: counterField,
-      });
-    } catch (err) {
-      console.warn("[startSession] counter increment failed (non-fatal):", err);
-    }
   }
 
   // ---- 8. Redirect into the room

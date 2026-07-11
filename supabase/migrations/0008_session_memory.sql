@@ -16,7 +16,7 @@
 
 create table if not exists public.user_session_memory (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.user_profiles(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
   persona text not null,
   source_session_id uuid references public.sessions(id) on delete set null,
 

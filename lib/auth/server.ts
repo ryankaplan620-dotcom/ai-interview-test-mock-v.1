@@ -36,7 +36,7 @@ export const getProfile = cache(async (): Promise<UserProfile | null> => {
   if (!user) return null;
 
   const supabase = createServerClient();
-  const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).single();
+  const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
 
   return data;
 });

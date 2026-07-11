@@ -52,7 +52,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sessionRaw, error: sessionErr } = await (supabase.from("sessions") as any)
     .select(
-      "id, user_id, persona, interview_type, mode, target_firm, target_role, duration_seconds, status, tavus_conversation_id, tavus_conversation_url",
+      "id, user_id, persona, interview_type, mode, target_firm, target_role, duration_seconds, status, tavus_conversation_id, tavus_conversation_url, is_overage",
     )
     .eq("id", parsed.data.sessionId)
     .single();
@@ -74,6 +74,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
         status: string;
         tavus_conversation_id: string | null;
         tavus_conversation_url: string | null;
+        is_overage: boolean;
       }
     | null;
 
@@ -82,6 +83,24 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   }
   if (["completed", "abandoned", "failed"].includes(session.status)) {
     return NextResponse.json({ error: "session_ended" }, { status: 409 });
+  }
+
+  // Overage sessions are inserted before payment (the Stripe Checkout
+  // success_url needs a session id to redirect back to). Don't spin up a
+  // billed Tavus conversation until that payment has actually cleared —
+  // otherwise a client can call this route directly with a never-paid
+  // overage session and get a free interview.
+  if (session.is_overage && !session.tavus_conversation_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: purchase } = await (supabase.from("overage_purchases") as any)
+      .select("id")
+      .eq("session_id", session.id)
+      .eq("status", "succeeded")
+      .maybeSingle();
+
+    if (!purchase) {
+      return NextResponse.json({ error: "overage_payment_required" }, { status: 402 });
+    }
   }
 
   // Idempotent re-entry — return cached, skip memory surfacing
