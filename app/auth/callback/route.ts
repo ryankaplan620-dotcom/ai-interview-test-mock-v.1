@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/db/server";
+import { safeRedirectPath } from "@/lib/utils/safe-redirect";
 
 /**
  * GET /auth/callback
@@ -10,9 +11,8 @@ import { createServerClient } from "@/lib/db/server";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const rawNext = url.searchParams.get("next") ?? "";
   // Only allow local paths to prevent open redirect attacks
-  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard";
+  const next = safeRedirectPath(url.searchParams.get("next"));
 
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=missing_code", url.origin));
