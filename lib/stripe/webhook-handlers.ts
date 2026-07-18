@@ -50,7 +50,7 @@ export interface WebhookSupabase {
     };
     upsert: (
       payload: Record<string, unknown>,
-      opts?: { onConflict: string },
+      opts?: { onConflict: string; ignoreDuplicates?: boolean },
     ) => Promise<{ error: unknown | null }>;
   };
 }
@@ -291,13 +291,9 @@ export async function handlePaymentIntentSucceeded(
   if (paymentIntent.metadata.product_type !== "overage_session") return;
 
   const userId = paymentIntent.metadata.user_id;
-  const sessionId = paymentIntent.metadata.session_id || null;
 
-  if (!userId || !sessionId) {
-    console.warn(
-      "[Stripe Webhook] Overage payment missing user_id or session_id:",
-      paymentIntent.id,
-    );
+  if (!userId) {
+    console.warn("[Stripe Webhook] Overage payment missing user_id:", paymentIntent.id);
     return;
   }
 
@@ -306,17 +302,25 @@ export async function handlePaymentIntentSucceeded(
       ? paymentIntent.latest_charge
       : paymentIntent.latest_charge?.id ?? null;
 
+  // session_id is intentionally left null: no session exists yet at purchase
+  // time. This is an unconsumed credit — /session/new's server action claims
+  // it (via claim_overage_purchase) and links it to the session it creates.
+  //
+  // ignoreDuplicates (INSERT ... ON CONFLICT DO NOTHING) is required, not a
+  // plain upsert: a webhook replay after the row has already been claimed
+  // (session_id set) must not overwrite session_id back to null, which would
+  // let the same purchase be claimed a second time.
   const { error } = await supabase.from("overage_purchases").upsert(
     {
       user_id: userId,
-      session_id: sessionId,
+      session_id: null,
       stripe_payment_intent_id: paymentIntent.id,
       stripe_charge_id: chargeId,
       amount: paymentIntent.amount,
       status: "succeeded",
       succeeded_at: new Date().toISOString(),
     },
-    { onConflict: "stripe_payment_intent_id" },
+    { onConflict: "stripe_payment_intent_id", ignoreDuplicates: true },
   );
 
   if (error && !(error as { message?: string }).message?.includes("duplicate")) {

@@ -105,12 +105,17 @@ export function makeInvoice(opts: {
 export interface PaymentIntentFixtureOpts {
   piId?: string;
   userId: string;
-  sessionId: string;
   amount?: number;
   chargeId?: string;
   productType?: string;
 }
 
+/**
+ * No `session_id` here: an overage PaymentIntent is created before any
+ * session exists (see lib/stripe/checkout.ts createOverageCheckout). The
+ * webhook records the purchase with session_id=null; it's linked to a
+ * session later via the claim_overage_purchase RPC when one is created.
+ */
 export function makePaymentIntent(opts: PaymentIntentFixtureOpts): Stripe.PaymentIntent {
   return {
     id: opts.piId ?? "pi_test_1",
@@ -122,7 +127,6 @@ export function makePaymentIntent(opts: PaymentIntentFixtureOpts): Stripe.Paymen
     metadata: {
       product_type: opts.productType ?? "overage_session",
       user_id: opts.userId,
-      session_id: opts.sessionId,
     },
   } as unknown as Stripe.PaymentIntent;
 }

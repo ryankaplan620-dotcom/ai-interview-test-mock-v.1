@@ -57,10 +57,13 @@ export type StartSessionResult =
  * Two-step overage flow:
  *   - First call without overageAccepted → returns session_quota_exceeded
  *     with overageAvailable=true if user has an active cycle. Client shows
- *     confirmation dialog.
- *   - Second call with overageAccepted=true → charges the overage via
- *     /api/stripe/overage-checkout (deferred to client post-confirm), then
- *     proceeds with session insert and increments overages_used_this_cycle.
+ *     a "buy an overage session" call to action.
+ *   - Client calls /api/stripe/overage-checkout, pays via Stripe, and is
+ *     redirected back here with ?overage=paid.
+ *   - Second call with overageAccepted=true → this action looks up whether
+ *     the user actually has a succeeded, unconsumed `overage_purchases` row
+ *     (never trusting the client's `overageAccepted` flag as proof of
+ *     payment) and, if so, atomically claims it for the new session.
  *
  * Throws via redirect on success. Returns a typed error object on failure.
  */
@@ -109,7 +112,31 @@ export async function startSession(
     ? !!tier.cycle_end && new Date(tier.cycle_end).getTime() > now
     : isDev;
 
-  // ---- 5. Gate check (combo, feature gates, session quota)
+  const supabase = createServerClient();
+
+  // ---- 5. Verify overage intent server-side — never trust the client's
+  // `overageAccepted` claim. It only means "the user asked to spend a
+  // credit"; whether one actually exists (i.e. a real Stripe payment
+  // succeeded) is looked up here. In dev, there's no subscription/purchase
+  // data to check against, so the client value is honored as before.
+  let overageVerified = false;
+  if (req.overageAccepted) {
+    if (isDev) {
+      overageVerified = true;
+    } else {
+      const { data: pendingOverage } = await supabase
+        .from("overage_purchases")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "succeeded")
+        .is("session_id", null)
+        .limit(1)
+        .maybeSingle();
+      overageVerified = !!pendingOverage;
+    }
+  }
+
+  // ---- 6. Gate check (combo, feature gates, session quota)
   const effectiveTier = tier?.effective_tier ?? "max";
   const gateResult = checkSessionStart(
     effectiveTier,
@@ -120,7 +147,7 @@ export async function startSession(
       targetFirm: req.targetFirm,
       targetRole: req.targetRole,
       isPanel: req.isPanel,
-      overageAccepted: req.overageAccepted,
+      overageAccepted: overageVerified,
     },
     {
       sessionsUsedThisCycle: tier?.sessions_used_this_cycle ?? 0,
@@ -140,8 +167,7 @@ export async function startSession(
     };
   }
 
-  // ---- 6. Insert the session row
-  const supabase = createServerClient();
+  // ---- 7. Insert the session row
   const persona = PERSONAS[req.personaId];
   const durationSeconds = persona.defaultDurationMinutes * 60;
 
@@ -163,7 +189,7 @@ export async function startSession(
     role: req.targetRole || null,
     duration_seconds: durationSeconds,
     status: "scheduled",
-    is_overage: req.overageAccepted ?? false,
+    is_overage: overageVerified,
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,13 +208,32 @@ export async function startSession(
     };
   }
 
-  // ---- 7. Increment session-usage counter on the subscription row
+  const sessionId = (inserted as { id: string }).id;
+
+  // ---- 8. Overage sessions: atomically claim the purchase credit now that
+  // the session row exists. If another concurrent request already claimed
+  // the same credit, don't let this unpaid session through.
+  if (overageVerified && !isDev) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: claimed, error: claimError } = await (supabase.rpc as any)(
+      "claim_overage_purchase",
+      { p_user_id: user.id, p_session_id: sessionId },
+    );
+
+    if (claimError || !claimed) {
+      await supabase.from("sessions").delete().eq("id", sessionId);
+      return {
+        ok: false,
+        error: "That overage credit was already used. Try again.",
+        code: "overage_already_claimed",
+      };
+    }
+  }
+
+  // ---- 9. Increment session-usage counter on the subscription row
   // Within-quota: bump sessions_used_this_cycle
-  // Overage: bump overages_used_this_cycle (overage charge happens separately
-  // via /api/stripe/overage-checkout before redirect, not tracked here)
-  const counterField = req.overageAccepted
-    ? "overages_used_this_cycle"
-    : "sessions_used_this_cycle";
+  // Overage: bump overages_used_this_cycle
+  const counterField = overageVerified ? "overages_used_this_cycle" : "sessions_used_this_cycle";
 
   // In dev mode, skip the counter increment (no subscription row exists)
   if (!isDev) {
@@ -203,6 +248,6 @@ export async function startSession(
     }
   }
 
-  // ---- 8. Redirect into the room
-  redirect(`/session/${(inserted as { id: string }).id}`);
+  // ---- 10. Redirect into the room
+  redirect(`/session/${sessionId}`);
 }

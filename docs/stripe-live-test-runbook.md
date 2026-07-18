@@ -116,7 +116,9 @@ trial_end:                     still set (historical record)
 
 ## Step 4 — Overage purchase
 
-**What you're testing:** a user consumes their included sessions, starts an overage session, the `payment_intent.succeeded` event fires, `overage_purchases` row is created.
+**What you're testing:** a user consumes their included sessions, buys an overage credit, the `payment_intent.succeeded` event fires and records an unconsumed `overage_purchases` row, and the next session creation atomically claims it.
+
+The purchase happens *before* any session exists — there's nothing to attach it to yet, so the flow is: pay first, then the picker resubmits and the server claims the credit for the session it creates.
 
 1. Manually set `sessions_used_this_cycle` to the tier's included count in Supabase (3 for Basic, 8 for Pro, 24 for Max) to simulate a user who's used all included sessions:
    ```sql
@@ -124,18 +126,21 @@ trial_end:                     still set (historical record)
    set sessions_used_this_cycle = 3
    where user_id = '<test-user-uuid>';
    ```
-2. In your app, start a new session. You should hit the overage consent dialog.
-3. Confirm the overage charge (use test card `4242 4242 4242 4242`, any future expiry, any 3-digit CVC).
+2. In your app, start a new session. You should get `session_quota_exceeded` with a "Buy an overage session" button.
+3. Click it — this calls `POST /api/stripe/overage-checkout` and redirects to Stripe Checkout. Confirm the charge (use test card `4242 4242 4242 4242`, any future expiry, any 3-digit CVC).
 4. `stripe listen` should show:
    - `payment_intent.succeeded` → 200
+5. Stripe redirects back to `/session/new?overage=paid`. The picker restores your prior selection from `sessionStorage` and resubmits automatically.
 
 **Expected:**
-- New row in `overage_purchases` keyed on the PaymentIntent ID.
-- `subscriptions.overages_used_this_cycle` bumped to 1 **(by the session creation code, not the webhook).**
+- After step 4: a new row in `overage_purchases`, keyed on the PaymentIntent ID, with `session_id = null` (unconsumed credit) and `status = succeeded`.
+- After step 5: that row's `session_id` is set to the newly created session (via the `claim_overage_purchase` RPC), the session is created with `is_overage = true`, and `subscriptions.overages_used_this_cycle` bumps to 1.
 
-**If `overages_used_this_cycle` stays at 0:** the bump happens in `app/(app)/session/new/actions.ts`, not the webhook. The webhook only records the purchase. If the counter is wrong, the bug is in `actions.ts`, not the webhook.
+**If the session is never created / user gets "credit already used":** the RPC in `app/(app)/session/new/actions.ts` couldn't find or lost a race to claim an unconsumed row — check for a `succeeded` row with `session_id is null` for that user in `overage_purchases`.
 
-**If `overage_purchases` row missing:** check the PaymentIntent metadata in Stripe dashboard. The handler only acts on `product_type=overage_session`. If the checkout that created the PI didn't set that metadata, the handler no-ops.
+**If `overage_purchases` row missing after payment:** check the PaymentIntent metadata in Stripe dashboard. The handler only acts on `product_type=overage_session`, read from `payment_intent_data.metadata` (not top-level Checkout Session metadata — Stripe doesn't copy that onto the PaymentIntent for one-time payments). If the checkout that created the PI didn't set that metadata, the handler no-ops.
+
+**Security note:** the session-creation action never trusts a client-supplied "I paid" claim — it always looks up a real `succeeded` / unconsumed `overage_purchases` row server-side before waiving the quota.
 
 ---
 
@@ -256,7 +261,7 @@ export const config = {
 - [ ] `stripe listen` shows 200 responses for all events in steps 2–7
 - [ ] Trial signup creates a `subscriptions` row with `status=trialing`, counters at 0
 - [ ] Trial conversion flips status to `active` and resets counters
-- [ ] Overage purchase creates an `overage_purchases` row; counter bumps from the session-creation path
+- [ ] Overage purchase creates an unconsumed `overage_purchases` row (`session_id=null`); the next session-creation attempt claims it and bumps the counter
 - [ ] Basic renewal resets counters and slides cycle window forward
 - [ ] Payment failure sets `status=past_due` without touching counters
 - [ ] Cancellation (two stages) handled correctly

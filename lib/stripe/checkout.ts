@@ -89,22 +89,28 @@ export async function createSubscriptionCheckout({
 
 /**
  * Create a one-off overage-session checkout. Used when a user has exhausted
- * their cycle quota and agreed to purchase additional sessions.
+ * their cycle quota and wants to purchase an additional session.
  *
- * Unlike the subscription checkout, this is payment-mode (single charge).
- * The session row has already been inserted server-side with is_overage=true;
- * this adds the payment record and, on webhook success, marks the
- * overage_purchases row as succeeded.
+ * Unlike the subscription checkout, this is payment-mode (single charge), and
+ * it runs *before* any session exists: no session has been created yet, so
+ * there's nothing to attach it to. On webhook success (`payment_intent.succeeded`)
+ * an `overage_purchases` row is recorded with `session_id = null` — an unconsumed
+ * credit. The user is redirected back to /session/new, which detects the
+ * pending credit server-side (never trusting a client-supplied claim) and
+ * atomically links it to the session it creates.
+ *
+ * Metadata is set on `payment_intent_data`, not just the top-level Checkout
+ * Session — for `mode: "payment"`, Stripe does not copy session-level
+ * metadata onto the resulting PaymentIntent, and the webhook handler reads
+ * `paymentIntent.metadata`.
  */
 export async function createOverageCheckout({
   userId,
   email,
-  sessionId,
   tier,
 }: {
   userId: string;
   email: string;
-  sessionId: string;
   tier: SubscriptionTier;
 }): Promise<{ url: string }> {
   const stripe = requireStripe();
@@ -119,12 +125,18 @@ export async function createOverageCheckout({
     customer: customerId,
     mode: "payment",
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${APP_URL}/session/${sessionId}?overage=paid`,
+    success_url: `${APP_URL}/session/new?overage=paid`,
     cancel_url: `${APP_URL}/session/new?overage=canceled`,
     automatic_tax: { enabled: false },
+    payment_intent_data: {
+      metadata: {
+        user_id: userId,
+        product_type: "overage_session",
+        tier,
+      },
+    },
     metadata: {
       user_id: userId,
-      session_id: sessionId,
       product_type: "overage_session",
       tier,
     },

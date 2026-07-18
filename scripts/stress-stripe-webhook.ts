@@ -60,7 +60,7 @@ interface SubscriptionRow {
 
 interface OveragePurchaseRow {
   user_id: string;
-  session_id: string;
+  session_id: string | null;
   stripe_payment_intent_id: string;
   stripe_charge_id: string | null;
   amount: number;
@@ -121,7 +121,7 @@ function createMockSupabase(db: MockDb): WebhookSupabase {
         },
         async upsert(
           payload: Record<string, unknown>,
-          opts?: { onConflict: string },
+          opts?: { onConflict: string; ignoreDuplicates?: boolean },
         ) {
           if (table === "subscriptions") {
             const userId = payload.user_id as string;
@@ -137,9 +137,11 @@ function createMockSupabase(db: MockDb): WebhookSupabase {
           }
           if (table === "overage_purchases") {
             const piId = payload.stripe_payment_intent_id as string;
-            // Simulate idempotency via onConflict: if the row exists, overwrite;
-            // if not, insert. Either way, key is constant.
-            void opts;
+            // Real INSERT ... ON CONFLICT DO NOTHING semantics: a replay must
+            // not clobber a row that's already been claimed (session_id set).
+            if (opts?.ignoreDuplicates && db.overage_purchases.has(piId)) {
+              return { error: null };
+            }
             db.overage_purchases.set(piId, payload as unknown as OveragePurchaseRow);
             return { error: null };
           }
@@ -453,11 +455,9 @@ async function main() {
   console.log("\n6. Overage purchase (payment_intent.succeeded)");
   {
     const db = createMockDb();
-    const sessionId = "session-abc-123";
     const pi = makePaymentIntent({
       piId: "pi_overage_1",
       userId: USER_A,
-      sessionId,
       amount: 800,
     });
 
@@ -471,7 +471,9 @@ async function main() {
     assert(db.overage_purchases.size === 1, "exactly one overage row");
     const row = db.overage_purchases.get("pi_overage_1");
     assert(row?.user_id === USER_A, "correct user_id");
-    assert(row?.session_id === sessionId, "correct session_id");
+    // No session exists yet at purchase time — it's an unconsumed credit
+    // until claim_overage_purchase links it to one.
+    assert(row?.session_id === null, "session_id starts null (unconsumed credit)");
     assert(row?.amount === 800, "amount recorded");
     assert(row?.status === "succeeded", "status=succeeded");
   }
@@ -485,7 +487,6 @@ async function main() {
     const pi = makePaymentIntent({
       piId: "pi_overage_replay",
       userId: USER_A,
-      sessionId: "session-replay",
     });
 
     const deps = {
@@ -494,9 +495,21 @@ async function main() {
     };
 
     await dispatchWebhookEvent(makeEvent("payment_intent.succeeded", pi), deps);
+    // Simulate the credit having been claimed by a session between the two
+    // webhook deliveries — a replay must not stomp session_id back to null.
+    const claimedRow = db.overage_purchases.get("pi_overage_replay");
+    db.overage_purchases.set("pi_overage_replay", {
+      ...(claimedRow as OveragePurchaseRow),
+      session_id: "session-replay",
+    });
+
     await dispatchWebhookEvent(makeEvent("payment_intent.succeeded", pi), deps);
     // Event ID differs but PI ID is the same — onConflict: stripe_payment_intent_id
     assert(db.overage_purchases.size === 1, "replay does not create duplicate row");
+    assert(
+      db.overage_purchases.get("pi_overage_replay")?.session_id === "session-replay",
+      "replay does not clobber an already-claimed session_id",
+    );
   }
 
   // --------------------------------------------------------------------------

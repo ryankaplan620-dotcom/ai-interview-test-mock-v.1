@@ -25,6 +25,8 @@
 export interface RateLimitConfig {
   /** Logical identifier used in error messages and log lines. */
   name: string;
+  /** Verb phrase for the client-facing message, e.g. "started a session". */
+  actionLabel: string;
   /** Short-window limit. */
   short: { max: number; windowSeconds: number };
   /** Long-window limit. */
@@ -52,17 +54,47 @@ export interface RateLimitConfig {
  *     per-call cost but can be called multiple times (poll for Q&A results).
  *     The endpoint is also already idempotent for existing feedback, so
  *     most repeat calls short-circuit without hitting Claude.
+ *
+ *   - Outreach scout/draft each make a Claude call with no idempotent
+ *     short-circuit (every request is a fresh generation). Scout is the
+ *     pricier of the two (research + multi-contact synthesis), hence the
+ *     tighter cap.
+ *
+ *   - Practice attempts call Deepgram + Claude per submission. The route
+ *     already caps at a drill's `targetAttempts` (≤20) and dedupes on
+ *     (drill_id, attempt_number), but nothing stops creating many drills —
+ *     this is the backstop on total spend per user.
  */
 export const RATE_LIMITS = {
   tavus_conversation: {
     name: "tavus_conversation",
+    actionLabel: "started a session",
     short: { max: 3, windowSeconds: 600 }, // 3 per 10 minutes
     daily: { max: 20, windowSeconds: 86_400 }, // 20 per 24 hours
   },
   feedback_generate: {
     name: "feedback_generate",
+    actionLabel: "requested feedback",
     short: { max: 20, windowSeconds: 600 }, // 20 per 10 minutes
     daily: { max: 100, windowSeconds: 86_400 }, // 100 per 24 hours
+  },
+  outreach_scout: {
+    name: "outreach_scout",
+    actionLabel: "scouted contacts",
+    short: { max: 5, windowSeconds: 600 }, // 5 per 10 minutes
+    daily: { max: 30, windowSeconds: 86_400 }, // 30 per 24 hours
+  },
+  outreach_draft: {
+    name: "outreach_draft",
+    actionLabel: "generated a draft",
+    short: { max: 10, windowSeconds: 600 }, // 10 per 10 minutes
+    daily: { max: 50, windowSeconds: 86_400 }, // 50 per 24 hours
+  },
+  practice_attempt: {
+    name: "practice_attempt",
+    actionLabel: "submitted a practice attempt",
+    short: { max: 10, windowSeconds: 600 }, // 10 per 10 minutes
+    daily: { max: 60, windowSeconds: 86_400 }, // 60 per 24 hours
   },
 } as const satisfies Record<string, RateLimitConfig>;
 
@@ -304,7 +336,7 @@ function buildMessage(
   retryAfterSeconds: number,
 ): string {
   const w = config[window];
-  const action = config.name === "tavus_conversation" ? "started a session" : "requested feedback";
+  const action = config.actionLabel;
   const windowLabel = humanWindow(w.windowSeconds);
   const retryLabel = humanDuration(retryAfterSeconds);
   return `You've ${action} ${w.max} times in the last ${windowLabel}. Try again in ${retryLabel}.`;

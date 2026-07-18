@@ -81,7 +81,7 @@ const categories: FaqCategory[] = [
 
 export default function FaqPage() {
   return (
-    <main className="min-h-screen bg-canvas">
+    <main id="main-content" className="min-h-screen bg-canvas">
       <Nav />
       <script
         type="application/ld+json"

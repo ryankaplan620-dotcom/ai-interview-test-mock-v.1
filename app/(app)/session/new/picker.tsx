@@ -1,12 +1,26 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { startSession, type StartSessionResult } from "./actions";
 import type { PersonaId, InterviewType, SubscriptionTier } from "@/types/supabase";
 import type { InterviewMode } from "@/lib/personas/types";
 import { TIERS } from "@/lib/tiers";
+
+// Selection is stashed here before redirecting to Stripe Checkout for an
+// overage purchase, and restored when the user is redirected back — the
+// picker remounts fresh on return, losing all in-memory state.
+const OVERAGE_PENDING_KEY = "folio:pendingOverageSelection";
+
+interface PendingSelection {
+  personaId: PersonaId;
+  interviewType: InterviewType;
+  mode: InterviewMode;
+  targetFirm?: string;
+  targetRole?: string;
+  isPanel: boolean;
+}
 
 // --------------------------------------------------------------------------
 // Static picker data (mirrors the persona registry for client-side rendering)
@@ -68,7 +82,56 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
   const [targetRole, setTargetRole] = useState("");
   const [isPanel, setIsPanel] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quotaExceeded, setQuotaExceeded] = useState<{ price?: number } | null>(null);
+  const [buyingOverage, setBuyingOverage] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  // On return from Stripe Checkout (either outcome), restore the selection
+  // that was in progress before the redirect. On a successful payment,
+  // resubmit immediately — the server verifies the credit server-side, it
+  // isn't trusted from the URL.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const overageStatus = params.get("overage");
+    if (!overageStatus) return;
+
+    window.history.replaceState(null, "", window.location.pathname);
+
+    const raw = sessionStorage.getItem(OVERAGE_PENDING_KEY);
+    sessionStorage.removeItem(OVERAGE_PENDING_KEY);
+    if (!raw) return;
+
+    let restored: PendingSelection;
+    try {
+      restored = JSON.parse(raw) as PendingSelection;
+    } catch {
+      return;
+    }
+
+    setPersonaId(restored.personaId);
+    setInterviewType(restored.interviewType);
+    setMode(restored.mode);
+    setTargetFirm(restored.targetFirm ?? "");
+    setTargetRole(restored.targetRole ?? "");
+    setIsPanel(restored.isPanel);
+
+    if (overageStatus === "paid") {
+      startTransition(async () => {
+        const result: StartSessionResult = await startSession({
+          ...restored,
+          overageAccepted: true,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          if (result.code === "session_quota_exceeded" && result.overageAvailable) {
+            setQuotaExceeded({ price: result.overagePrice });
+          }
+        }
+      });
+    }
+    // Runs once on mount only — this is a one-time resume of a redirect round-trip.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const persona = useMemo(() => personas.find((p) => p.id === personaId) ?? null, [personas, personaId]);
 
@@ -92,6 +155,7 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
   const onSubmit = () => {
     if (!personaId || !interviewType) return;
     setError(null);
+    setQuotaExceeded(null);
 
     startTransition(async () => {
       const result: StartSessionResult = await startSession({
@@ -105,9 +169,42 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
       });
       if (!result.ok) {
         setError(result.error);
+        if (result.code === "session_quota_exceeded" && result.overageAvailable) {
+          setQuotaExceeded({ price: result.overagePrice });
+        }
       }
       // On ok, the server action redirects — code after startTransition is unreachable on success.
     });
+  };
+
+  const onBuyOverage = () => {
+    if (!personaId || !interviewType) return;
+    setError(null);
+    setBuyingOverage(true);
+
+    const pending: PendingSelection = {
+      personaId,
+      interviewType,
+      mode,
+      targetFirm: targetFirm.trim() || undefined,
+      targetRole: targetRole.trim() || undefined,
+      isPanel,
+    };
+    sessionStorage.setItem(OVERAGE_PENDING_KEY, JSON.stringify(pending));
+
+    fetch("/api/stripe/overage-checkout", { method: "POST" })
+      .then(async (res) => {
+        const data: { url?: string; error?: string } = await res.json();
+        if (!res.ok || !data.url) {
+          throw new Error(data.error ?? "Checkout failed. Please try again.");
+        }
+        window.location.href = data.url;
+      })
+      .catch((err: unknown) => {
+        sessionStorage.removeItem(OVERAGE_PENDING_KEY);
+        setBuyingOverage(false);
+        setError(err instanceof Error ? err.message : "Checkout failed. Please try again.");
+      });
   };
 
   return (
@@ -335,6 +432,18 @@ export function SessionPicker({ personas, tier, hasFirmCalibration, hasPanel, ha
           <p className="font-sans text-[13px] text-red-400" role="alert">
             {error}
           </p>
+        )}
+        {quotaExceeded && (
+          <button
+            type="button"
+            onClick={onBuyOverage}
+            disabled={buyingOverage}
+            className="rounded-full border border-accent px-6 py-2.5 font-sans text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {buyingOverage
+              ? "Redirecting to checkout..."
+              : `Buy an overage session${quotaExceeded.price ? ` — $${quotaExceeded.price}` : ""} →`}
+          </button>
         )}
         <button
           type="button"
