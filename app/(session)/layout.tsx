@@ -10,7 +10,7 @@ export default async function SessionLayout({ children }: { children: React.Reac
   await requireUser();
 
   return (
-    <main className="min-h-screen bg-ink text-text-primary">
+    <main id="main-content" className="min-h-screen bg-ink text-text-primary">
       {children}
     </main>
   );

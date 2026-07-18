@@ -23,7 +23,7 @@ import { getUser } from "@/lib/auth/server";
 import { checkRateLimit, type RateLimitConfig } from "./index";
 
 export interface AuthedContext {
-  user: { id: string };
+  user: { id: string; email?: string };
 }
 
 export type AuthedHandler = (
@@ -72,6 +72,6 @@ export function withRateLimit(
       );
     }
 
-    return handler(req, { user: { id: user.id } });
+    return handler(req, { user: { id: user.id, email: user.email } });
   };
 }

@@ -378,10 +378,14 @@ function ScoutTab({
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+            <label
+              htmlFor="outreach-target-company"
+              className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary"
+            >
               TARGET COMPANY
             </label>
             <input
+              id="outreach-target-company"
               type="text"
               value={targetCompany}
               onChange={(e) => onCompanyChange(e.target.value)}
@@ -390,10 +394,14 @@ function ScoutTab({
             />
           </div>
           <div>
-            <label className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+            <label
+              htmlFor="outreach-target-role"
+              className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary"
+            >
               TARGET ROLE
             </label>
             <input
+              id="outreach-target-role"
               type="text"
               value={targetRole}
               onChange={(e) => onRoleChange(e.target.value)}
@@ -402,10 +410,14 @@ function ScoutTab({
             />
           </div>
           <div>
-            <label className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+            <label
+              htmlFor="outreach-target-city"
+              className="mb-1.5 block font-mono text-[10px] font-medium tracking-label text-text-tertiary"
+            >
               CITY / OFFICE
             </label>
             <select
+              id="outreach-target-city"
               value={targetCity}
               onChange={(e) => onCityChange(e.target.value)}
               className="w-full rounded-lg border border-ink-border bg-ink px-3.5 py-2.5 font-sans text-[14px] text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
@@ -723,10 +735,14 @@ function DraftsTab({
               /* Inline editor */
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+                  <label
+                    htmlFor={`draft-subject-${draft.id}`}
+                    className="mb-1 block font-mono text-[10px] font-medium tracking-label text-text-tertiary"
+                  >
                     SUBJECT
                   </label>
                   <input
+                    id={`draft-subject-${draft.id}`}
                     type="text"
                     value={editSubject}
                     onChange={(e) => onEditSubjectChange(e.target.value)}
@@ -734,10 +750,14 @@ function DraftsTab({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block font-mono text-[10px] font-medium tracking-label text-text-tertiary">
+                  <label
+                    htmlFor={`draft-body-${draft.id}`}
+                    className="mb-1 block font-mono text-[10px] font-medium tracking-label text-text-tertiary"
+                  >
                     BODY
                   </label>
                   <textarea
+                    id={`draft-body-${draft.id}`}
                     value={editBody}
                     onChange={(e) => onEditBodyChange(e.target.value)}
                     rows={6}
@@ -782,7 +802,11 @@ function DraftsTab({
                     Send
                   </button>
                   <button
-                    onClick={() => onDelete(draft.id)}
+                    onClick={() => {
+                      if (window.confirm("Delete this draft? This can't be undone.")) {
+                        onDelete(draft.id);
+                      }
+                    }}
                     className="rounded-full border border-ink-border px-3.5 py-1.5 font-sans text-[12px] font-medium text-rose-300/90 transition-colors hover:border-rose-300/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/60"
                   >
                     Delete

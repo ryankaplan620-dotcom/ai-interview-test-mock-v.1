@@ -2,7 +2,7 @@ import { FolioMark } from "@/components/FolioMark";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex min-h-screen flex-col bg-ink lg:flex-row">
+    <main id="main-content" className="flex min-h-screen flex-col bg-ink lg:flex-row">
       {/* Brand panel — cosmos cover moment */}
       <section className="bg-gradient-dark relative flex flex-col overflow-hidden px-6 py-10 sm:px-10 lg:w-[44%] lg:justify-between lg:px-14 lg:py-12">
         <div className="flex items-center gap-2.5">

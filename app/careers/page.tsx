@@ -37,7 +37,7 @@ const roles = [
 
 export default function CareersPage() {
   return (
-    <main className="min-h-screen bg-canvas">
+    <main id="main-content" className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Hero */}

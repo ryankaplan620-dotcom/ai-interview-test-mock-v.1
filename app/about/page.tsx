@@ -25,7 +25,7 @@ const paragraphs = [
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-canvas">
+    <main id="main-content" className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Hero */}

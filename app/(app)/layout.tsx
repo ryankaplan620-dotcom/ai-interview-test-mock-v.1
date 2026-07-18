@@ -14,7 +14,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const tierConfig = tier ? TIERS[tier.effective_tier] : TIERS.free;
 
   return (
-    <main className="relative flex min-h-screen flex-col bg-ink">
+    <main id="main-content" className="relative flex min-h-screen flex-col bg-ink">
       {/* Atmospheric layers */}
       <div className="pointer-events-none fixed inset-0 bg-grid-dark opacity-[0.25]" aria-hidden />
       <div className="pointer-events-none fixed inset-0 bg-depth-glow opacity-60" aria-hidden />

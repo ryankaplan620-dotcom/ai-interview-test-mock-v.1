@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { shouldMock } from "@/lib/pipeline/env";
 import { env } from "@/lib/pipeline/env";
 import { generateDrillFeedback } from "@/lib/practice/feedback";
 import { DRILL_TYPES } from "@/lib/practice/drills";
 import type { DrillType } from "@/types/supabase";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit, type AuthedContext } from "@/lib/rate-limit/middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,10 +33,7 @@ export const maxDuration = 60;
  *      mark drill as completed
  *   7. Return the full feedback payload to the client
  */
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function handler(req: NextRequest, { user }: AuthedContext) {
   let form: FormData;
   try {
     form = await req.formData();
@@ -210,6 +208,8 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ attempt: inserted, cached: false });
 }
+
+export const POST = withRateLimit(RATE_LIMITS.practice_attempt, handler);
 
 // --------------------------------------------------------------------------
 // Deepgram pre-recorded transcription

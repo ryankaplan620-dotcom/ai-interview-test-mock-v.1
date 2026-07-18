@@ -13,7 +13,7 @@ const legalLinks = [
  */
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-canvas">
+    <main id="main-content" className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Legal sub-navigation */}

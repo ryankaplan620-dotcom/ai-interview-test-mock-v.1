@@ -82,7 +82,7 @@ const channels: Channel[] = [
 
 export default function ContactPage() {
   return (
-    <main className="min-h-screen bg-canvas">
+    <main id="main-content" className="min-h-screen bg-canvas">
       <Nav />
 
       {/* Hero */}

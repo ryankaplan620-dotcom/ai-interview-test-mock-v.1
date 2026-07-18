@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { generateDraft } from "@/lib/outreach/draft";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit, type AuthedContext } from "@/lib/rate-limit/middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,10 +29,7 @@ const DeleteInput = z.object({
  * Loads a contact from outreach_contacts, generates a personalized outreach
  * email via Claude, and persists the draft to outreach_drafts.
  */
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function handler(req: NextRequest, { user }: AuthedContext) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
@@ -98,6 +97,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "draft_failed" }, { status: 500 });
   }
 }
+
+export const POST = withRateLimit(RATE_LIMITS.outreach_draft, handler);
 
 export async function PATCH(req: NextRequest) {
   const user = await getUser();
