@@ -1,16 +1,16 @@
 import clsx from "clsx";
 
-interface FolioMarkProps {
+interface PrepSpaceMarkProps {
   className?: string;
   color?: string;
   size?: number;
 }
 
 /**
- * Folio monogram. Two-path SVG on 100×100 viewBox.
+ * PrepSpace monogram. Two-path SVG on 100×100 viewBox.
  * Brand-locked geometry — do not modify proportions.
  */
-export function FolioMark({ className, color = "currentColor", size }: FolioMarkProps) {
+export function PrepSpaceMark({ className, color = "currentColor", size }: PrepSpaceMarkProps) {
   return (
     <svg
       className={clsx("folio-mark", className)}
@@ -18,7 +18,7 @@ export function FolioMark({ className, color = "currentColor", size }: FolioMark
       width={size}
       height={size}
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="Folio"
+      aria-label="PrepSpace"
       role="img"
     >
       <path

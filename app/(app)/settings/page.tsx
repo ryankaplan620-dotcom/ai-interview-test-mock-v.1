@@ -93,18 +93,18 @@ export default async function SettingsPage() {
         {/* Data */}
         <Panel title="Your data">
           <p className="font-sans text-[14px] leading-relaxed text-text-secondary">
-            Folio stores your session recordings, transcripts, and feedback. You can export or delete this
+            PrepSpace stores your session recordings, transcripts, and feedback. You can export or delete this
             data at any time, in accordance with GDPR and CCPA.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <a
-              href="mailto:support@folio.io?subject=Data%20export%20request"
+              href="mailto:support@prepspace.example?subject=Data%20export%20request"
               className="inline-flex h-9 items-center rounded-full border border-ink-border bg-ink-raised px-4 font-sans text-[13px] font-medium text-text-primary transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Request data export
             </a>
             <a
-              href="mailto:support@folio.io?subject=Account%20deletion%20request"
+              href="mailto:support@prepspace.example?subject=Account%20deletion%20request"
               className="inline-flex h-9 items-center rounded-full border border-rose-900 bg-transparent px-4 font-sans text-[13px] font-medium text-rose-400 transition-colors hover:bg-rose-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
             >
               Delete account

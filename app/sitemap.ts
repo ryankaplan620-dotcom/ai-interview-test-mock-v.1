@@ -24,7 +24,7 @@ const routes: Route[] = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://prepspace.example";
   const lastModified = new Date();
 
   return routes.map(({ path, priority, changeFrequency }) => ({

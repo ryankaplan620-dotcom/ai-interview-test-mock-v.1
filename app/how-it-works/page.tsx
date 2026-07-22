@@ -7,7 +7,7 @@ import { Section, Container, Eyebrow, SectionHeading, Lede, Button, ArrowLink, C
 export const metadata: Metadata = {
   title: "How it works",
   description:
-    "How Folio works: configure a session, talk to a calibrated interviewer in real time, and get a scored, quote-level breakdown the moment you finish.",
+    "How PrepSpace works: configure a session, talk to a calibrated interviewer in real time, and get a scored, quote-level breakdown the moment you finish.",
   alternates: { canonical: "/how-it-works" },
 };
 
@@ -27,8 +27,8 @@ const steps = [
   {
     n: "03",
     title: "Get the verdict",
-    body: "The moment you finish, Folio scores you across four dimensions and pulls the exact sentences that cost you the round — each paired with a stronger version.",
-    points: ["A single Folio Score", "Quote-level feedback", "Strengths, gaps, next steps"],
+    body: "The moment you finish, PrepSpace scores you across four dimensions and pulls the exact sentences that cost you the round — each paired with a stronger version.",
+    points: ["A single PrepSpace Score", "Quote-level feedback", "Strengths, gaps, next steps"],
   },
   {
     n: "04",
@@ -64,7 +64,7 @@ export default function HowItWorksPage() {
               The interview, before the interview.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[600px]">
-              Folio turns interview prep into reps that feel real — a live voice conversation
+              PrepSpace turns interview prep into reps that feel real — a live voice conversation
               with a calibrated interviewer, then a scored breakdown of every answer.
             </Lede>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
@@ -154,7 +154,7 @@ export default function HowItWorksPage() {
           <ScrollReveal>
             <SectionHeading className="font-bold">Run your first session free.</SectionHeading>
             <Lede className="mx-auto mt-5 max-w-[460px]">
-              Under 90 seconds to your first Folio Score. No credit card required.
+              Under 90 seconds to your first PrepSpace Score. No credit card required.
             </Lede>
             <div className="mt-9 flex justify-center">
               <Button href="/signup" size="lg" withArrow>

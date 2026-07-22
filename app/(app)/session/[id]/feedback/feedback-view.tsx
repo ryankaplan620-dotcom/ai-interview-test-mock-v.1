@@ -58,7 +58,7 @@ export function FeedbackView({ feedback, sessionMeta }: FeedbackViewProps) {
         </p>
       </header>
 
-      {/* Score hero — the Folio scorecard */}
+      {/* Score hero — the PrepSpace scorecard */}
       <section className="relative mt-10 overflow-hidden rounded-2xl border border-ink-border bg-ink-surface px-8 py-10 sm:px-10">
         <div
           className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-accent/[0.06] blur-3xl"

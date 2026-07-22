@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/db/client";
-import { FolioMark } from "@/components/FolioMark";
+import { PrepSpaceMark } from "@/components/PrepSpaceMark";
 
 export default function LoginPage() {
   return (
@@ -17,7 +17,7 @@ export default function LoginPage() {
 function LoginSkeleton() {
   return (
     <div className="w-full max-w-[400px] text-center">
-      <FolioMark className="mx-auto h-8 w-8" color="#63D88A" />
+      <PrepSpaceMark className="mx-auto h-8 w-8" color="#63D88A" />
       <p className="mt-6 font-sans text-[15px] text-text-secondary">Loading...</p>
     </div>
   );

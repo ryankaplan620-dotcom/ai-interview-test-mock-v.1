@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { COMPANY, LEGAL_VERSIONS, formatEffectiveDate } from "@/lib/legal/constants";
 
 export const metadata: Metadata = {
-  title: "Terms of Service · Folio",
-  description: "The agreement between you and Folio when using the product.",
+  title: "Terms of Service · PrepSpace",
+  description: "The agreement between you and PrepSpace when using the product.",
 };
 
 export default function TermsPage() {
@@ -40,7 +40,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section n="2" title="What Folio is">
+        <Section n="2" title="What PrepSpace is">
           <p>
             {COMPANY.short_name} is a practice-interview platform. You speak with an AI interviewer
             modeled after a named persona, and after each session you receive a structured evaluation
@@ -55,7 +55,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section n="3" title="Who can use Folio">
+        <Section n="3" title="Who can use PrepSpace">
           <p>
             You may use {COMPANY.short_name} only if you are at least 18 years old. If you are under
             18, you may use {COMPANY.short_name} only with the consent and supervision of a parent or

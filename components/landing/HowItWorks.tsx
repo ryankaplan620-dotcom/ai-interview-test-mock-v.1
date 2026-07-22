@@ -10,12 +10,12 @@ const steps = [
   {
     number: "02",
     title: "See your exact words, made stronger",
-    body: "After every session, Folio pulls the sentences that cost you the round and shows you the stronger version, side by side.",
+    body: "After every session, PrepSpace pulls the sentences that cost you the round and shows you the stronger version, side by side.",
   },
   {
     number: "03",
     title: "Open doors while you sleep",
-    body: "Folio finds the recruiters who can open the door, drafts in your voice, and waits for your review before anything sends.",
+    body: "PrepSpace finds the recruiters who can open the door, drafts in your voice, and waits for your review before anything sends.",
   },
 ];
 

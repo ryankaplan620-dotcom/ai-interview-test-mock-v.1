@@ -6,7 +6,7 @@ import { Section, Container, Eyebrow, SectionHeading, Lede } from "@/components/
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with Folio — general questions, product support, security, privacy, careers, and press.",
+  description: "Get in touch with PrepSpace — general questions, product support, security, privacy, careers, and press.",
   alternates: { canonical: "/contact" },
 };
 
@@ -20,8 +20,8 @@ type Channel = {
 const channels: Channel[] = [
   {
     title: "General",
-    description: "Questions about Folio, partnerships, or anything else.",
-    email: "hello@folio.io",
+    description: "Questions about PrepSpace, partnerships, or anything else.",
+    email: "hello@prepspace.example",
     icon: (
       <path d="M4 7h16v10H4zM4 8l8 5 8-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     ),
@@ -29,7 +29,7 @@ const channels: Channel[] = [
   {
     title: "Product support",
     description: "Trouble with a session, your account, or billing.",
-    email: "support@folio.io",
+    email: "support@prepspace.example",
     icon: (
       <>
         <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.5" />
@@ -40,7 +40,7 @@ const channels: Channel[] = [
   {
     title: "Security",
     description: "Report a vulnerability or ask about our practices.",
-    email: "security@folio.io",
+    email: "security@prepspace.example",
     icon: (
       <path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     ),
@@ -48,7 +48,7 @@ const channels: Channel[] = [
   {
     title: "Privacy",
     description: "Data requests, deletion, or privacy questions.",
-    email: "privacy@folio.io",
+    email: "privacy@prepspace.example",
     icon: (
       <>
         <rect x="5" y="10" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.5" />
@@ -58,8 +58,8 @@ const channels: Channel[] = [
   },
   {
     title: "Careers",
-    description: "Open roles and anything about working at Folio.",
-    email: "careers@folio.io",
+    description: "Open roles and anything about working at PrepSpace.",
+    email: "careers@prepspace.example",
     icon: (
       <>
         <rect x="4" y="7" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
@@ -70,7 +70,7 @@ const channels: Channel[] = [
   {
     title: "Press",
     description: "Media inquiries and brand assets.",
-    email: "press@folio.io",
+    email: "press@prepspace.example",
     icon: (
       <>
         <path d="M5 5h11v14H6a2 2 0 0 1-2-2V6" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />

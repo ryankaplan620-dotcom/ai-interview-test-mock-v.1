@@ -47,7 +47,7 @@ export function Interviewers() {
               <div className="relative aspect-square overflow-hidden">
                 <Image
                   src={agent.image}
-                  alt={`${agent.name}, Folio interview agent`}
+                  alt={`${agent.name}, PrepSpace interview agent`}
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"

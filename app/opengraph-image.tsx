@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Folio — The interview before the interview";
+export const alt = "PrepSpace — The interview before the interview";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -46,7 +46,7 @@ export default function OpengraphImage() {
               color: "transparent",
             }}
           >
-            Folio
+            PrepSpace
           </span>
         </div>
 
@@ -78,7 +78,7 @@ export default function OpengraphImage() {
               Built to get you hired.
             </span>
           </div>
-          <span style={{ display: "flex", color: "#6E7480", fontSize: 24 }}>folio.io</span>
+          <span style={{ display: "flex", color: "#6E7480", fontSize: 24 }}>prepspace.example</span>
         </div>
       </div>
     ),

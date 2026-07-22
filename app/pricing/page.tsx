@@ -8,7 +8,7 @@ import { getUser, getUserTier } from "@/lib/auth/server";
 export const metadata = {
   title: "Pricing",
   description:
-    "Folio pricing — Basic $49 (90 days, students only), Pro $149 (full year), Max $249 (full year, unlimited sessions, panels and superday).",
+    "PrepSpace pricing — Basic $49 (90 days, students only), Pro $149 (full year), Max $249 (full year, unlimited sessions, panels and superday).",
 };
 
 export default async function PricingPage() {

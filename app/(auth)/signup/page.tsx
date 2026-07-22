@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/db/client";
-import { FolioMark } from "@/components/FolioMark";
+import { PrepSpaceMark } from "@/components/PrepSpaceMark";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -51,7 +51,7 @@ export default function SignupPage() {
       <div className="w-full max-w-[400px]">
         <div className="rounded-2xl border border-accent/30 bg-ink-surface p-8 text-center shadow-accent-glow sm:p-10">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
-            <FolioMark className="h-6 w-6" color="#63D88A" />
+            <PrepSpaceMark className="h-6 w-6" color="#63D88A" />
           </span>
           <h1 className="mt-6 font-display text-[24px] font-bold tracking-heading text-text-primary">
             Confirm your email

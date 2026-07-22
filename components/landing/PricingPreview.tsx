@@ -5,7 +5,7 @@ import { Section, Eyebrow, SectionHeading, Lede, Button, ArrowLink, CheckIcon } 
 const tiers = [
   {
     name: "Free",
-    tagline: "See what Folio feels like.",
+    tagline: "See what PrepSpace feels like.",
     price: "$0",
     period: "",
     cta: "Start free",
@@ -14,7 +14,7 @@ const tiers = [
     features: [
       "1 interview session (10 min)",
       "All interviewer personas",
-      "Folio Score with basic feedback",
+      "PrepSpace Score with basic feedback",
       "Limited session replay",
     ],
   },

@@ -258,7 +258,7 @@ export default async function DashboardPage() {
               <PersonaRow
                 name="Sarah Chen"
                 version="v.2"
-                role="Folio · Engineering Manager"
+                role="PrepSpace · Engineering Manager"
                 image="/images/agents/sarah.png"
               />
               <PersonaRow
@@ -276,7 +276,7 @@ export default async function DashboardPage() {
               &ldquo;The interview before the interview.&rdquo;
             </p>
             <p className="mt-2 font-mono text-[10px] tracking-label text-text-tertiary">
-              — THE FOLIO METHOD
+              — THE PREPSPACE METHOD
             </p>
           </div>
         </aside>

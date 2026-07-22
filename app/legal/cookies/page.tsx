@@ -7,8 +7,8 @@ import {
 import { CookieControls } from "@/components/legal/cookie-controls";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy · Folio",
-  description: "What cookies Folio uses, why, and how you control them.",
+  title: "Cookie Policy · PrepSpace",
+  description: "What cookies PrepSpace uses, why, and how you control them.",
 };
 
 export default function CookiesPage() {

@@ -237,10 +237,10 @@ export default async function SessionDetailsPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Folio Score */}
+          {/* PrepSpace Score */}
           {feedbackScore !== null && (
             <div className="rounded-xl border border-ink-border bg-ink-surface p-5">
-              <p className="font-mono text-[10px] tracking-label text-text-tertiary">FOLIO SCORE</p>
+              <p className="font-mono text-[10px] tracking-label text-text-tertiary">PREPSPACE SCORE</p>
               <div className="mt-2 flex items-baseline gap-2">
                 <p
                   className={[

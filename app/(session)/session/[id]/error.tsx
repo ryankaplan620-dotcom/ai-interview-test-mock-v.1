@@ -124,10 +124,10 @@ export default function SessionError({
               </Link>{" "}
               — if this session ends up counted incorrectly, email{" "}
               <a
-                href="mailto:support@folio.io"
+                href="mailto:support@prepspace.example"
                 className="underline hover:text-amber-200"
               >
-                support@folio.io
+                support@prepspace.example
               </a>{" "}
               and we'll fix it.
             </p>
@@ -137,10 +137,10 @@ export default function SessionError({
         <p className="mt-8 font-sans text-[12.5px] leading-relaxed text-text-tertiary">
           If this keeps happening, it's not you. Email{" "}
           <a
-            href="mailto:support@folio.io"
+            href="mailto:support@prepspace.example"
             className="text-accent hover:underline"
           >
-            support@folio.io
+            support@prepspace.example
           </a>{" "}
           and we'll take a look.
         </p>

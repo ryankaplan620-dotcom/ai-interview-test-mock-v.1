@@ -7,7 +7,7 @@ import { Section, Container, Eyebrow, SectionHeading, Lede, Button, Card } from 
 export const metadata: Metadata = {
   title: "Security",
   description:
-    "How Folio keeps your data safe. Encryption at rest and in transit, no training on your data, and the right to delete anytime.",
+    "How PrepSpace keeps your data safe. Encryption at rest and in transit, no training on your data, and the right to delete anytime.",
 };
 
 const cards = [
@@ -21,7 +21,7 @@ const cards = [
     title: "Encrypted in transit",
     detail: "TLS 1.3",
     description:
-      "Every connection to Folio is encrypted with TLS 1.3. Your audio, video, and data never travel over an unencrypted channel.",
+      "Every connection to PrepSpace is encrypted with TLS 1.3. Your audio, video, and data never travel over an unencrypted channel.",
   },
   {
     title: "Your data stays yours",
@@ -87,7 +87,7 @@ export default function SecurityPage() {
           <div className="mt-8 space-y-5 text-[16.5px] leading-[1.75] text-gray-600">
             <ScrollReveal delay={100}>
               <p>
-                Your practice sessions are visible only to you. No one at Folio reviews your
+                Your practice sessions are visible only to you. No one at PrepSpace reviews your
                 transcripts, listens to your recordings, or reads your feedback unless you
                 explicitly ask for human support. The interviewers process your audio in real
                 time and discard the raw stream after the session ends.
@@ -116,8 +116,8 @@ export default function SecurityPage() {
               hours.
             </Lede>
             <div className="mt-9 flex justify-center">
-              <Button href="mailto:security@folio.io" size="lg">
-                security@folio.io
+              <Button href="mailto:security@prepspace.example" size="lg">
+                security@prepspace.example
               </Button>
             </div>
           </ScrollReveal>

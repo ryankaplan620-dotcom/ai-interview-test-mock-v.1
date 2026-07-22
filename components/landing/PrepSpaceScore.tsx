@@ -36,12 +36,12 @@ function polygonPath(fraction: number): string {
   }).join(" ");
 }
 
-export function FolioScore() {
+export function PrepSpaceScore() {
   return (
     <Section tone="white">
       <ScrollReveal>
         <div className="text-center">
-          <Eyebrow>The Folio Score</Eyebrow>
+          <Eyebrow>The PrepSpace Score</Eyebrow>
           <SectionHeading className="mt-4">One number. The one that matters.</SectionHeading>
           <Lede className="mx-auto mt-5 max-w-[560px]">
             Every session resolves to a single score across three dimensions interviewers

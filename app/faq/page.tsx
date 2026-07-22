@@ -8,7 +8,7 @@ import { FaqAccordion, type FaqCategory } from "./faq-accordion";
 export const metadata: Metadata = {
   title: "FAQ",
   description:
-    "Answers about Folio — how the live voice interviews work, what's included in each plan, the free trial, and how your data is handled.",
+    "Answers about PrepSpace — how the live voice interviews work, what's included in each plan, the free trial, and how your data is handled.",
   alternates: { canonical: "/faq" },
 };
 
@@ -17,15 +17,15 @@ const categories: FaqCategory[] = [
     title: "General",
     items: [
       {
-        q: "What exactly is Folio?",
-        a: "Folio runs live voice interview practice with distinct interviewer personas, each calibrated to your target firm and role. After every session you get a Folio Score and quote-level feedback showing your exact words next to a stronger version.",
+        q: "What exactly is PrepSpace?",
+        a: "PrepSpace runs live voice interview practice with distinct interviewer personas, each calibrated to your target firm and role. After every session you get a PrepSpace Score and quote-level feedback showing your exact words next to a stronger version.",
       },
       {
         q: "How is this different from practicing with a chatbot?",
-        a: "A chatbot is text-based, un-calibrated, and coaches you mid-conversation. Folio is voice-only, calibrated to specific firms and rounds, uses distinct interviewer personalities, and only gives feedback after the session ends — the way real interviews actually work.",
+        a: "A chatbot is text-based, un-calibrated, and coaches you mid-conversation. PrepSpace is voice-only, calibrated to specific firms and rounds, uses distinct interviewer personalities, and only gives feedback after the session ends — the way real interviews actually work.",
       },
       {
-        q: "What kinds of interviews does Folio cover?",
+        q: "What kinds of interviews does PrepSpace cover?",
         a: "Behavioral, technical, case, product, and general professional interviews — across Fortune 500 companies, startups, consulting, finance, healthcare, and government. Sessions calibrate to how each organization tends to interview.",
       },
     ],
@@ -52,7 +52,7 @@ const categories: FaqCategory[] = [
     items: [
       {
         q: "Is there a free trial?",
-        a: "Your first interview is free with no credit card. Paid plans add a 15-day free trial on your first purchase — run sessions and see your Folio Score before you're charged.",
+        a: "Your first interview is free with no credit card. Paid plans add a 15-day free trial on your first purchase — run sessions and see your PrepSpace Score before you're charged.",
       },
       {
         q: "Why cycles instead of monthly billing?",
@@ -110,7 +110,7 @@ export default function FaqPage() {
               Questions, answered.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[520px]">
-              Everything about how Folio works, what's included, and how your data is handled.
+              Everything about how PrepSpace works, what's included, and how your data is handled.
             </Lede>
           </ScrollReveal>
         </Container>

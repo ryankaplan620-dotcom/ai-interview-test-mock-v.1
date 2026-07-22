@@ -58,7 +58,7 @@ const bands: Band[] = [
     eyebrow: "02 · Train",
     heading: "Your exact words, stronger.",
     accentWord: "stronger.",
-    body: "Folio doesn’t just score you. It pulls your weakest sentences, shows you a better version, and tracks your growth over time.",
+    body: "PrepSpace doesn’t just score you. It pulls your weakest sentences, shows you a better version, and tracks your growth over time.",
     features: [
       "Quote-based feedback",
       "Four score dimensions",
@@ -73,7 +73,7 @@ const bands: Band[] = [
     eyebrow: "03 · Outreach",
     heading: "Doors, opened.",
     accentWord: "opened.",
-    body: "Folio identifies the right people, writes in your voice, and never sends without your approval. Networking on autopilot, with a human in the loop.",
+    body: "PrepSpace identifies the right people, writes in your voice, and never sends without your approval. Networking on autopilot, with a human in the loop.",
     features: [
       "Contact scouting",
       "Voice-matched drafts",

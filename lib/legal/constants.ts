@@ -25,7 +25,7 @@ export const LEGAL_VERSIONS = {
  * Company details. These are placeholders — update with your actual
  * registered business entity before publishing.
  *
- * Note on the entity question: Folio is currently a sole-proprietor product
+ * Note on the entity question: PrepSpace is currently a sole-proprietor product
  * under your name. Before taking paid users, you should register an LLC
  * (Delaware or Florida, depending on where you plan to domicile). The ToS
  * lists the registered entity as the contracting party — running it under
@@ -35,16 +35,16 @@ export const LEGAL_VERSIONS = {
  * ~$125 to register.
  *
  * TODO BEFORE PUBLISHING: replace these with real entity name, address, and
- * a contact email on the folio.io domain.
+ * a contact email on the prepspace.example domain.
  */
 export const COMPANY = {
-  legal_name: "Folio (operating as a sole proprietorship pending LLC registration)",
-  short_name: "Folio",
-  product_domain: "folio.io",
-  support_email: "support@folio.io",
-  privacy_email: "privacy@folio.io",
-  legal_email: "legal@folio.io",
-  dpo_email: "privacy@folio.io",
+  legal_name: "PrepSpace (operating as a sole proprietorship pending LLC registration)",
+  short_name: "PrepSpace",
+  product_domain: "prepspace.example",
+  support_email: "support@prepspace.example",
+  privacy_email: "privacy@prepspace.example",
+  legal_email: "legal@prepspace.example",
+  dpo_email: "privacy@prepspace.example",
   address_line_1: "[To be added upon entity registration]",
   address_line_2: "[City, State, ZIP]",
   governing_law: "State of Florida, United States of America",
@@ -95,7 +95,7 @@ export const PROCESSORS: Processor[] = [
     jurisdiction: "United States",
     privacy_policy_url: "https://www.anthropic.com/legal/privacy",
     handles_user_content: true,
-    retention_note: "Anthropic does not use your transcripts to train their models (this is an API-only guarantee under their commercial terms). Data is retained per Anthropic's policy and is not stored at rest by Folio beyond the feedback results we persist to our database.",
+    retention_note: "Anthropic does not use your transcripts to train their models (this is an API-only guarantee under their commercial terms). Data is retained per Anthropic's policy and is not stored at rest by PrepSpace beyond the feedback results we persist to our database.",
   },
   {
     name: "SheerID",
@@ -104,7 +104,7 @@ export const PROCESSORS: Processor[] = [
     jurisdiction: "United States",
     privacy_policy_url: "https://www.sheerid.com/privacy-policy/",
     handles_user_content: false,
-    retention_note: "SheerID stores verification outcomes per their policy. Folio stores only the verification status (verified/rejected) and does not retain the underlying documentation.",
+    retention_note: "SheerID stores verification outcomes per their policy. PrepSpace stores only the verification status (verified/rejected) and does not retain the underlying documentation.",
   },
   {
     name: "Stripe",
@@ -113,7 +113,7 @@ export const PROCESSORS: Processor[] = [
     jurisdiction: "United States",
     privacy_policy_url: "https://stripe.com/privacy",
     handles_user_content: false,
-    retention_note: "Stripe retains transaction records per financial-regulation requirements (typically 7 years). Folio stores only your Stripe customer ID and subscription status.",
+    retention_note: "Stripe retains transaction records per financial-regulation requirements (typically 7 years). PrepSpace stores only your Stripe customer ID and subscription status.",
   },
   {
     name: "Cloudflare R2",

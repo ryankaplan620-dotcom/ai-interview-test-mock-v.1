@@ -43,7 +43,7 @@ export function ProductDemo() {
                   <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" strokeWidth="1" />
                   <path d="M4 5.5V4a2 2 0 014 0v1.5" stroke="currentColor" strokeWidth="1" />
                 </svg>
-                <span className="font-mono text-[11px] text-text-tertiary">folio.io/session</span>
+                <span className="font-mono text-[11px] text-text-tertiary">prepspace.example/session</span>
               </div>
             </div>
 

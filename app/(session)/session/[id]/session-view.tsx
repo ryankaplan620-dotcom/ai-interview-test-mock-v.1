@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { FolioMark } from "@/components/FolioMark";
+import { PrepSpaceMark } from "@/components/PrepSpaceMark";
 import { endSession, markSessionStarted } from "./actions";
 import type { PersonaId, InterviewType, SessionStatus, SessionMode } from "@/types/supabase";
 import type { ConversationTurn, OrchestratorState, OrchestratorHandle } from "@/lib/pipeline/types";
@@ -613,7 +613,7 @@ function LiveCallScreen({
       {/* Top bar */}
       <header className="flex items-center justify-between border-b border-ink-border px-6 py-3">
         <div className="flex items-center gap-3">
-          <FolioMark className="h-5 w-5 text-accent" />
+          <PrepSpaceMark className="h-5 w-5 text-accent" />
           <span className="font-mono text-[11px] tracking-label text-text-tertiary">
             {session.interview_type.replace(/_/g, " ").toUpperCase()} · {formatSessionMode(session.mode).toUpperCase()}
           </span>
@@ -791,7 +791,7 @@ function EndingScreen() {
   return (
     <div className="relative min-h-screen bg-gradient-dark">
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6">
-        <FolioMark className="h-10 w-10 text-accent" />
+        <PrepSpaceMark className="h-10 w-10 text-accent" />
         <p className="mt-6 font-display text-[18px] font-bold tracking-heading text-text-primary">Wrapping up.</p>
         <p className="mt-1 font-sans text-[13px] text-text-secondary">
           Saving your session. Feedback in a moment.

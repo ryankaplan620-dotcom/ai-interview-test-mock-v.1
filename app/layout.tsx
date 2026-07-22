@@ -41,13 +41,13 @@ const jetbrainsMono = JetBrains_Mono({
 // ==========================================
 // Metadata
 // ==========================================
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://folio.io";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://prepspace.example";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Folio — The interview before the interview",
-    template: "%s · Folio",
+    default: "PrepSpace — The interview before the interview",
+    template: "%s · PrepSpace",
   },
   description: "Live video interview practice, indistinguishable from the real thing.",
   keywords: [
@@ -60,24 +60,23 @@ export const metadata: Metadata = {
     "interview prep",
     "tech interview prep",
     "consulting interview prep",
-    "Folio",
+    "PrepSpace",
   ],
-  authors: [{ name: "Folio" }],
-  creator: "Folio",
-  publisher: "Folio",
+  authors: [{ name: "PrepSpace" }],
+  creator: "PrepSpace",
+  publisher: "PrepSpace",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    siteName: "Folio",
-    title: "Folio — The interview before the interview",
+    siteName: "PrepSpace",
+    title: "PrepSpace — The interview before the interview",
     description: "Live video interview practice, indistinguishable from the real thing.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Folio — The interview before the interview",
+    title: "PrepSpace — The interview before the interview",
     description: "Live video interview practice, indistinguishable from the real thing.",
-    creator: "@folio",
   },
   icons: {
     icon: [
@@ -129,7 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "Organization",
-                name: "Folio",
+                name: "PrepSpace",
                 url: SITE_URL,
                 logo: `${SITE_URL}/favicon-96.png`,
                 description:
@@ -138,7 +137,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
-                name: "Folio",
+                name: "PrepSpace",
                 url: SITE_URL,
               },
             ]),

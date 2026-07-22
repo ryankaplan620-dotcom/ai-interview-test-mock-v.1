@@ -7,7 +7,7 @@ import { Section, Container, Eyebrow, SectionHeading, Lede, Button } from "@/com
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Folio exists because interview prep is broken. We built a practice environment indistinguishable from the real thing.",
+    "PrepSpace exists because interview prep is broken. We built a practice environment indistinguishable from the real thing.",
 };
 
 const stats = [
@@ -20,7 +20,7 @@ const stats = [
 const paragraphs = [
   "Most candidates prepare by reading lists of questions and rehearsing answers in their head. That is not practice. Real interviews are live, unpredictable, and conversational. The gap between reading about interviews and sitting in one is enormous, and that gap costs people offers.",
   "Practice needs to feel real. That means a voice on the other end that listens, follows up, and pushes back. It means feedback that cites the exact words you said, not generic advice. And it means scoring that tracks your progress across the dimensions interviewers actually evaluate: structure, specificity, and delivery.",
-  "Folio is built around live conversation because interviews are conversations, not text boxes. Our feedback is quote-based because you need to see what you actually said, not what a summary thinks you said. And our outreach pipeline is human-in-the-loop because automated spam does not land interviews. Every piece of the product exists to close the gap between practice and performance.",
+  "PrepSpace is built around live conversation because interviews are conversations, not text boxes. Our feedback is quote-based because you need to see what you actually said, not what a summary thinks you said. And our outreach pipeline is human-in-the-loop because automated spam does not land interviews. Every piece of the product exists to close the gap between practice and performance.",
 ];
 
 export default function AboutPage() {
@@ -37,7 +37,7 @@ export default function AboutPage() {
               Built to get you hired.
             </SectionHeading>
             <Lede className="mx-auto mt-6 max-w-[600px]">
-              Folio is a live interview practice platform where every session feels
+              PrepSpace is a live interview practice platform where every session feels
               indistinguishable from the real thing. We combine live AI interviewers,
               quote-level feedback, and human-calibrated scoring so you walk into the room
               already sharp.
@@ -89,7 +89,7 @@ export default function AboutPage() {
           <ScrollReveal>
             <SectionHeading className="font-bold">Ready to practice?</SectionHeading>
             <Lede className="mx-auto mt-5 max-w-[440px]">
-              Under 90 seconds to your first Folio Score. No credit card.
+              Under 90 seconds to your first PrepSpace Score. No credit card.
             </Lede>
             <div className="mt-9 flex justify-center">
               <Button href="/signup" size="lg" withArrow>

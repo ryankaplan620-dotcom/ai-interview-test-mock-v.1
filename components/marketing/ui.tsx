@@ -3,7 +3,7 @@ import clsx from "clsx";
 import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 
 /* ============================================================
-   Folio marketing UI primitives
+   PrepSpace marketing UI primitives
    ------------------------------------------------------------
    One vocabulary for the entire public site so every page
    shares the same rhythm, type scale, and color. Light canvas,

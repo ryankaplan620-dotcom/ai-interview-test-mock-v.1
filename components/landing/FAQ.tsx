@@ -6,9 +6,9 @@ import { Section, Eyebrow, SectionHeading } from "@/components/marketing/ui";
 
 const faqs = [
   {
-    question: "What exactly is Folio?",
+    question: "What exactly is PrepSpace?",
     answer:
-      "Folio runs live voice interview practice sessions with distinct interviewer personas, each calibrated to your target firm. After each session, you get quote-based feedback showing your exact words alongside stronger versions. A separate outreach engine finds and drafts personalized messages to recruiters in your voice.",
+      "PrepSpace runs live voice interview practice sessions with distinct interviewer personas, each calibrated to your target firm. After each session, you get quote-based feedback showing your exact words alongside stronger versions. A separate outreach engine finds and drafts personalized messages to recruiters in your voice.",
   },
   {
     question: "How realistic are the interviews?",
@@ -18,22 +18,22 @@ const faqs = [
   {
     question: "Is there a free trial?",
     answer:
-      "Yes. Every plan includes a 15-day free trial with no credit card required. You can run sessions, get feedback, and see your Folio Score before deciding.",
+      "Yes. Every plan includes a 15-day free trial with no credit card required. You can run sessions, get feedback, and see your PrepSpace Score before deciding.",
   },
   {
     question: "How is this different from practicing with a chatbot?",
     answer:
-      "A chatbot is text-based, un-calibrated, and coaches you during the conversation. Folio is voice-only, calibrated to specific firms and rounds, uses distinct interviewer personalities, and only gives feedback after the session ends — the way real interviews work.",
+      "A chatbot is text-based, un-calibrated, and coaches you during the conversation. PrepSpace is voice-only, calibrated to specific firms and rounds, uses distinct interviewer personalities, and only gives feedback after the session ends — the way real interviews work.",
   },
   {
-    question: "What firms does Folio cover?",
+    question: "What firms does PrepSpace cover?",
     answer:
-      "Folio covers all types of interviews — from Fortune 500 companies to startups, government agencies to healthcare systems. Our question banks span behavioral, technical, case, product, and general professional interviews. Whether you’re interviewing at Google or your local hospital, Folio adapts.",
+      "PrepSpace covers all types of interviews — from Fortune 500 companies to startups, government agencies to healthcare systems. Our question banks span behavioral, technical, case, product, and general professional interviews. Whether you’re interviewing at Google or your local hospital, PrepSpace adapts.",
   },
   {
     question: "Is my data private?",
     answer:
-      "Sessions are encrypted at rest and in transit. Folio never uses your practice sessions for training. You can export or delete all your data at any time.",
+      "Sessions are encrypted at rest and in transit. PrepSpace never uses your practice sessions for training. You can export or delete all your data at any time.",
   },
   {
     question: "Can I cancel anytime?",
@@ -43,7 +43,7 @@ const faqs = [
   {
     question: "What if I don’t improve?",
     answer:
-      "94% of users who practice three or more times in their first week reach a Folio Score of 70 by day 14. If you don’t see improvement after consistent use, email us — we’ll work with you directly.",
+      "94% of users who practice three or more times in their first week reach a PrepSpace Score of 70 by day 14. If you don’t see improvement after consistent use, email us — we’ll work with you directly.",
   },
 ];
 

@@ -19,7 +19,7 @@ export function ClosingCTA() {
           </h2>
 
           <p className="mx-auto mt-7 max-w-[440px] text-[17px] leading-relaxed text-text-secondary">
-            Under 90 seconds to your first Folio Score. No credit card required.
+            Under 90 seconds to your first PrepSpace Score. No credit card required.
           </p>
 
           <div className="mt-12 flex justify-center">

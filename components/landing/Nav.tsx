@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { FolioMark } from "../FolioMark";
+import { PrepSpaceMark } from "../PrepSpaceMark";
 import { Button } from "@/components/marketing/ui";
 
 const navLinks = [
@@ -51,16 +51,16 @@ export function Nav({ onDark = false }: { onDark?: boolean }) {
         <Link
           href="/"
           className="flex items-center gap-2.5 transition-opacity duration-200 hover:opacity-70"
-          aria-label="Folio home"
+          aria-label="PrepSpace home"
         >
-          <FolioMark className="h-7 w-7" color="#63D88A" />
+          <PrepSpaceMark className="h-7 w-7" color="#63D88A" />
           <span
             className={clsx(
               "font-display text-[18px] font-semibold tracking-[-0.025em]",
               onDark ? "text-text-primary" : "text-gray-900",
             )}
           >
-            Folio
+            PrepSpace
           </span>
         </Link>
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FolioMark } from "@/components/FolioMark";
+import { PrepSpaceMark } from "@/components/PrepSpaceMark";
 import { SignOutButton } from "@/components/SignOutButton";
 import { AppDesktopNav, AppMobileNav } from "@/components/AppNav";
 import { LinkButton } from "@/components/Button";
@@ -27,9 +27,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               href="/dashboard"
               className="inline-flex flex-shrink-0 items-center gap-2.5 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             >
-              <FolioMark className="h-6 w-6 text-accent" />
+              <PrepSpaceMark className="h-6 w-6 text-accent" />
               <span className="font-display text-[18px] font-bold tracking-[-0.03em] text-text-primary">
-                Folio
+                PrepSpace
               </span>
             </Link>
 

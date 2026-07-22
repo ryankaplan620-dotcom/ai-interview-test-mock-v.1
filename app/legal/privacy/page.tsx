@@ -7,8 +7,8 @@ import {
 } from "@/lib/legal/constants";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · Folio",
-  description: "How Folio collects, uses, shares, and protects your data.",
+  title: "Privacy Policy · PrepSpace",
+  description: "How PrepSpace collects, uses, shares, and protects your data.",
 };
 
 export default function PrivacyPage() {

@@ -7,7 +7,7 @@ import { Section, Container, Eyebrow, SectionHeading, Lede, Button, Card } from 
 export const metadata: Metadata = {
   title: "Careers",
   description:
-    "Join Folio and help build the thing that gets people hired. Open roles in engineering, ML, marketing, and content.",
+    "Join PrepSpace and help build the thing that gets people hired. Open roles in engineering, ML, marketing, and content.",
 };
 
 const values = [
@@ -88,7 +88,7 @@ export default function CareersPage() {
             {roles.map((role, i) => (
               <ScrollReveal key={role.title} delay={i * 70}>
                 <a
-                  href={`mailto:careers@folio.io?subject=Application: ${role.title}`}
+                  href={`mailto:careers@prepspace.example?subject=Application: ${role.title}`}
                   className="group flex items-center justify-between gap-4 rounded-2xl border border-gray-200/70 bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover"
                 >
                   <div>
@@ -119,8 +119,8 @@ export default function CareersPage() {
               Reach out anyway. We are always looking for people who care about this problem.
             </Lede>
             <div className="mt-9 flex justify-center">
-              <Button href="mailto:careers@folio.io" size="lg">
-                careers@folio.io
+              <Button href="mailto:careers@prepspace.example" size="lg">
+                careers@prepspace.example
               </Button>
             </div>
           </ScrollReveal>

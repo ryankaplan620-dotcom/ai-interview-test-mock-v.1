@@ -61,7 +61,7 @@ export function Hero() {
           className="mt-7 max-w-[600px] animate-fade-up text-[17px] leading-[1.6] text-text-secondary opacity-0 motion-reduce:opacity-100 sm:text-[18px]"
           style={{ animationDelay: "160ms" }}
         >
-          Folio runs live voice interviews with distinct personas calibrated to your target
+          PrepSpace runs live voice interviews with distinct personas calibrated to your target
           role. Get scored feedback, track your improvement, and walk in unmistakable.
         </p>
 
@@ -86,7 +86,7 @@ export function Hero() {
           </Link>
         </div>
 
-        {/* Agent roster — the Folio Labs interviewers */}
+        {/* Agent roster — the PrepSpace interviewers */}
         <div
           className="mt-12 flex animate-fade-up flex-wrap items-center justify-center gap-x-4 gap-y-3 opacity-0 motion-reduce:opacity-100"
           style={{ animationDelay: "320ms" }}
@@ -98,7 +98,7 @@ export function Hero() {
             >
               <Image
                 src={a.src}
-                alt={`${a.name}, a Folio interview agent`}
+                alt={`${a.name}, a PrepSpace interview agent`}
                 width={28}
                 height={28}
                 className="h-7 w-7 rounded-full object-cover ring-1 ring-accent/50"

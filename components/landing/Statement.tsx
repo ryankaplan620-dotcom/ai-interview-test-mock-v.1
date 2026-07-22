@@ -4,10 +4,10 @@
  */
 export function Statement() {
   return (
-    <section className="relative overflow-hidden bg-ink" aria-label="Folio Labs statement">
+    <section className="relative overflow-hidden bg-ink" aria-label="PrepSpace statement">
       <div className="mx-auto max-w-[1200px] px-6 py-24 text-center sm:px-8 sm:py-32">
         <p className="font-mono text-[12px] font-medium uppercase tracking-label text-text-tertiary">
-          Folio Labs
+          PrepSpace
         </p>
 
         <h2

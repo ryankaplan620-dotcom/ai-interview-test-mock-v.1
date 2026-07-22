@@ -1,10 +1,10 @@
-import { FolioMark } from "@/components/FolioMark";
+import { PrepSpaceMark } from "@/components/PrepSpaceMark";
 import { Button } from "@/components/marketing/ui";
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-6 text-center">
-      <FolioMark className="h-10 w-10" color="#3FC579" />
+      <PrepSpaceMark className="h-10 w-10" color="#3FC579" />
       <p className="mt-8 font-display text-[128px] font-bold leading-none tracking-[-0.04em] text-gray-900/[0.06]">
         404
       </p>

@@ -1,6 +1,6 @@
 {
-  "name": "Folio",
-  "short_name": "Folio",
+  "name": "PrepSpace",
+  "short_name": "PrepSpace",
   "description": "Live video interview practice, indistinguishable from the real thing.",
   "start_url": "/",
   "display": "standalone",

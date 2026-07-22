@@ -5,7 +5,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { ProductDemo } from "@/components/landing/ProductDemo";
 import { Statement } from "@/components/landing/Statement";
 import { Engines } from "@/components/landing/Engines";
-import { FolioScore } from "@/components/landing/FolioScore";
+import { PrepSpaceScore } from "@/components/landing/PrepSpaceScore";
 import { QuoteDemo } from "@/components/landing/QuoteDemo";
 import { CompanyPreview } from "@/components/landing/CompanyPreview";
 import { Interviewers } from "@/components/landing/Interviewers";
@@ -25,7 +25,7 @@ export default function LandingPage() {
       <ProductDemo />
       <Statement />
       <Engines />
-      <FolioScore />
+      <PrepSpaceScore />
       <QuoteDemo />
       <CompanyPreview />
       <Interviewers />

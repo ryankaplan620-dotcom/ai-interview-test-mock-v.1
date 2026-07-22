@@ -1,4 +1,4 @@
-import { FolioMark } from "@/components/FolioMark";
+import { PrepSpaceMark } from "@/components/PrepSpaceMark";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -6,15 +6,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Brand panel — cosmos cover moment */}
       <section className="bg-gradient-dark relative flex flex-col overflow-hidden px-6 py-10 sm:px-10 lg:w-[44%] lg:justify-between lg:px-14 lg:py-12">
         <div className="flex items-center gap-2.5">
-          <FolioMark className="h-8 w-8" color="#63D88A" />
+          <PrepSpaceMark className="h-8 w-8" color="#63D88A" />
           <span className="font-display text-xl font-semibold tracking-heading text-text-primary">
-            Folio
+            PrepSpace
           </span>
         </div>
 
         <div className="mt-10 lg:mt-0">
           <p className="font-mono text-[11px] uppercase tracking-label text-text-tertiary">
-            Folio Labs
+            PrepSpace
           </p>
           <p className="mt-4 max-w-[420px] font-display text-[32px] font-extrabold leading-[1.08] tracking-[-0.03em] text-text-primary sm:text-[38px] lg:text-[44px]">
             Practice like it&apos;s <span className="text-gradient-mint">real</span>.

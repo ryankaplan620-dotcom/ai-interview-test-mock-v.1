@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ===========================================
-   Folio base styles — light, premium
+   PrepSpace base styles — light, premium
    =========================================== */
 
 :root {
@@ -138,7 +138,7 @@ body {
 }
 
 /* ===========================================
-   Brand text treatments (from the Folio deck)
+   Brand text treatments (from the PrepSpace deck)
    =========================================== */
 
 /* Wordmark treatment: mint gradient fading down into the canvas */

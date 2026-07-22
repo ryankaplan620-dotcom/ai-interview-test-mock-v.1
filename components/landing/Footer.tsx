@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FolioMark } from "@/components/FolioMark";
+import { PrepSpaceMark } from "@/components/PrepSpaceMark";
 
 const columns: { heading: string; links: { label: string; href: string }[] }[] = [
   {
@@ -31,8 +31,8 @@ const columns: { heading: string; links: { label: string; href: string }[] }[] =
 ];
 
 const socials: { label: string; href: string }[] = [
-  { label: "X", href: "https://x.com/tryfolio" },
-  { label: "LinkedIn", href: "https://linkedin.com/company/tryfolio" },
+  { label: "X", href: "https://x.com/prepspace" },
+  { label: "LinkedIn", href: "https://linkedin.com/company/prepspace" },
 ];
 
 export function Footer() {
@@ -42,10 +42,10 @@ export function Footer() {
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           {/* Brand block */}
           <div className="max-w-[280px]">
-            <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Folio home">
-              <FolioMark className="h-6 w-6" color="#63D88A" />
+            <Link href="/" className="inline-flex items-center gap-2.5" aria-label="PrepSpace home">
+              <PrepSpaceMark className="h-6 w-6" color="#63D88A" />
               <span className="font-display text-[17px] font-bold tracking-[-0.025em] text-white">
-                Folio
+                PrepSpace
               </span>
             </Link>
             <p className="mt-4 text-[14px] leading-relaxed text-text-secondary">
@@ -64,9 +64,9 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 flex flex-col items-start justify-between gap-5 border-t border-white/[0.08] pt-8 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2.5">
-            <FolioMark className="h-4 w-4" color="#6E7480" />
+            <PrepSpaceMark className="h-4 w-4" color="#6E7480" />
             <p className="font-mono text-[11px] tracking-[0.12em] text-text-tertiary">
-              © {new Date().getFullYear()} FOLIO LABS
+              © {new Date().getFullYear()} PREPSPACE
             </p>
           </div>
 
