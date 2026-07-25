@@ -29,6 +29,10 @@ export class DeepgramSTTClient implements STTClient {
   private interimCbs = new Set<(text: string) => void>();
   private finalCbs = new Set<(e: { text: string; startedAtMs: number; endedAtMs: number }) => void>();
   private utteranceEndCbs = new Set<() => void>();
+  private errorCbs = new Set<(err: Error) => void>();
+
+  /** Set by stop() so the post-connect close/error listeners don't report our own teardown. */
+  private intentionalClose = false;
 
   /** Text committed so far in the current utterance (is_final accumulations). */
   private currentTurnText = "";
@@ -94,6 +98,18 @@ export class DeepgramSTTClient implements STTClient {
       }
     });
 
+    // Post-connect close/error — a network blip, server timeout, or the 60s temp
+    // token expiring mid-session would otherwise fail silently (sends are already
+    // guarded on readyState, so nothing downstream would ever hear about it).
+    ws.addEventListener("close", (event) => {
+      if (this.intentionalClose) return;
+      this.errorCbs.forEach((cb) => cb(new Error(`deepgram_ws_closed_${event.code}`)));
+    });
+    ws.addEventListener("error", () => {
+      if (this.intentionalClose) return;
+      this.errorCbs.forEach((cb) => cb(new Error("deepgram_ws_error")));
+    });
+
     // 4. Start MediaRecorder
     const mimeType = pickMimeType();
     if (!mimeType) {
@@ -125,6 +141,7 @@ export class DeepgramSTTClient implements STTClient {
   }
 
   async stop(): Promise<void> {
+    this.intentionalClose = true;
     if (this.keepAliveInterval) {
       clearInterval(this.keepAliveInterval);
       this.keepAliveInterval = null;
@@ -173,6 +190,11 @@ export class DeepgramSTTClient implements STTClient {
   onUtteranceEnd(cb: () => void): () => void {
     this.utteranceEndCbs.add(cb);
     return () => this.utteranceEndCbs.delete(cb);
+  }
+
+  onError(cb: (err: Error) => void): () => void {
+    this.errorCbs.add(cb);
+    return () => this.errorCbs.delete(cb);
   }
 
   // ------------------------------------------------------------------

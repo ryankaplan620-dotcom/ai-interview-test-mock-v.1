@@ -126,6 +126,10 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
   }, []);
 
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [sttError, setSttError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+  const startingRef = useRef(false);
+  const sttErrorUnsubRef = useRef<(() => void) | null>(null);
 
   const [, startEndTransition] = useTransition();
 
@@ -202,9 +206,11 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
   // ---- Cleanup on unmount ----------------------------------------------
 
   useEffect(() => {
-    const stream = streamRef.current;
+    // Read streamRef.current inside the cleanup closure itself (not captured
+    // here) — getUserMedia resolves asynchronously after this effect runs on
+    // mount, so capturing it eagerly would always see null.
     return () => {
-      stream?.getTracks().forEach((t) => t.stop());
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
@@ -239,11 +245,17 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
   const startCall = useCallback(async () => {
     if (mediaState !== "granted") return;
     if (!streamRef.current) return;
-    if (orchestratorRef.current) return; // already running
+    if (orchestratorRef.current || startingRef.current) return; // already running or already starting
+    // Set synchronously, before the first await, so a second click that lands
+    // before markSessionStarted resolves can't slip past this guard too.
+    startingRef.current = true;
+    setStarting(true);
 
     const result = await markSessionStarted(session.id);
     if (!result.ok) {
       setMediaError("Couldn't start the session. Try again.");
+      startingRef.current = false;
+      setStarting(false);
       return;
     }
     setCallStartedAtMs(Date.now());
@@ -293,6 +305,11 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
     mockAvatarRef.current = avatar instanceof MockAvatarClient ? avatar : null;
     mockSttRef.current = stt instanceof MockSTTClient ? stt : null;
 
+    sttErrorUnsubRef.current = stt.onError?.((err) => {
+      console.error("[deepgram]", err);
+      setSttError("Live transcription lost connection. Your interviewer may not be able to hear your answers — try ending and restarting the session if this continues.");
+    }) ?? null;
+
     if (mockAvatarRef.current) {
       mockAvatarRef.current.onSpeakingChange((speaking) => setAvatarSpeaking(speaking));
     } else if (avatar instanceof TavusAvatarClient) {
@@ -314,6 +331,8 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       clients: { stt, tts, avatar },
     });
     orchestratorRef.current = orchestrator;
+    startingRef.current = false;
+    setStarting(false);
 
     const unsub = orchestrator.subscribe((s) => setOrchestratorState(s));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -343,6 +362,10 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       const unsub = (orchestratorRef as any).unsub as (() => void) | undefined;
       unsub?.();
       orchestratorRef.current = null;
+
+      sttErrorUnsubRef.current?.();
+      sttErrorUnsubRef.current = null;
+      setSttError(null);
 
       // Tear down shared audio sink (AudioContext)
       try {
@@ -399,6 +422,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
         onRetryMedia={requestMedia}
         attachSelfVideo={attachSelfVideo}
         onStart={startCall}
+        starting={starting}
         targetMinutes={targetMinutes}
       />
     );
@@ -426,6 +450,7 @@ export function SessionView({ session, persona, runtimeFeatures, pipelineCapabil
       avatarSpeaking={avatarSpeaking}
       remoteAvatarStream={remoteAvatarStream}
       avatarError={avatarError}
+      sttError={sttError}
       orchestratorPhase={orchestratorState?.phase ?? "idle"}
       onMockSubmit={(text) => orchestratorRef.current?.mockSubmitUserTurn(text)}
       isMockMode={mockSttRef.current?.isMock ?? true}
@@ -446,6 +471,7 @@ function PreCallScreen({
   onRetryMedia,
   attachSelfVideo,
   onStart,
+  starting,
   targetMinutes,
 }: {
   persona: SessionViewPersona;
@@ -456,6 +482,7 @@ function PreCallScreen({
   onRetryMedia: () => void;
   attachSelfVideo: (el: HTMLVideoElement | null) => void;
   onStart: () => void;
+  starting: boolean;
   targetMinutes: number;
 }) {
   const ready = mediaState === "granted";
@@ -543,15 +570,15 @@ function PreCallScreen({
             <button
               type="button"
               onClick={onStart}
-              disabled={!ready}
+              disabled={!ready || starting}
               className={[
                 "mt-2 inline-flex h-12 items-center justify-center rounded-full px-6 font-sans text-[14px] font-semibold transition-all duration-200 ease-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cosmos",
-                ready
+                ready && !starting
                   ? "bg-cta-gradient text-ink hover:shadow-accent-glow"
                   : "cursor-not-allowed border border-white/[0.08] bg-white/[0.04] text-text-tertiary",
               ].join(" ")}
             >
-              {ready ? `Join the interview →` : "Waiting for camera..."}
+              {starting ? "Starting..." : ready ? `Join the interview →` : "Waiting for camera..."}
             </button>
           </aside>
         </div>
@@ -581,6 +608,7 @@ function LiveCallScreen({
   avatarSpeaking,
   remoteAvatarStream,
   avatarError,
+  sttError,
   orchestratorPhase,
   onMockSubmit,
   isMockMode,
@@ -601,6 +629,7 @@ function LiveCallScreen({
   avatarSpeaking: boolean;
   remoteAvatarStream: MediaStream | null;
   avatarError: string | null;
+  sttError: string | null;
   orchestratorPhase: string;
   onMockSubmit: (text: string) => void;
   isMockMode: boolean;
@@ -634,10 +663,15 @@ function LiveCallScreen({
         </div>
       </header>
 
-      {/* Avatar error banner */}
+      {/* Avatar / transcription error banners */}
       {avatarError && (
         <div className="border-b border-amber-300/20 bg-amber-300/5 px-6 py-2 text-center font-sans text-[12px] text-amber-300/90">
           {avatarError}
+        </div>
+      )}
+      {sttError && (
+        <div className="border-b border-amber-300/20 bg-amber-300/5 px-6 py-2 text-center font-sans text-[12px] text-amber-300/90">
+          {sttError}
         </div>
       )}
 
