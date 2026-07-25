@@ -21,6 +21,8 @@ export interface STTClient {
   onFinal(cb: (event: { text: string; startedAtMs: number; endedAtMs: number }) => void): () => void;
   /** Subscribe to utterance-end (silence past threshold) events. */
   onUtteranceEnd(cb: () => void): () => void;
+  /** Subscribe to unexpected disconnects/errors after a successful start. Optional — mocks never fire it. */
+  onError?(cb: (err: Error) => void): () => void;
   /** Mock-only: synthetically submit a user turn. No-op in real implementations. */
   mockSubmit?(text: string): void;
   /** True if this is the mock implementation — UIs may show a dev panel. */
