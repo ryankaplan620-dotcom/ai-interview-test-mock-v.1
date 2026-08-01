@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceRoleClient } from "@/lib/db/server";
 
 /**
@@ -175,6 +176,35 @@ async function initiateEduEmailVerification({
   return { mode: "edu_email", status: "sent" };
 }
 
+const EDU_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // link expires after 24h
+
+function getEduTokenSecret(): string {
+  const secret = process.env.STUDENT_VERIFICATION_SECRET;
+  if (!secret) {
+    throw new Error(
+      "STUDENT_VERIFICATION_SECRET not configured. Set it (e.g. `openssl rand -hex 32`) before sending or confirming .edu verification links.",
+    );
+  }
+  return secret;
+}
+
+function signEduTokenPayload(payload: string): string {
+  return createHmac("sha256", getEduTokenSecret()).update(payload).digest("base64url");
+}
+
+/**
+ * Generates a signed, time-limited token for the .edu email verification
+ * link sent to the user. Call this from the route handler that sends the
+ * verification email; embed the result in the link's `token` query param.
+ */
+export function generateEduEmailToken({ userId, eduEmail }: { userId: string; eduEmail: string }): string {
+  const expiresAt = Date.now() + EDU_TOKEN_TTL_MS;
+  const payload = JSON.stringify({ userId, eduEmail: eduEmail.toLowerCase().trim(), expiresAt });
+  const payloadB64 = Buffer.from(payload, "utf8").toString("base64url");
+  const signature = signEduTokenPayload(payloadB64);
+  return `${payloadB64}.${signature}`;
+}
+
 /**
  * Confirm a .edu email via verification token.
  * Call from a route handler after the user clicks the verify link in their email.
@@ -192,10 +222,32 @@ export async function confirmEduEmail({
     return { success: false, error: "Email must end in .edu, .ac.uk, or .edu.au" };
   }
 
-  // In production, verify token using a signed JWT or a verification code stored in DB.
-  // For now, minimal skeleton — the route handler is responsible for generating and verifying tokens.
-  if (!token || token.length < 16) {
+  const [payloadB64, signature] = (token ?? "").split(".");
+  if (!payloadB64 || !signature) {
     return { success: false, error: "Invalid verification token" };
+  }
+
+  const expectedSignature = signEduTokenPayload(payloadB64);
+  const sigBuf = Buffer.from(signature, "utf8");
+  const expectedBuf = Buffer.from(expectedSignature, "utf8");
+  if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) {
+    return { success: false, error: "Invalid verification token" };
+  }
+
+  let parsed: { userId?: string; eduEmail?: string; expiresAt?: number };
+  try {
+    parsed = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8"));
+  } catch {
+    return { success: false, error: "Invalid verification token" };
+  }
+
+  if (
+    parsed.userId !== userId ||
+    parsed.eduEmail !== eduEmail.toLowerCase().trim() ||
+    typeof parsed.expiresAt !== "number" ||
+    Date.now() > parsed.expiresAt
+  ) {
+    return { success: false, error: "Verification link is invalid or has expired" };
   }
 
   const supabase = createServiceRoleClient();

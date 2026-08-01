@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireUser, getUserTier } from "@/lib/auth/server";
+import { getUser, getUserTier } from "@/lib/auth/server";
 import { createOverageCheckout } from "@/lib/stripe/checkout";
 
 const Input = z.object({
@@ -24,8 +24,10 @@ const Input = z.object({
  *   6. Stripe redirects user back to /session/[id]?overage=paid → interview starts
  */
 export async function POST(request: Request) {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   try {
-    const user = await requireUser();
     const body = await request.json();
     const parsed = Input.safeParse(body);
 

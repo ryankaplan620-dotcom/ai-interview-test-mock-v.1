@@ -103,8 +103,15 @@ export function OutreachClient({
         body: JSON.stringify({ targetCompany: targetCompany.trim(), targetRole: targetRole.trim(), targetCity: targetCity.trim() || undefined }),
       });
       if (!res.ok) throw new Error("Scout request failed");
-      const { contacts: newContacts } = await res.json();
-      setScoutResults(newContacts);
+      const { contacts: newContacts, persisted } = await res.json();
+      if (persisted) {
+        // Persisted rows carry a real id, so they can go straight into the
+        // actionable list instead of the read-only "just scouted" preview.
+        setContacts((prev) => [...(newContacts as OutreachContact[]), ...prev]);
+        setScoutResults([]);
+      } else {
+        setScoutResults(newContacts);
+      }
     } catch {
       setScoutError("Failed to find contacts. Please try again.");
     } finally {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/server";
+import { getUser } from "@/lib/auth/server";
 import { fetchCompanyIntel } from "@/lib/intel/pipeline/fetch-company";
 
 export const dynamic = "force-dynamic";
@@ -15,13 +15,14 @@ const ADMIN_EMAILS = (process.env.INTEL_ADMIN_EMAILS ?? "")
  * Uses a 30s timeout (admin can wait longer than a session start).
  */
 export async function GET(request: Request) {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  if (!user.email || !ADMIN_EMAILS.includes(user.email)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
   try {
-    const user = await requireUser();
-
-    if (!user.email || !ADMIN_EMAILS.includes(user.email)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
-
     const { searchParams } = new URL(request.url);
     const company = searchParams.get("company");
 
