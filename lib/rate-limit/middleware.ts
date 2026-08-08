@@ -29,12 +29,12 @@ export interface AuthedContext {
 export type AuthedHandler = (
   req: NextRequest,
   ctx: AuthedContext,
-) => Promise<NextResponse>;
+) => Promise<Response>;
 
 export function withRateLimit(
   config: RateLimitConfig,
   handler: AuthedHandler,
-): (req: NextRequest) => Promise<NextResponse> {
+): (req: NextRequest) => Promise<Response> {
   return async (req: NextRequest) => {
     const user = await getUser();
     if (!user) {

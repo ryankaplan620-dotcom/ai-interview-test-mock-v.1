@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { getPersonaAvatarId } from "@/lib/personas";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 import type { PersonaId } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -20,10 +21,10 @@ const SessionInput = z.object({
 // Route
 // --------------------------------------------------------------------------
 
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+// Rate limited per-user like /api/tavus/conversation — this route creates
+// billed Tavus conversations the same way and has no idempotent re-entry
+// check of its own, so an unbounded client loop is otherwise unbounded spend.
+async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const tavusApiKey = process.env.TAVUS_API_KEY;
   if (!tavusApiKey) {
     return NextResponse.json({ error: "tavus_not_configured" }, { status: 503 });
@@ -87,3 +88,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "tavus_session_failed" }, { status: 502 });
   }
 }
+
+export const POST = withRateLimit(RATE_LIMITS.tavus_conversation, handler);

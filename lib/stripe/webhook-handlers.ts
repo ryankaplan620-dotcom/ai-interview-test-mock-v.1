@@ -222,18 +222,34 @@ export async function handleInvoicePaid(
   const periodStart = new Date(sub.current_period_start * 1000).toISOString();
   const periodEnd = new Date(sub.current_period_end * 1000).toISOString();
 
-  await supabase
+  // invoice.paid fires for more than clean renewals — e.g. a mid-cycle
+  // proration invoice on a plan change, a $0/coupon invoice, or a manual
+  // invoice item — none of which should zero the user's usage counters.
+  // Only reset when the subscription's billing period has actually rolled
+  // over, mirroring the cycleChanged guard in syncSubscription above.
+  const { data: existingRow } = await supabase
     .from("subscriptions")
-    .update({
-      status: "active",
-      cycle_start: periodStart,
-      cycle_end: periodEnd,
-      current_period_start: periodStart,
-      current_period_end: periodEnd,
-      sessions_used_this_cycle: 0,
-      overages_used_this_cycle: 0,
-    })
-    .eq("stripe_subscription_id", subId);
+    .select("cycle_start")
+    .eq("stripe_subscription_id", subId)
+    .maybeSingle();
+
+  const existing = existingRow as { cycle_start: string | null } | null;
+  const cycleChanged = existing?.cycle_start !== periodStart;
+
+  const updatePayload: Record<string, unknown> = {
+    status: "active",
+    cycle_start: periodStart,
+    cycle_end: periodEnd,
+    current_period_start: periodStart,
+    current_period_end: periodEnd,
+  };
+
+  if (cycleChanged) {
+    updatePayload.sessions_used_this_cycle = 0;
+    updatePayload.overages_used_this_cycle = 0;
+  }
+
+  await supabase.from("subscriptions").update(updatePayload).eq("stripe_subscription_id", subId);
 }
 
 // --------------------------------------------------------------------------

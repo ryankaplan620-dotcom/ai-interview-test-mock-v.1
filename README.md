@@ -1,11 +1,10 @@
 # folio-web
 
-Production landing page for Folio.
+Folio — AI-powered mock interview practice and job-search outreach.
 
-**Primary tagline:** The interview before the interview.
 **Signature line:** Built to get you hired.
 **Domain:** folio.io
-**Brand color:** Electric Emerald (#00F590) on Ink-navy (#0D1117)
+**Brand system:** Folio Mint (#63D88A) accent, Intelligence Violet (#885DEB) secondary, Ink-dark (#0E1116) canvas. See `tailwind.config.ts` for the full token system.
 
 ---
 
@@ -24,70 +23,94 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-The waitlist form will work locally without any configuration — signups just log to the console. When you add a `RESEND_API_KEY`, the form sends real welcome emails and adds contacts to a Resend audience.
+Every third-party integration (Supabase, Stripe, Deepgram, Tavus, Anthropic, Resend) falls back to a mock mode locally when its keys are unset — see `.env.example` for the annotated list of what each one unlocks.
 
 ---
 
 ## Stack
 
-- **Next.js 14** (App Router)
-- **TypeScript** (strict mode)
-- **Tailwind CSS** with full Folio brand token system
-- **Resend** for transactional email (optional for local dev)
-- **Zod** for input validation
-
-All fonts loaded via `next/font/google`:
-
-- **Inter / Inter Display** — sans (headlines + body)
-- **Georgia** — system serif for italic display accents
-- **JetBrains Mono** — labels and eyebrows
-- **Cinzel / Playfair Display / Spectral / Crimson Text** — wordmark-style serifs for the proof row
-
----
+- **Next.js 14** (App Router) + **TypeScript** (strict mode)
+- **Supabase** — Postgres, auth, and row-level security (`supabase/migrations/`)
+- **Stripe** — subscription billing + one-off overage-session purchases
+- **Anthropic Claude** — live interview turns, feedback generation, outreach drafting, company intel
+- **Deepgram** — real-time (live interview) and pre-recorded (practice drills) speech-to-text
+- **Tavus** — avatar video for live mock interviews
+- **Resend** — transactional email
+- **Tailwind CSS** with the full Folio brand token system
+- **Zod** for input validation across API routes
 
 ## Project structure
 
 ```
 folio-web/
 ├── app/
-│   ├── api/waitlist/route.ts     Waitlist signup endpoint (Resend-backed)
-│   ├── globals.css               Base styles + brand CSS variables
-│   ├── layout.tsx                Root layout with all fonts + SEO meta
-│   └── page.tsx                  Landing page
-├── components/
-│   ├── FolioMark.tsx             Logo monogram SVG (brand-locked geometry)
-│   └── landing/
-│       ├── Nav.tsx               Top navigation
-│       ├── Hero.tsx              Hero section + DemoCard + proof row
-│       ├── Waitlist.tsx          Waitlist section
-│       ├── WaitlistForm.tsx      Client-side form with optimistic UI
-│       └── Footer.tsx            Footer with signature line + domain
-├── public/
-│   ├── images/priya.jpg          Interviewer portrait (Priya Patel)
-│   ├── favicon-*.png             Favicon set (16/32/48)
-│   ├── apple-touch-icon.png      iOS homescreen icon
-│   ├── og-default.png            OpenGraph social share image
-│   └── site.webmanifest          Web app manifest
-├── tailwind.config.ts            Brand token system
-├── next.config.js                Security headers + image optimization
-└── tsconfig.json                 TypeScript strict config
+│   ├── (auth)/                  Login / signup
+│   ├── (app)/                   Authenticated product: dashboard, sessions,
+│   │                            practice drills, outreach, settings
+│   ├── (session)/session/[id]/  Live mock-interview client pipeline
+│   ├── admin/                   Internal company-intel admin views
+│   ├── api/                     Route handlers — interview turns, feedback,
+│   │                            practice attempts, outreach, Stripe/Tavus/
+│   │                            Deepgram webhooks and integrations
+│   └── (marketing pages)        /, /about, /pricing, /faq, /security, ...
+├── lib/
+│   ├── auth/                    Session helpers (getUser/requireUser)
+│   ├── db/                      Supabase client factories
+│   ├── stripe/                  Webhook handlers + billing logic
+│   ├── pipeline/                Live-interview Claude/Deepgram/Tavus pipeline
+│   ├── practice/                Drill definitions + feedback generation
+│   ├── outreach/                Contact scouting + email drafting
+│   ├── intel/                   Company intelligence fetch/cache/inject
+│   ├── personas/                Interviewer persona prompts
+│   └── rate-limit/               Per-user sliding-window rate limiting
+├── supabase/migrations/         Tracked schema, in apply order
+├── scripts/                     Stress-test harnesses (`npx tsx scripts/...`)
+│                                 and one-off ops scripts (bootstrap, smoke)
+├── tailwind.config.ts           Brand token system
+└── next.config.js               Security headers + image optimization
 ```
 
 ---
 
 ## Environment variables
 
-### Required for production
+See `.env.example` for the complete annotated list, grouped by integration. Nothing is required to run the app locally — Supabase, Stripe, Deepgram, Tavus, and Anthropic all degrade to mock mode when unset. For a real deploy you need at minimum:
 
 - `NEXT_PUBLIC_APP_URL` — your production URL (https://folio.io)
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` — auth + database
+- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_*` — billing
+- `ANTHROPIC_API_KEY`, `DEEPGRAM_API_KEY`, `TAVUS_API_KEY` — the live interview pipeline
 
-### Optional (graceful degradation if not set)
+---
 
-- `RESEND_API_KEY` — enables real welcome emails + waitlist audience
-- `RESEND_AUDIENCE_ID` — Resend audience ID for the waitlist
-- `WAITLIST_NOTIFY_EMAIL` — email address to notify of new signups
+## Database
 
-See `.env.example` for the complete annotated environment variable list.
+Schema lives in `supabase/migrations/`, applied in numeric order:
+
+```bash
+npm run db:push   # supabase db push
+```
+
+Every table that's read through the anon-key client (`lib/db/server.ts`) must have row-level security enabled with owner-scoped policies — see `0002_rls_policies.sql` and `0008_session_memory.sql` for the pattern new tables should follow.
+
+---
+
+## Testing
+
+There's no Jest/Vitest suite yet. Correctness is checked via:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+
+# Scenario-based stress harnesses (in-memory mocks, no live keys needed)
+npx tsx scripts/stress-stripe-webhook.ts
+npx tsx scripts/stress-rate-limit.ts
+npx tsx scripts/stress-personas.ts
+npx tsx scripts/stress-cookie-consent.ts
+npx tsx lib/intel/__tests__/intel.test.ts
+```
 
 ---
 
@@ -108,31 +131,7 @@ Point folio.io DNS to Vercel (Project Settings → Domains).
 
 ---
 
-## Design system reference
-
-### Colors
-
-| Token | Hex | Use |
-|---|---|---|
-| `accent` | #00F590 | Brand accent — Electric Emerald |
-| `accent-deep` | #00D478 | Hover/pressed state |
-| `accent-highlight` | #33FAA6 | Gradients and lighter emphasis |
-| `ink` | #0D1117 | Primary canvas |
-| `ink-surface` | #161B22 | Elevated surfaces |
-| `ink-border` | #2A3139 | Subtle borders |
-| `text-primary` | #F0F6FC | Primary text on dark |
-| `text-secondary` | #A8B0BA | Muted text on dark |
-| `text-tertiary` | #6E7681 | Most muted text on dark |
-| `text-onAccent` | #0D1117 | Text on accent buttons (always dark, never white) |
-
-### Typography
-
-- Display headlines: `font-display` (Inter Display) at `font-semibold` (600)
-- Italic accents: `font-serif` (Georgia) at `italic font-normal`
-- Body: `font-sans` (Inter) at `font-normal` (400)
-- Labels/eyebrows: `font-mono` (JetBrains Mono) at `font-medium` (500) with `tracking-label`
-
-### Critical brand rules
+## Critical brand rules
 
 1. Never alter the Folio monogram geometry (see `components/FolioMark.tsx`).
 2. Always use `text-onAccent` (dark ink) on accent-colored surfaces — never white.

@@ -64,6 +64,15 @@ export const RATE_LIMITS = {
     short: { max: 20, windowSeconds: 600 }, // 20 per 10 minutes
     daily: { max: 100, windowSeconds: 86_400 }, // 100 per 24 hours
   },
+  interview_turn: {
+    name: "interview_turn",
+    // Hit once per conversational exchange during a live session — a normal
+    // 20-30 min interview runs well under 100 turns. Loose short window to
+    // never interrupt a legitimate live call; daily window bounds a scripted
+    // loop driving unbounded Claude spend against a session the user owns.
+    short: { max: 100, windowSeconds: 600 }, // 100 per 10 minutes
+    daily: { max: 600, windowSeconds: 86_400 }, // 600 per 24 hours
+  },
 } as const satisfies Record<string, RateLimitConfig>;
 
 export type RateLimitName = keyof typeof RATE_LIMITS;
@@ -304,7 +313,12 @@ function buildMessage(
   retryAfterSeconds: number,
 ): string {
   const w = config[window];
-  const action = config.name === "tavus_conversation" ? "started a session" : "requested feedback";
+  const action =
+    config.name === "tavus_conversation"
+      ? "started a session"
+      : config.name === "interview_turn"
+        ? "sent a message"
+        : "requested feedback";
   const windowLabel = humanWindow(w.windowSeconds);
   const retryLabel = humanDuration(retryAfterSeconds);
   return `You've ${action} ${w.max} times in the last ${windowLabel}. Try again in ${retryLabel}.`;

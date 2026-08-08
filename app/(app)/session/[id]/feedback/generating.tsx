@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FeedbackPayload } from "@/lib/pipeline/feedback-types";
 import { FeedbackView, type SessionMeta } from "./feedback-view";
 
@@ -21,19 +20,14 @@ const STAGES = [
 ];
 
 export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
-  const router = useRouter();
   const [phase, setPhase] = useState<Phase>("generating");
   const [feedback, setFeedback] = useState<FeedbackPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [stageIdx, setStageIdx] = useState(0);
-  const startedRef = useRef(false);
+  const attemptRef = useRef(0);
 
-  // Trigger generation once on mount
-  useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
-
-    let cancelled = false;
+  const generate = useCallback(() => {
+    const attempt = ++attemptRef.current;
 
     const run = async () => {
       try {
@@ -46,7 +40,8 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
           | { feedback?: unknown; error?: string }
           | null;
 
-        if (cancelled) return;
+        // A newer attempt superseded this one (retry fired again) — drop it.
+        if (attempt !== attemptRef.current) return;
 
         if (!res.ok || !body?.feedback) {
           setError(body?.error ?? `Request failed (${res.status})`);
@@ -68,7 +63,7 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
         });
         setPhase("ready");
       } catch (err) {
-        if (cancelled) return;
+        if (attempt !== attemptRef.current) return;
         console.error("[feedback.generating] fetch failed:", err);
         setError("Connection error. Check your network and try again.");
         setPhase("error");
@@ -76,10 +71,16 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
     };
 
     void run();
+  }, [sessionId]);
 
+  // Trigger generation once on mount
+  useEffect(() => {
+    generate();
     return () => {
-      cancelled = true;
+      // Mark any in-flight request from this mount as superseded.
+      attemptRef.current += 1;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   // Cycle through stage labels while generating
@@ -108,11 +109,10 @@ export function FeedbackGenerating({ sessionId, sessionMeta }: Props) {
         <div className="mt-8 flex flex-wrap gap-3">
           <button
             onClick={() => {
-              startedRef.current = false;
               setError(null);
               setPhase("generating");
               setStageIdx(0);
-              router.refresh();
+              generate();
             }}
             className="rounded-full bg-accent px-5 py-2.5 font-sans text-[13px] font-semibold text-brand-ink transition-all hover:bg-accent-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
           >
