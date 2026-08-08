@@ -24,8 +24,9 @@ export const maxDuration = 60;
  *
  * Flow:
  *   1. Verify auth + drill ownership + drill status = in_progress
- *   2. Send audio to Deepgram pre-recorded API → transcript
- *   3. Load prior attempts for context
+ *   2. Load prior attempts; reject if attempt_number isn't the next one
+ *      in sequence (server-derived, not trusted from the client)
+ *   3. Send audio to Deepgram pre-recorded API → transcript
  *   4. Call Claude (via generateDrillFeedback) for analysis
  *   5. Insert drill_attempts row
  *   6. If this is the final attempt (attempt_number === target_attempts),
@@ -109,22 +110,13 @@ export async function POST(req: NextRequest) {
   }
 
   // --------------------------------------------------------------------
-  // 2. Transcribe via Deepgram pre-recorded API
-  // --------------------------------------------------------------------
-  let transcript: string;
-  try {
-    transcript = await transcribeAudio(audio);
-  } catch (err) {
-    console.error("[practice.attempt] transcription failed:", err);
-    return NextResponse.json({ error: "transcription_failed" }, { status: 502 });
-  }
-
-  if (transcript.trim().length < 5) {
-    return NextResponse.json({ error: "transcript_too_short" }, { status: 400 });
-  }
-
-  // --------------------------------------------------------------------
-  // 3. Load prior attempts (for progression-aware feedback)
+  // 2. Load prior attempts (for progression-aware feedback) and verify
+  //    attempt_number is actually the next one in sequence. The client
+  //    sends attempt_number, but it's untrusted: a stale/crafted request
+  //    claiming the final attempt number on the first real submission
+  //    would mark the drill "completed" after one attempt and 409 every
+  //    legitimate attempt after it. Checked here, before the expensive
+  //    transcription/analysis calls, so a bad request fails cheaply.
   // --------------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: priorRaw } = await (supabase.from("drill_attempts") as any)
@@ -138,6 +130,29 @@ export async function POST(req: NextRequest) {
     overall_score: number | null;
     summary: string | null;
   }> | null) ?? [];
+
+  const expectedAttemptNumber = priorAttempts.length + 1;
+  if (attemptNumber !== expectedAttemptNumber) {
+    return NextResponse.json(
+      { error: "out_of_sequence_attempt", expected: expectedAttemptNumber },
+      { status: 409 },
+    );
+  }
+
+  // --------------------------------------------------------------------
+  // 3. Transcribe via Deepgram pre-recorded API
+  // --------------------------------------------------------------------
+  let transcript: string;
+  try {
+    transcript = await transcribeAudio(audio);
+  } catch (err) {
+    console.error("[practice.attempt] transcription failed:", err);
+    return NextResponse.json({ error: "transcription_failed" }, { status: 502 });
+  }
+
+  if (transcript.trim().length < 5) {
+    return NextResponse.json({ error: "transcript_too_short" }, { status: 400 });
+  }
 
   // --------------------------------------------------------------------
   // 4. Generate feedback

@@ -13,6 +13,7 @@
  *   8. Irrelevant event (charge.updated → no-op)
  *   9. Subscription missing user_id metadata (→ warn, no-op)
  *   10. Tier upgrade (subscription.updated from cycle → pro mid-cycle)
+ *   11. Mid-cycle invoice.paid (proration, same period) — counters preserved
  *
  * This is the real behavior contract for the Phase H webhook logic. If this
  * test passes, the logic is correct. If Stripe sends an event that this
@@ -91,6 +92,12 @@ function createMockSupabase(db: MockDb): WebhookSupabase {
                 async maybeSingle() {
                   if (table === "subscriptions" && col === "user_id") {
                     const row = db.subscriptions.get(val);
+                    return { data: row ?? null, error: null };
+                  }
+                  if (table === "subscriptions" && col === "stripe_subscription_id") {
+                    const row = [...db.subscriptions.values()].find(
+                      (r) => r.stripe_subscription_id === val,
+                    );
                     return { data: row ?? null, error: null };
                   }
                   return { data: null, error: null };
@@ -597,6 +604,65 @@ async function main() {
     assert(row?.cycle_start === "2026-06-01T00:00:00.000Z", "cycle_start moved to upgrade time");
     // cycleChanged triggers counter reset
     assert(row?.sessions_used_this_cycle === 0, "counter reset on tier upgrade");
+  }
+
+  // --------------------------------------------------------------------------
+  // 11. Mid-cycle invoice.paid (proration) does NOT reset counters
+  // --------------------------------------------------------------------------
+  console.log("\n11. Mid-cycle invoice.paid (proration) — counters preserved");
+  {
+    const db = createMockDb();
+    const cycleStart = new Date("2026-05-16T00:00:00Z");
+    const cycleEnd = new Date("2027-05-16T00:00:00Z");
+
+    // Active sub, mid-cycle, with consumed counters
+    db.subscriptions.set(USER_A, {
+      user_id: USER_A,
+      stripe_customer_id: "cus_a",
+      stripe_subscription_id: "sub_a_11",
+      stripe_price_id: "price_pro",
+      tier: "pro",
+      status: "active",
+      cycle_start: cycleStart.toISOString(),
+      cycle_end: cycleEnd.toISOString(),
+      current_period_start: cycleStart.toISOString(),
+      current_period_end: cycleEnd.toISOString(),
+      trial_start: null,
+      trial_end: null,
+      cancel_at_period_end: false,
+      auto_renew: true,
+      canceled_at: null,
+      sessions_used_this_cycle: 3,
+      overages_used_this_cycle: 1,
+    });
+
+    // Stripe retrieves the SAME subscription (same period) — this models a
+    // mid-cycle proration invoice (e.g. a manual invoice item, a $0/coupon
+    // invoice) rather than a real renewal. The period on file is unchanged.
+    const sameSub = makeSubscription({
+      subId: "sub_a_11",
+      userId: USER_A,
+      tier: "pro",
+      status: "active",
+      currentPeriodStart: cycleStart,
+      currentPeriodEnd: cycleEnd,
+    });
+
+    const deps = {
+      supabase: createMockSupabase(db),
+      stripe: createMockStripe(new Map([[sameSub.id, sameSub]])),
+    };
+
+    await dispatchWebhookEvent(
+      makeEvent("invoice.paid", makeInvoice({ subscriptionId: sameSub.id, amountPaid: 500 })),
+      deps,
+    );
+
+    const row = db.subscriptions.get(USER_A);
+    assert(row?.cycle_start === cycleStart.toISOString(), "cycle_start unchanged");
+    assert(row?.sessions_used_this_cycle === 3, "sessions NOT reset on same-cycle invoice");
+    assert(row?.overages_used_this_cycle === 1, "overages NOT reset on same-cycle invoice");
+    assert(row?.status === "active", "status stays active");
   }
 
   // --------------------------------------------------------------------------
