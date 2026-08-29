@@ -36,6 +36,22 @@ export default async function SessionPage({ params }: PageProps) {
     notFound();
   }
 
+  // ---- 2b. Overage sessions are inserted before payment; only let the user
+  // in once Stripe's payment_intent.succeeded webhook has actually recorded
+  // a succeeded purchase for this session. Without this, anyone could start
+  // an overage session and skip paying for it entirely.
+  if (session.is_overage) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: purchase } = await (supabase.from("overage_purchases") as any)
+      .select("status")
+      .eq("session_id", session.id)
+      .eq("status", "succeeded")
+      .maybeSingle();
+    if (!purchase) {
+      redirect("/session/new?overage=pending");
+    }
+  }
+
   // ---- 3. Terminal-status redirect — go to feedback page (it handles each status)
   if (session.status === "completed" || session.status === "failed" || session.status === "abandoned") {
     redirect(`/session/${session.id}/feedback`);

@@ -6,6 +6,7 @@ import { createServerClient } from "@/lib/db/server";
 import { getUser, getUserTier } from "@/lib/auth/server";
 import { PERSONAS, isValidCombo } from "@/lib/personas";
 import { checkSessionStart } from "@/lib/gates/session";
+import { createOverageCheckout } from "@/lib/stripe/checkout";
 import type { PersonaId, InterviewType } from "@/types/supabase";
 import type { InterviewMode } from "@/lib/personas/types";
 
@@ -182,27 +183,58 @@ export async function startSession(
     };
   }
 
-  // ---- 7. Increment session-usage counter on the subscription row
-  // Within-quota: bump sessions_used_this_cycle
-  // Overage: bump overages_used_this_cycle (overage charge happens separately
-  // via /api/stripe/overage-checkout before redirect, not tracked here)
-  const counterField = req.overageAccepted
-    ? "overages_used_this_cycle"
-    : "sessions_used_this_cycle";
+  const sessionId = (inserted as { id: string }).id;
 
+  // ---- 7. Overage sessions are unpaid until Stripe confirms the charge.
+  // Send the user to Checkout now; the payment_intent.succeeded webhook is
+  // what actually grants the seat (bumps overages_used_this_cycle) and
+  // records the overage_purchases row that /session/[id] requires before
+  // it will render the interview for an is_overage session. Nothing here
+  // should let the user into the room for free.
+  if (req.overageAccepted) {
+    if (!user.email) {
+      return {
+        ok: false,
+        error: "Your account is missing an email address. Contact support.",
+        code: "missing_email",
+      };
+    }
+    let checkoutUrl: string;
+    try {
+      checkoutUrl = (
+        await createOverageCheckout({
+          userId: user.id,
+          email: user.email,
+          sessionId,
+          tier: effectiveTier,
+        })
+      ).url;
+    } catch (err) {
+      console.error("[startSession] overage checkout failed:", err);
+      return {
+        ok: false,
+        error: "Couldn't start checkout for the overage session. Try again.",
+        code: "checkout_failed",
+      };
+    }
+    // redirect() throws internally — must happen outside the try/catch above
+    // or Next.js's redirect signal gets swallowed as a regular error.
+    redirect(checkoutUrl);
+  }
+
+  // ---- 8. Within-quota session — bump the usage counter and enter directly.
   // In dev mode, skip the counter increment (no subscription row exists)
   if (!isDev) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (supabase.rpc as any)("increment_subscription_counter", {
         p_user_id: user.id,
-        p_field: counterField,
+        p_field: "sessions_used_this_cycle",
       });
     } catch (err) {
       console.warn("[startSession] counter increment failed (non-fatal):", err);
     }
   }
 
-  // ---- 8. Redirect into the room
-  redirect(`/session/${(inserted as { id: string }).id}`);
+  redirect(`/session/${sessionId}`);
 }

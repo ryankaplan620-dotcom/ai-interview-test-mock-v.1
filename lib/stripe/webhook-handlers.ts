@@ -23,7 +23,7 @@
  */
 
 import type Stripe from "stripe";
-import { TIERS } from "@/lib/tiers";
+import { TIERS, getTierForStripePriceId } from "@/lib/tiers";
 import type { SubscriptionTier, SubscriptionStatus } from "@/types/supabase";
 
 // --------------------------------------------------------------------------
@@ -140,10 +140,15 @@ export async function syncSubscription(
     return;
   }
 
-  const tier = (subscription.metadata.tier ?? "basic") as SubscriptionTier;
-  void TIERS[tier]; // validate tier exists in our catalog
   const status = subscription.status as SubscriptionStatus;
   const priceId = subscription.items.data[0]?.price.id ?? null;
+  // Derive tier from the price Stripe is actually billing, not the metadata
+  // set once at Checkout — the Billing Portal lets customers change price
+  // without touching subscription metadata, which would otherwise go stale.
+  const tier = (getTierForStripePriceId(priceId) ??
+    (subscription.metadata.tier as SubscriptionTier | undefined) ??
+    "basic") as SubscriptionTier;
+  void TIERS[tier]; // validate tier exists in our catalog
   const customerId =
     typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
 
@@ -222,17 +227,32 @@ export async function handleInvoicePaid(
   const periodStart = new Date(sub.current_period_start * 1000).toISOString();
   const periodEnd = new Date(sub.current_period_end * 1000).toISOString();
 
+  // invoice.paid also fires for proration invoices (e.g. a mid-cycle plan
+  // change) and for a recovered past-due invoice — neither of those starts
+  // a new billing cycle. Only reset usage counters when the period actually
+  // rolled over, same rule syncSubscription uses.
+  const { data: existingRow } = await supabase
+    .from("subscriptions")
+    .select("cycle_start")
+    .eq("stripe_subscription_id", subId)
+    .maybeSingle();
+  const cycleChanged = (existingRow as { cycle_start: string | null } | null)?.cycle_start !== periodStart;
+
+  const updatePayload: Record<string, unknown> = {
+    status: "active",
+    cycle_start: periodStart,
+    cycle_end: periodEnd,
+    current_period_start: periodStart,
+    current_period_end: periodEnd,
+  };
+  if (cycleChanged) {
+    updatePayload.sessions_used_this_cycle = 0;
+    updatePayload.overages_used_this_cycle = 0;
+  }
+
   await supabase
     .from("subscriptions")
-    .update({
-      status: "active",
-      cycle_start: periodStart,
-      cycle_end: periodEnd,
-      current_period_start: periodStart,
-      current_period_end: periodEnd,
-      sessions_used_this_cycle: 0,
-      overages_used_this_cycle: 0,
-    })
+    .update(updatePayload)
     .eq("stripe_subscription_id", subId);
 }
 
@@ -301,6 +321,18 @@ export async function handlePaymentIntentSucceeded(
     return;
   }
 
+  // Idempotency — Stripe may redeliver this event. This row's `succeeded`
+  // status is also what /session/[id] checks before letting the user into
+  // an overage session, so only grant + count it once per payment intent.
+  const { data: existingPurchase } = await supabase
+    .from("overage_purchases")
+    .select("status")
+    .eq("stripe_payment_intent_id", paymentIntent.id)
+    .maybeSingle();
+  if ((existingPurchase as { status?: string } | null)?.status === "succeeded") {
+    return;
+  }
+
   const chargeId =
     typeof paymentIntent.latest_charge === "string"
       ? paymentIntent.latest_charge
@@ -324,4 +356,19 @@ export async function handlePaymentIntentSucceeded(
       `Failed to record overage purchase: ${(error as { message?: string }).message ?? "unknown"}`,
     );
   }
+
+  // Payment confirmed — this is the only place that grants the overage
+  // seat. The session row is inserted (unpaid) before checkout, so nothing
+  // counts against the user's quota until the charge actually succeeds.
+  const { data: subRow } = await supabase
+    .from("subscriptions")
+    .select("overages_used_this_cycle")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const currentOverages =
+    (subRow as { overages_used_this_cycle?: number } | null)?.overages_used_this_cycle ?? 0;
+  await supabase
+    .from("subscriptions")
+    .update({ overages_used_this_cycle: currentOverages + 1 })
+    .eq("user_id", userId);
 }
