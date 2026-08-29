@@ -1,11 +1,12 @@
 # folio-web
 
-Production landing page for Folio.
+Folio — an AI interview-practice product. Users run live voice/video mock interviews
+against AI personas (Sarah, Gemma), get structured feedback and Q&A scoring, track
+progress across sessions, and use company-intel + outreach tooling to prep for real
+interviews.
 
-**Primary tagline:** The interview before the interview.
 **Signature line:** Built to get you hired.
 **Domain:** folio.io
-**Brand color:** Electric Emerald (#00F590) on Ink-navy (#0D1117)
 
 ---
 
@@ -24,7 +25,10 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-The waitlist form will work locally without any configuration — signups just log to the console. When you add a `RESEND_API_KEY`, the form sends real welcome emails and adds contacts to a Resend audience.
+Most external integrations (Tavus, ElevenLabs, Deepgram, Anthropic, R2, Upstash) fall
+back to mock mode when their API keys are unset, so the app is usable locally without
+full credentials. Supabase (auth + database) and Stripe (billing) are required for
+their respective features to work — see `.env.example` for the full annotated list.
 
 ---
 
@@ -32,16 +36,20 @@ The waitlist form will work locally without any configuration — signups just l
 
 - **Next.js 14** (App Router)
 - **TypeScript** (strict mode)
-- **Tailwind CSS** with full Folio brand token system
-- **Resend** for transactional email (optional for local dev)
+- **Tailwind CSS** with the Folio brand token system
+- **Supabase** for auth, Postgres, and file storage
+- **Stripe** for subscription billing (Free/Basic/Pro/Max tiers)
+- **Anthropic Claude API** for feedback generation, memory extraction, and Q&A scoring
+- **Tavus** for the AI video-interviewer avatar + conversation orchestration
+- **ElevenLabs** for TTS, **Deepgram** for speech-to-text
+- **Cloudflare R2** for transcript/recording storage
+- **Upstash Redis** for per-user rate limiting
+- **Resend** for transactional email
+- **Sentry** for error monitoring (via Next.js instrumentation hook)
 - **Zod** for input validation
 
-All fonts loaded via `next/font/google`:
-
-- **Inter / Inter Display** — sans (headlines + body)
-- **Georgia** — system serif for italic display accents
-- **JetBrains Mono** — labels and eyebrows
-- **Cinzel / Playfair Display / Spectral / Crimson Text** — wordmark-style serifs for the proof row
+All fonts loaded via `next/font`: Open Sauce One/Two (sans/display) and JetBrains Mono
+(labels and eyebrows).
 
 ---
 
@@ -50,50 +58,76 @@ All fonts loaded via `next/font/google`:
 ```
 folio-web/
 ├── app/
-│   ├── api/waitlist/route.ts     Waitlist signup endpoint (Resend-backed)
-│   ├── globals.css               Base styles + brand CSS variables
-│   ├── layout.tsx                Root layout with all fonts + SEO meta
-│   └── page.tsx                  Landing page
+│   ├── (auth)/                    Login, signup
+│   ├── (app)/                     Logged-in product: dashboard, sessions,
+│   │                              practice, outreach, settings
+│   ├── (session)/                 Live interview session UI
+│   ├── admin/                     Internal company-intel admin views
+│   ├── api/                       Route handlers (Stripe, Tavus, feedback,
+│   │                              outreach, memory, verification, etc.)
+│   ├── auth/callback/             Supabase OAuth callback
+│   ├── legal/                     Terms, privacy, cookies
+│   └── (about|careers|contact|faq|how-it-works|pricing|security)/
+│                                  Marketing pages
 ├── components/
-│   ├── FolioMark.tsx             Logo monogram SVG (brand-locked geometry)
-│   └── landing/
-│       ├── Nav.tsx               Top navigation
-│       ├── Hero.tsx              Hero section + DemoCard + proof row
-│       ├── Waitlist.tsx          Waitlist section
-│       ├── WaitlistForm.tsx      Client-side form with optimistic UI
-│       └── Footer.tsx            Footer with signature line + domain
-├── public/
-│   ├── images/priya.jpg          Interviewer portrait (Priya Patel)
-│   ├── favicon-*.png             Favicon set (16/32/48)
-│   ├── apple-touch-icon.png      iOS homescreen icon
-│   ├── og-default.png            OpenGraph social share image
-│   └── site.webmanifest          Web app manifest
-├── tailwind.config.ts            Brand token system
-├── next.config.js                Security headers + image optimization
-└── tsconfig.json                 TypeScript strict config
+│   ├── FolioMark.tsx              Logo monogram SVG (brand-locked geometry)
+│   ├── AppNav.tsx                 Logged-in product nav
+│   ├── landing/                   Marketing-page sections (Hero, FAQ, Pricing, ...)
+│   ├── legal/                     Legal-page components
+│   └── marketing/                 Shared marketing components
+├── lib/
+│   ├── auth/                      Auth helpers
+│   ├── stripe/                    Checkout, client, webhook handlers
+│   ├── pipeline/                  Voice/video session pipeline (Tavus, R2, memory,
+│   │                              QA feedback, persona registry)
+│   ├── personas/                  Persona prompt composition
+│   ├── practice/                  Practice-mode feedback generation
+│   ├── outreach/                  Outreach draft/scout/send
+│   ├── intel/                     Company-intel fetchers
+│   ├── gates/                     Feature/quota gating
+│   ├── rate-limit/                Upstash-backed rate limiting
+│   ├── verification/              Student verification (SheerID / edu-email)
+│   ├── db/                        Supabase client + queries
+│   ├── legal/                     Legal-document constants
+│   └── tiers.ts                   Subscription tier definitions
+├── middleware.ts                  Route protection + session refresh
+├── instrumentation.ts             Sentry server/edge init
+├── supabase/                      Database migrations
+├── scripts/                       Stress-test and bootstrap scripts
+├── tailwind.config.ts             Brand token system
+└── next.config.js                 Security headers + image optimization
 ```
 
 ---
 
 ## Environment variables
 
-### Required for production
+See `.env.example` for the complete, annotated list — it documents required vs.
+optional variables per integration and what happens locally when a key is unset.
 
-- `NEXT_PUBLIC_APP_URL` — your production URL (https://folio.io)
+At minimum for local dev with auth working: the Supabase variables. For billing:
+the Stripe variables. Everything else degrades gracefully to mock mode.
 
-### Optional (graceful degradation if not set)
+---
 
-- `RESEND_API_KEY` — enables real welcome emails + waitlist audience
-- `RESEND_AUDIENCE_ID` — Resend audience ID for the waitlist
-- `WAITLIST_NOTIFY_EMAIL` — email address to notify of new signups
+## Development scripts
 
-See `.env.example` for the complete annotated environment variable list.
+```bash
+npm run dev        # start the dev server
+npm run build       # production build
+npm run lint         # ESLint (next lint)
+npm run typecheck    # tsc --noEmit
+npm run db:push      # push Supabase migrations
+```
+
+`scripts/` also has one-off stress/smoke scripts (rate limiting, cookie consent,
+Stripe webhooks, personas, memory) — run with `tsx scripts/<name>.ts`.
 
 ---
 
 ## Deployment
 
-This is ready to deploy to Vercel.
+Deploys to Vercel.
 
 ```bash
 # Connect the repo to Vercel
@@ -114,23 +148,27 @@ Point folio.io DNS to Vercel (Project Settings → Domains).
 
 | Token | Hex | Use |
 |---|---|---|
-| `accent` | #00F590 | Brand accent — Electric Emerald |
-| `accent-deep` | #00D478 | Hover/pressed state |
-| `accent-highlight` | #33FAA6 | Gradients and lighter emphasis |
-| `ink` | #0D1117 | Primary canvas |
-| `ink-surface` | #161B22 | Elevated surfaces |
-| `ink-border` | #2A3139 | Subtle borders |
-| `text-primary` | #F0F6FC | Primary text on dark |
-| `text-secondary` | #A8B0BA | Muted text on dark |
-| `text-tertiary` | #6E7681 | Most muted text on dark |
-| `text-onAccent` | #0D1117 | Text on accent buttons (always dark, never white) |
+| `accent` | #63D88A | Brand accent — Folio Mint |
+| `accent-deep` | #41B06C | Hover/pressed state |
+| `accent-highlight` | #82E8A5 | Gradients and lighter emphasis |
+| `violet` | #885DEB | Secondary accent — Intelligence Violet |
+| `cosmos` | #0D042B | Cover/hero canvas |
+| `ink` | #0E1116 | Dark-mode canvas |
+| `ink-surface` | #151923 | Elevated dark surfaces |
+| `canvas` | #F7F8FA | Light marketing canvas |
+| `text-primary` | #F2F4F8 | Primary text on dark |
+| `text-secondary` | #A6ADBB | Muted text on dark |
+| `text-onAccent` | #07140C | Text on accent-colored surfaces (always dark, never white) |
+
+See `tailwind.config.ts` for the full token set (brand scale, paper/canvas surfaces,
+shadows, animations).
 
 ### Typography
 
-- Display headlines: `font-display` (Inter Display) at `font-semibold` (600)
-- Italic accents: `font-serif` (Georgia) at `italic font-normal`
-- Body: `font-sans` (Inter) at `font-normal` (400)
+- Display headlines: `font-display` (Open Sauce Two) at `font-semibold` (600)
+- Body: `font-sans` (Open Sauce One) at `font-normal` (400)
 - Labels/eyebrows: `font-mono` (JetBrains Mono) at `font-medium` (500) with `tracking-label`
+- No dedicated serif — italic accents render in Open Sauce One italic
 
 ### Critical brand rules
 

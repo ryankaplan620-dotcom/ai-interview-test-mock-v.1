@@ -191,6 +191,21 @@ export function getOverageStripePriceId(tierKey: TierKey): string | null {
 }
 
 /**
+ * Reverse-lookup: given a Stripe subscription price ID, find the tier it
+ * belongs to. Used by the subscription webhook to determine the *current*
+ * tier from the price Stripe is actually billing, rather than trusting
+ * `subscription.metadata.tier` — which is set once at Checkout and never
+ * updated when a customer changes plans through the Billing Portal.
+ */
+export function getTierForStripePriceId(priceId: string | null | undefined): TierKey | null {
+  if (!priceId) return null;
+  for (const key of PAID_TIER_KEYS) {
+    if (getStripePriceId(key) === priceId) return key;
+  }
+  return null;
+}
+
+/**
  * Returns true if the given feature is available on the given tier.
  * Use this for paywall gating in route handlers.
  */

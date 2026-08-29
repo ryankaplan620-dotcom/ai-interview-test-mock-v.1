@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/db/client";
 import { FolioMark } from "@/components/FolioMark";
+import { safeRedirectPath } from "@/lib/utils/safe-redirect";
 
 export default function LoginPage() {
   return (
@@ -28,7 +29,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") ?? "";
   // Only allow local paths (must start with /) to prevent open redirect
-  const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/dashboard";
+  const redirectTo = safeRedirectPath(rawRedirect);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

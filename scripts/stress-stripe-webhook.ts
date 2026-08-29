@@ -13,6 +13,7 @@
  *   8. Irrelevant event (charge.updated → no-op)
  *   9. Subscription missing user_id metadata (→ warn, no-op)
  *   10. Tier upgrade (subscription.updated from cycle → pro mid-cycle)
+ *   11. Billing Portal plan change (tier resolved from price ID, not stale metadata)
  *
  * This is the real behavior contract for the Phase H webhook logic. If this
  * test passes, the logic is correct. If Stripe sends an event that this
@@ -89,9 +90,25 @@ function createMockSupabase(db: MockDb): WebhookSupabase {
             eq(col: string, val: string) {
               return {
                 async maybeSingle() {
-                  if (table === "subscriptions" && col === "user_id") {
-                    const row = db.subscriptions.get(val);
-                    return { data: row ?? null, error: null };
+                  // Generic scan-by-column, matching what the real Supabase
+                  // client would return for an .eq() on any column (the
+                  // handlers filter by user_id, stripe_subscription_id, and
+                  // stripe_payment_intent_id across the two tables).
+                  if (table === "subscriptions") {
+                    for (const row of db.subscriptions.values()) {
+                      if ((row as unknown as Record<string, unknown>)[col] === val) {
+                        return { data: row, error: null };
+                      }
+                    }
+                    return { data: null, error: null };
+                  }
+                  if (table === "overage_purchases") {
+                    for (const row of db.overage_purchases.values()) {
+                      if ((row as unknown as Record<string, unknown>)[col] === val) {
+                        return { data: row, error: null };
+                      }
+                    }
+                    return { data: null, error: null };
                   }
                   return { data: null, error: null };
                 },
@@ -349,6 +366,32 @@ async function main() {
     assert(row?.sessions_used_this_cycle === 0, "sessions reset on renewal");
     assert(row?.overages_used_this_cycle === 0, "overages reset on renewal");
     assert(row?.status === "active", "status stays active");
+
+    // A second invoice.paid for the SAME period — e.g. a mid-cycle proration
+    // invoice, or a retried/recovered past-due invoice — must NOT reset
+    // counters again. Simulate some usage happening after the renewal, then
+    // fire another invoice.paid against the identical period.
+    db.subscriptions.set(USER_A, {
+      ...(db.subscriptions.get(USER_A) as SubscriptionRow),
+      sessions_used_this_cycle: 2,
+      overages_used_this_cycle: 1,
+    });
+    await dispatchWebhookEvent(
+      makeEvent(
+        "invoice.paid",
+        makeInvoice({ subscriptionId: renewedSub.id, amountPaid: 0 }),
+      ),
+      deps,
+    );
+    const rowAfterProration = db.subscriptions.get(USER_A);
+    assert(
+      rowAfterProration?.sessions_used_this_cycle === 2,
+      "same-period invoice.paid (proration) does not reset session counter",
+    );
+    assert(
+      rowAfterProration?.overages_used_this_cycle === 1,
+      "same-period invoice.paid (proration) does not reset overage counter",
+    );
   }
 
   // --------------------------------------------------------------------------
@@ -454,6 +497,28 @@ async function main() {
   {
     const db = createMockDb();
     const sessionId = "session-abc-123";
+    // Overage checkout requires an active base subscription (enforced by
+    // /api/stripe/overage-checkout before Checkout is even created), so a
+    // subscriptions row always exists by the time this webhook fires.
+    db.subscriptions.set(USER_A, {
+      user_id: USER_A,
+      stripe_customer_id: "cus_a",
+      stripe_subscription_id: "sub_a_6",
+      stripe_price_id: "price_pro",
+      tier: "pro",
+      status: "active",
+      cycle_start: "2026-05-01T00:00:00.000Z",
+      cycle_end: "2027-05-01T00:00:00.000Z",
+      current_period_start: "2026-05-01T00:00:00.000Z",
+      current_period_end: "2027-05-01T00:00:00.000Z",
+      trial_start: null,
+      trial_end: null,
+      cancel_at_period_end: false,
+      auto_renew: true,
+      canceled_at: null,
+      sessions_used_this_cycle: 8,
+      overages_used_this_cycle: 1,
+    });
     const pi = makePaymentIntent({
       piId: "pi_overage_1",
       userId: USER_A,
@@ -474,6 +539,12 @@ async function main() {
     assert(row?.session_id === sessionId, "correct session_id");
     assert(row?.amount === 800, "amount recorded");
     assert(row?.status === "succeeded", "status=succeeded");
+    // The webhook is what actually grants the paid overage seat — this is
+    // the counter checkSessionQuota reads to enforce the next session's gate.
+    assert(
+      db.subscriptions.get(USER_A)?.overages_used_this_cycle === 2,
+      "overages_used_this_cycle incremented on payment success",
+    );
   }
 
   // --------------------------------------------------------------------------
@@ -482,6 +553,25 @@ async function main() {
   console.log("\n7. Overage replay idempotency (same PI event twice)");
   {
     const db = createMockDb();
+    db.subscriptions.set(USER_A, {
+      user_id: USER_A,
+      stripe_customer_id: "cus_a",
+      stripe_subscription_id: "sub_a_7",
+      stripe_price_id: "price_pro",
+      tier: "pro",
+      status: "active",
+      cycle_start: "2026-05-01T00:00:00.000Z",
+      cycle_end: "2027-05-01T00:00:00.000Z",
+      current_period_start: "2026-05-01T00:00:00.000Z",
+      current_period_end: "2027-05-01T00:00:00.000Z",
+      trial_start: null,
+      trial_end: null,
+      cancel_at_period_end: false,
+      auto_renew: true,
+      canceled_at: null,
+      sessions_used_this_cycle: 0,
+      overages_used_this_cycle: 0,
+    });
     const pi = makePaymentIntent({
       piId: "pi_overage_replay",
       userId: USER_A,
@@ -497,6 +587,11 @@ async function main() {
     await dispatchWebhookEvent(makeEvent("payment_intent.succeeded", pi), deps);
     // Event ID differs but PI ID is the same — onConflict: stripe_payment_intent_id
     assert(db.overage_purchases.size === 1, "replay does not create duplicate row");
+    // The replay must not grant a second free overage seat on top of the first.
+    assert(
+      db.subscriptions.get(USER_A)?.overages_used_this_cycle === 1,
+      "replay does not double-increment the overage counter",
+    );
   }
 
   // --------------------------------------------------------------------------
@@ -597,6 +692,67 @@ async function main() {
     assert(row?.cycle_start === "2026-06-01T00:00:00.000Z", "cycle_start moved to upgrade time");
     // cycleChanged triggers counter reset
     assert(row?.sessions_used_this_cycle === 0, "counter reset on tier upgrade");
+  }
+
+  // --------------------------------------------------------------------------
+  // 11. Billing Portal plan change — tier derived from price, not stale metadata
+  // --------------------------------------------------------------------------
+  console.log("\n11. Portal plan change (tier derived from price ID)");
+  {
+    // The Billing Portal lets a customer swap which Stripe Price they're on
+    // without anyone setting subscription.metadata.tier — Stripe just fires
+    // customer.subscription.updated with the new price and the OLD metadata
+    // still attached. Confirm we resolve tier from the price, not the stale
+    // metadata Checkout set once at signup.
+    const prevEnv = process.env.STRIPE_PRICE_MAX;
+    process.env.STRIPE_PRICE_MAX = "price_portal_max";
+    try {
+      const db = createMockDb();
+      db.subscriptions.set(USER_A, {
+        user_id: USER_A,
+        stripe_customer_id: "cus_a",
+        stripe_subscription_id: "sub_a_11",
+        stripe_price_id: "price_test_pro",
+        tier: "pro",
+        status: "active",
+        cycle_start: "2026-05-01T00:00:00.000Z",
+        cycle_end: "2027-05-01T00:00:00.000Z",
+        current_period_start: "2026-05-01T00:00:00.000Z",
+        current_period_end: "2027-05-01T00:00:00.000Z",
+        trial_start: null,
+        trial_end: null,
+        cancel_at_period_end: false,
+        auto_renew: true,
+        canceled_at: null,
+        sessions_used_this_cycle: 5,
+        overages_used_this_cycle: 0,
+      });
+
+      // Stripe still carries metadata.tier="pro" (set once at Checkout) even
+      // though the customer just moved to the Max price via the Portal.
+      const portalChangedSub = makeSubscription({
+        subId: "sub_a_11",
+        userId: USER_A,
+        tier: "pro",
+        priceId: "price_portal_max",
+        status: "active",
+        currentPeriodStart: new Date("2026-05-01T00:00:00Z"),
+        currentPeriodEnd: new Date("2027-05-01T00:00:00Z"),
+      });
+
+      const deps = {
+        supabase: createMockSupabase(db),
+        stripe: createMockStripe(new Map([[portalChangedSub.id, portalChangedSub]])),
+      };
+
+      await dispatchWebhookEvent(makeEvent("customer.subscription.updated", portalChangedSub), deps);
+
+      const row = db.subscriptions.get(USER_A);
+      assert(row?.tier === "max", "tier resolved from price ID (max), not stale metadata (pro)");
+    } finally {
+      if (prevEnv === undefined) delete process.env.STRIPE_PRICE_MAX;
+      else process.env.STRIPE_PRICE_MAX = prevEnv;
+    }
   }
 
   // --------------------------------------------------------------------------
