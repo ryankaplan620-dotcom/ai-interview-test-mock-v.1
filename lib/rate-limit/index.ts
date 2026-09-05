@@ -64,6 +64,32 @@ export const RATE_LIMITS = {
     short: { max: 20, windowSeconds: 600 }, // 20 per 10 minutes
     daily: { max: 100, windowSeconds: 86_400 }, // 100 per 24 hours
   },
+  tts_stream: {
+    name: "tts_stream",
+    // Called once per sentence the AI interviewer speaks — a single long
+    // answer can legitimately fire a dozen+ calls in a short burst. Short
+    // window is loose so a live call never stalls; daily window bounds a
+    // scripted loop running up ElevenLabs spend against one account (a
+    // heavy day of several full sessions is still well under this).
+    short: { max: 200, windowSeconds: 600 }, // 200 per 10 minutes
+    daily: { max: 2000, windowSeconds: 86_400 }, // 2000 per 24 hours
+  },
+  deepgram_token: {
+    name: "deepgram_token",
+    // One mint per session start, occasionally re-minted on a mid-session
+    // reconnect (60s TTL). 10/10min comfortably covers reconnect storms
+    // from a flaky connection without leaving key-minting unbounded.
+    short: { max: 10, windowSeconds: 600 }, // 10 per 10 minutes
+    daily: { max: 100, windowSeconds: 86_400 }, // 100 per 24 hours
+  },
+  outreach_draft: {
+    name: "outreach_draft",
+    // One Claude call per drafted email. Generous enough to draft to an
+    // entire scouted contact list in one sitting, bounded against a script
+    // hammering the endpoint.
+    short: { max: 15, windowSeconds: 600 }, // 15 per 10 minutes
+    daily: { max: 60, windowSeconds: 86_400 }, // 60 per 24 hours
+  },
 } as const satisfies Record<string, RateLimitConfig>;
 
 export type RateLimitName = keyof typeof RATE_LIMITS;
@@ -304,7 +330,16 @@ function buildMessage(
   retryAfterSeconds: number,
 ): string {
   const w = config[window];
-  const action = config.name === "tavus_conversation" ? "started a session" : "requested feedback";
+  const action =
+    config.name === "tavus_conversation"
+      ? "started a session"
+      : config.name === "tts_stream"
+        ? "sent an audio request"
+        : config.name === "deepgram_token"
+          ? "started a live transcription"
+          : config.name === "outreach_draft"
+            ? "drafted an email"
+            : "requested feedback";
   const windowLabel = humanWindow(w.windowSeconds);
   const retryLabel = humanDuration(retryAfterSeconds);
   return `You've ${action} ${w.max} times in the last ${windowLabel}. Try again in ${retryLabel}.`;

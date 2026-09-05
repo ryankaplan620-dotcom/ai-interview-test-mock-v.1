@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/server";
+import { getUser } from "@/lib/auth/server";
 import { initiateVerification } from "@/lib/verification/student";
 
 export async function POST() {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   try {
-    const user = await requireUser();
     if (!user.email) {
       return NextResponse.json({ error: "Email required" }, { status: 400 });
     }
