@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { PERSONAS, getPersonaVoiceId } from "@/lib/personas";
 import { env } from "@/lib/pipeline/env";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 import type { PersonaId } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -25,10 +26,7 @@ const TTSInput = z.object({
 // Route — POST returns raw PCM audio (chunked)
 // --------------------------------------------------------------------------
 
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return new Response("unauthorized", { status: 401 });
-
+async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) {
     return new Response("elevenlabs_not_configured", { status: 503 });
@@ -118,3 +116,5 @@ export async function POST(req: NextRequest) {
     },
   });
 }
+
+export const POST = withRateLimit(RATE_LIMITS.tts_stream, handler);
