@@ -35,7 +35,7 @@ interface MemoryRow {
 export default async function MemorySettingsPage() {
   const user = await requireUser();
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase.from("user_session_memory") as any)
     .select(

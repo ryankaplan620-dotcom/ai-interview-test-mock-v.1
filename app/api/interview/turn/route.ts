@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return new Response("bad_request", { status: 400 });
 
   // Load the session to rebuild ConversationContext server-side (don't trust client)
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sessionRaw } = await (supabase.from("sessions") as any)
     .select(

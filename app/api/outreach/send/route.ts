@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   const sentAt = new Date().toISOString();
 

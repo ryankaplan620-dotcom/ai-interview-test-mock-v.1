@@ -10,14 +10,15 @@ import { SessionView, type SessionViewPersona } from "./session-view";
 import { TavusSessionView } from "./tavus-session-view";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const dynamic = "force-dynamic";
 
-export default async function SessionPage({ params }: PageProps) {
+export default async function SessionPage(props: PageProps) {
+  const params = await props.params;
   const user = await requireUser();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // ---- 1. Load the session
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

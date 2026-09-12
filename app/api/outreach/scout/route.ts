@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // column doesn't exist yet (migration 0013 not applied), fall back to the
     // legacy shape so we still keep contact rows.
     try {
-      const supabase = createServerClient();
+      const supabase = await createServerClient();
 
       const rich = contacts.map((c) => ({
         user_id: user.id,

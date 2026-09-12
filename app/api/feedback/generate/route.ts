@@ -37,7 +37,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   const { sessionId } = parsed.data;
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // 1. Verify ownership
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

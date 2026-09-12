@@ -85,7 +85,8 @@ interface TavusWebhookPayload {
   };
 }
 
-export async function POST(req: NextRequest, { params }: { params: { secret: string } }) {
+export async function POST(req: NextRequest, props: { params: Promise<{ secret: string }> }) {
+  const params = await props.params;
   // Secret-in-URL verification. Tavus does not support custom webhook headers,
   // so we embed a shared secret in the callback URL path — known only to us
   // (stored in env) and Tavus (stored in their conversation record on our

@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const profile = await getProfile();
   const tier = await getUserTier();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sessionsRaw } = await (supabase.from("sessions") as any)

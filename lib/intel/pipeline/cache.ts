@@ -151,7 +151,7 @@ async function getSupabaseClient(): Promise<any | null> {
     // The intel tables aren't in the generated Database type yet, so we
     // return `any` to access them until types are regenerated.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return createServerClient() as any;
+    return (await createServerClient()) as any;
   } catch {
     console.warn(
       "[intel.cache] Supabase not configured — cache operations will be skipped"

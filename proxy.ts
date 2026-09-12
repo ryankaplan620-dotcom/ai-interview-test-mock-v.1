@@ -14,7 +14,7 @@ const PROTECTED_ROUTES = ["/dashboard", "/session", "/settings", "/account", "/o
  */
 const AUTH_ONLY_ROUTES = ["/login", "/signup"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: { headers: request.headers },
   });

@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   // --------------------------------------------------------------------
   // 1. Verify drill
   // --------------------------------------------------------------------
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: drillRaw } = await (supabase.from("drills") as any)
     .select("id, user_id, drill_type, prompt_id, prompt_text, config, status")

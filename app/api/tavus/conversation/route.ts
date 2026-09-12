@@ -48,7 +48,7 @@ async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: sessionRaw, error: sessionErr } = await (supabase.from("sessions") as any)
     .select(

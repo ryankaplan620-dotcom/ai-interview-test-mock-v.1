@@ -15,9 +15,9 @@ function requireSupabasePublicEnv(): { url: string; anonKey: string } {
   return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
 }
 
-export function createServerClient() {
+export async function createServerClient() {
   const { url, anonKey } = requireSupabasePublicEnv();
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   return createServerClientSSR<Database>(url, anonKey, {
     cookies: {

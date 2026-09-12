@@ -141,7 +141,7 @@ export async function startSession(
   }
 
   // ---- 6. Insert the session row
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const persona = PERSONAS[req.personaId];
   const durationSeconds = persona.defaultDurationMinutes * 60;
 

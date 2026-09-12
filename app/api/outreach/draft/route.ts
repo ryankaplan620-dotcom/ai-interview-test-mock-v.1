@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // 1. Load the contact
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,7 +106,7 @@ export async function PATCH(req: NextRequest) {
   const parsed = PatchInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from("outreach_drafts") as any)
@@ -134,7 +134,7 @@ export async function DELETE(req: NextRequest) {
   const parsed = DeleteInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase.from("outreach_drafts") as any)

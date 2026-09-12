@@ -11,7 +11,7 @@ const ADMIN_EMAILS = (process.env.INTEL_ADMIN_EMAILS ?? "")
   .filter(Boolean);
 
 interface PageProps {
-  params: { company: string };
+  params: Promise<{ company: string }>;
 }
 
 // --------------------------------------------------------------------------
@@ -50,7 +50,8 @@ function formatDate(iso: string | undefined | null): string {
 // Page
 // --------------------------------------------------------------------------
 
-export default async function IntelCompanyPage({ params }: PageProps) {
+export default async function IntelCompanyPage(props: PageProps) {
+  const params = await props.params;
   const user = await requireUser();
 
   if (!user.email || !ADMIN_EMAILS.includes(user.email)) {

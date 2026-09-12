@@ -23,9 +23,9 @@ export async function fetchUserContributed(
     // which would break in non-server contexts during tree-shaking.
     const { createServerClient } = await import("@/lib/db/server");
 
-    let supabase: ReturnType<typeof createServerClient>;
+    let supabase: Awaited<ReturnType<typeof createServerClient>>;
     try {
-      supabase = createServerClient();
+      supabase = await createServerClient();
     } catch {
       console.warn(
         `[intel.user-contributed] Supabase not configured, skipping (rid=${requestId})`

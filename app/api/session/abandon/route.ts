@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, note: "unauthenticated" });
   }
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sessions = supabase.from("sessions") as any;
 

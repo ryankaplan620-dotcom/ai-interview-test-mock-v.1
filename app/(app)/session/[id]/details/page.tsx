@@ -18,12 +18,13 @@ import { formatSeconds } from "@/lib/utils/time";
 import { formatInterviewType, formatSessionMode } from "@/lib/utils/session-labels";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default async function SessionDetailsPage({ params }: PageProps) {
+export default async function SessionDetailsPage(props: PageProps) {
+  const params = await props.params;
   const user = await requireUser();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // Load session + verify ownership
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -5,10 +5,11 @@ import { DrillPicker } from "./prompt-picker";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }
 
-export default async function PracticePage({ searchParams }: PageProps) {
+export default async function PracticePage(props: PageProps) {
+  const searchParams = await props.searchParams;
   await requireUser();
 
   const errorMessage = searchParams.error
