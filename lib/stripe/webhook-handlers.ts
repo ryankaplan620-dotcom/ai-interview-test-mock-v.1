@@ -291,11 +291,14 @@ export async function handlePaymentIntentSucceeded(
   if (paymentIntent.metadata.product_type !== "overage_session") return;
 
   const userId = paymentIntent.metadata.user_id;
+  // session_id is legitimately absent — the payment happens before the
+  // session exists. It's linked to a session later, when startSession()
+  // consumes this purchase row.
   const sessionId = paymentIntent.metadata.session_id || null;
 
-  if (!userId || !sessionId) {
+  if (!userId) {
     console.warn(
-      "[Stripe Webhook] Overage payment missing user_id or session_id:",
+      "[Stripe Webhook] Overage payment missing user_id:",
       paymentIntent.id,
     );
     return;
