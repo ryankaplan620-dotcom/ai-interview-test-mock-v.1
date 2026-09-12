@@ -31,7 +31,7 @@ export default async function IntelAdminIndexPage() {
     );
   }
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (supabase.from("company_intel_cache") as any)

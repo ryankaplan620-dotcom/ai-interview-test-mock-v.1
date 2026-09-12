@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   const { sessionId } = parsed.data;
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // Verify ownership — RLS would handle this, but returning a clean 404 is
   // less leaky than relying on an empty select result.

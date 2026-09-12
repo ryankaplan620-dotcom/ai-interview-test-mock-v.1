@@ -52,6 +52,37 @@ export interface RateLimitConfig {
  *     per-call cost but can be called multiple times (poll for Q&A results).
  *     The endpoint is also already idempotent for existing feedback, so
  *     most repeat calls short-circuit without hitting Claude.
+ *
+ *   - Outreach scout is one LLM call that researches and returns a batch of
+ *     contacts per (company, role) pair — a user has no legitimate reason to
+ *     do this more than a handful of times in a sitting. Calibrated similar
+ *     to tavus_conversation (comparable per-call LLM cost, no idempotent
+ *     short-circuit path), a bit looser since it's not a real-money charge.
+ *
+ *   - Outreach draft is one LLM call per contact to write an email. Users
+ *     drafting outreach to a real target list plausibly generate dozens in a
+ *     session, so this is looser than scout but still bounded well below
+ *     what a scripted scrape-and-spam loop would need.
+ *
+ *   - Practice attempt costs one Deepgram transcription + one Claude
+ *     feedback call per submitted attempt. Drills cap attempts per drill
+ *     (targetAttempts, small single digits) so legitimate use is naturally
+ *     low-volume; calibrated close to tavus_conversation.
+ *
+ *   - Deepgram token minting itself is nearly free (a short-lived key), but
+ *     each token backs a live streaming session and unbounded minting is a
+ *     resource-exhaustion / cost vector against Deepgram usage. Generous
+ *     short window (reconnects happen), moderate daily cap.
+ *
+ *   - TTS streaming calls ElevenLabs per sentence spoken by the interviewer,
+ *     so a single session legitimately makes many calls. The limits here are
+ *     sized per-sentence-call, not per-session — high enough that a normal
+ *     multi-session practice day never trips it, but bounded well short of
+ *     what a scripted flood would need.
+ *
+ *   - Interview turn calls Claude once per candidate turn (comparable cost
+ *     to feedback_generate) and can also be resent by a flaky client, so it
+ *     gets a similar, slightly looser allowance than feedback_generate.
  */
 export const RATE_LIMITS = {
   tavus_conversation: {
@@ -63,6 +94,36 @@ export const RATE_LIMITS = {
     name: "feedback_generate",
     short: { max: 20, windowSeconds: 600 }, // 20 per 10 minutes
     daily: { max: 100, windowSeconds: 86_400 }, // 100 per 24 hours
+  },
+  outreach_scout: {
+    name: "outreach_scout",
+    short: { max: 5, windowSeconds: 600 }, // 5 per 10 minutes
+    daily: { max: 30, windowSeconds: 86_400 }, // 30 per 24 hours
+  },
+  outreach_draft: {
+    name: "outreach_draft",
+    short: { max: 15, windowSeconds: 600 }, // 15 per 10 minutes
+    daily: { max: 75, windowSeconds: 86_400 }, // 75 per 24 hours
+  },
+  practice_attempt: {
+    name: "practice_attempt",
+    short: { max: 6, windowSeconds: 600 }, // 6 per 10 minutes
+    daily: { max: 40, windowSeconds: 86_400 }, // 40 per 24 hours
+  },
+  deepgram_token: {
+    name: "deepgram_token",
+    short: { max: 20, windowSeconds: 600 }, // 20 per 10 minutes (covers reconnects)
+    daily: { max: 150, windowSeconds: 86_400 }, // 150 per 24 hours
+  },
+  tts_stream: {
+    name: "tts_stream",
+    short: { max: 120, windowSeconds: 600 }, // 120 per 10 minutes (~1 sentence every 5s)
+    daily: { max: 2000, windowSeconds: 86_400 }, // 2000 per 24 hours
+  },
+  interview_turn: {
+    name: "interview_turn",
+    short: { max: 30, windowSeconds: 600 }, // 30 per 10 minutes
+    daily: { max: 150, windowSeconds: 86_400 }, // 150 per 24 hours
   },
 } as const satisfies Record<string, RateLimitConfig>;
 
@@ -298,13 +359,24 @@ export async function checkRateLimit(args: {
 // Error message builder — actionable, not just "rate limited"
 // --------------------------------------------------------------------------
 
+const RATE_LIMIT_ACTION_LABELS: Record<string, string> = {
+  tavus_conversation: "started a session",
+  feedback_generate: "requested feedback",
+  outreach_scout: "scouted contacts",
+  outreach_draft: "drafted a message",
+  practice_attempt: "submitted a drill attempt",
+  deepgram_token: "started transcription",
+  tts_stream: "requested audio",
+  interview_turn: "sent a turn",
+};
+
 function buildMessage(
   config: RateLimitConfig,
   window: "short" | "daily",
   retryAfterSeconds: number,
 ): string {
   const w = config[window];
-  const action = config.name === "tavus_conversation" ? "started a session" : "requested feedback";
+  const action = RATE_LIMIT_ACTION_LABELS[config.name] ?? "made this request";
   const windowLabel = humanWindow(w.windowSeconds);
   const retryLabel = humanDuration(retryAfterSeconds);
   return `You've ${action} ${w.max} times in the last ${windowLabel}. Try again in ${retryLabel}.`;

@@ -57,10 +57,16 @@ export type StartSessionResult =
  * Two-step overage flow:
  *   - First call without overageAccepted → returns session_quota_exceeded
  *     with overageAvailable=true if user has an active cycle. Client shows
- *     confirmation dialog.
- *   - Second call with overageAccepted=true → charges the overage via
- *     /api/stripe/overage-checkout (deferred to client post-confirm), then
- *     proceeds with session insert and increments overages_used_this_cycle.
+ *     confirmation dialog, which sends the user through
+ *     /api/stripe/overage-checkout → Stripe → webhook.
+ *   - Second call with overageAccepted=true → overageAccepted is only a
+ *     signal to look for a real payment; it is never trusted on its own.
+ *     This function requires an actual succeeded, unconsumed
+ *     `overage_purchases` row for this user (recorded by the
+ *     payment_intent.succeeded webhook) before it will insert a session —
+ *     otherwise it returns `overage_not_paid`. On success, the matching row
+ *     is linked to the new session (consumed) so it can't back a second
+ *     free session, and overages_used_this_cycle is incremented.
  *
  * Throws via redirect on success. Returns a typed error object on failure.
  */
@@ -140,8 +146,43 @@ export async function startSession(
     };
   }
 
+  const supabase = await createServerClient();
+
+  // ---- 5b. Overage requires proof of payment — a real, unconsumed
+  // overage_purchases row, not just the client-supplied overageAccepted flag.
+  // (`checkSessionStart` only checked the flag itself; this is the actual
+  // gate that closes the billing bypass.) The matching row is consumed
+  // (linked to the new session) after the session insert below.
+  let overagePurchaseId: string | null = null;
+  if (req.overageAccepted) {
+    const { data: purchaseRaw, error: purchaseError } = await (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      supabase.from("overage_purchases") as any
+    )
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "succeeded")
+      .is("session_id", null)
+      .order("succeeded_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (purchaseError) {
+      console.error("[startSession] overage purchase lookup failed:", purchaseError);
+    }
+
+    const purchase = purchaseRaw as { id: string } | null;
+    if (!purchase) {
+      return {
+        ok: false,
+        error: "No completed overage payment found. Purchase an overage session first.",
+        code: "overage_not_paid",
+      };
+    }
+    overagePurchaseId = purchase.id;
+  }
+
   // ---- 6. Insert the session row
-  const supabase = createServerClient();
   const persona = PERSONAS[req.personaId];
   const durationSeconds = persona.defaultDurationMinutes * 60;
 
@@ -182,6 +223,21 @@ export async function startSession(
     };
   }
 
+  const newSessionId = (inserted as { id: string }).id;
+
+  // ---- 6b. Consume the overage purchase — link it to the session that was
+  // just created so it can't be re-used to back a second free session.
+  if (overagePurchaseId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: consumeError } = await (supabase.from("overage_purchases") as any)
+      .update({ session_id: newSessionId })
+      .eq("id", overagePurchaseId);
+
+    if (consumeError) {
+      console.error("[startSession] failed to consume overage purchase:", consumeError);
+    }
+  }
+
   // ---- 7. Increment session-usage counter on the subscription row
   // Within-quota: bump sessions_used_this_cycle
   // Overage: bump overages_used_this_cycle (overage charge happens separately
@@ -204,5 +260,5 @@ export async function startSession(
   }
 
   // ---- 8. Redirect into the room
-  redirect(`/session/${(inserted as { id: string }).id}`);
+  redirect(`/session/${newSessionId}`);
 }

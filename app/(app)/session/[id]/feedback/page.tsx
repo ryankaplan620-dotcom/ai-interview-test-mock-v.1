@@ -9,14 +9,15 @@ import { FeedbackView } from "./feedback-view";
 import { FeedbackGenerating } from "./generating";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const dynamic = "force-dynamic";
 
-export default async function FeedbackPage({ params }: PageProps) {
+export default async function FeedbackPage(props: PageProps) {
+  const params = await props.params;
   const user = await requireUser();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // Load session + verify ownership
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

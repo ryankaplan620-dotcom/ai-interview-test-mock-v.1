@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { generateDraft } from "@/lib/outreach/draft";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,15 +28,21 @@ const DeleteInput = z.object({
  *
  * Loads a contact from outreach_contacts, generates a personalized outreach
  * email via Claude, and persists the draft to outreach_drafts.
+ *
+ * Rate limited (LLM-backed generation). PATCH/DELETE below are plain CRUD
+ * over an already-generated draft and don't call the LLM, so they keep
+ * their own lightweight auth check instead of the rate limiter.
  */
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function postHandler(req: NextRequest, { user }: { user: { id: string } }) {
   const parsed = Input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
+  // getUser() is React.cache()'d per-request — withRateLimit already resolved
+  // it once to authenticate; this just gets the full user object (for email)
+  // without a second round-trip.
+  const authUser = await getUser();
+  const email = authUser?.email ?? null;
 
   // 1. Load the contact
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +64,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   const userProfile = {
-    name: profile?.full_name ?? user.email?.split("@")[0] ?? "Candidate",
+    name: profile?.full_name ?? email?.split("@")[0] ?? "Candidate",
     background: profile?.target_role
       ? `Targeting ${profile.target_role} roles`
       : "Career professional",
@@ -99,6 +107,8 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export const POST = withRateLimit(RATE_LIMITS.outreach_draft, postHandler);
+
 export async function PATCH(req: NextRequest) {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -106,7 +116,7 @@ export async function PATCH(req: NextRequest) {
   const parsed = PatchInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.from("outreach_drafts") as any)
@@ -134,7 +144,7 @@ export async function DELETE(req: NextRequest) {
   const parsed = DeleteInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase.from("outreach_drafts") as any)

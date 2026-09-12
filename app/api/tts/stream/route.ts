@@ -1,9 +1,10 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { PERSONAS, getPersonaVoiceId } from "@/lib/personas";
 import { env } from "@/lib/pipeline/env";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit/middleware";
 import type { PersonaId } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -25,20 +26,17 @@ const TTSInput = z.object({
 // Route — POST returns raw PCM audio (chunked)
 // --------------------------------------------------------------------------
 
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return new Response("unauthorized", { status: 401 });
-
+async function handler(req: NextRequest, { user }: { user: { id: string } }) {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) {
-    return new Response("elevenlabs_not_configured", { status: 503 });
+    return new NextResponse("elevenlabs_not_configured", { status: 503 });
   }
 
   const parsed = TTSInput.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return new Response("bad_request", { status: 400 });
+  if (!parsed.success) return new NextResponse("bad_request", { status: 400 });
 
   // Server-side: rebuild persona from session (don't trust client claims about voice ID)
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase.from("sessions") as any)
     .select("id, user_id, persona, status")
@@ -50,16 +48,16 @@ export async function POST(req: NextRequest) {
     | null;
 
   if (!session || session.user_id !== user.id) {
-    return new Response("not_found", { status: 404 });
+    return new NextResponse("not_found", { status: 404 });
   }
   if (["completed", "abandoned", "failed"].includes(session.status)) {
-    return new Response("session_ended", { status: 409 });
+    return new NextResponse("session_ended", { status: 409 });
   }
 
   const persona = PERSONAS[session.persona];
   const voiceId = getPersonaVoiceId(session.persona);
   if (!voiceId) {
-    return new Response("voice_not_configured", { status: 503 });
+    return new NextResponse("voice_not_configured", { status: 503 });
   }
 
   // --------------------------------------------------------------------
@@ -96,19 +94,19 @@ export async function POST(req: NextRequest) {
   if (!elevenLabsRes.ok) {
     const text = await elevenLabsRes.text().catch(() => "");
     console.error(`[tts.stream] elevenlabs failed ${elevenLabsRes.status}: ${text.slice(0, 500)}`);
-    return new Response(
+    return new NextResponse(
       JSON.stringify({ error: "tts_failed" }),
       { status: 502, headers: { "Content-Type": "application/json" } },
     );
   }
 
   if (!elevenLabsRes.body) {
-    return new Response("elevenlabs_no_body", { status: 502 });
+    return new NextResponse("elevenlabs_no_body", { status: 502 });
   }
 
   // Forward the audio stream directly. Headers tell the client to treat this
   // as raw PCM at 22050 Hz, mono, 16-bit signed little-endian.
-  return new Response(elevenLabsRes.body, {
+  return new NextResponse(elevenLabsRes.body, {
     headers: {
       "Content-Type": "audio/pcm",
       "X-Audio-Sample-Rate": "22050",
@@ -118,3 +116,5 @@ export async function POST(req: NextRequest) {
     },
   });
 }
+
+export const POST = withRateLimit(RATE_LIMITS.tts_stream, handler);

@@ -20,12 +20,13 @@ interface SessionWithFeedbackRaw {
 const PAGE_SIZE = 25;
 
 interface PageProps {
-  searchParams: { page?: string; filter?: string };
+  searchParams: Promise<{ page?: string; filter?: string }>;
 }
 
-export default async function SessionsPage({ searchParams }: PageProps) {
+export default async function SessionsPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   const user = await requireUser();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   const pageNum = Math.max(1, Number.parseInt(searchParams.page ?? "1", 10) || 1);
   const filter = searchParams.filter ?? "all";

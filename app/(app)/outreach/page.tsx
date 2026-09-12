@@ -39,7 +39,7 @@ interface OutreachDraft {
 
 export default async function OutreachPage() {
   const user = await requireUser();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: contactsRaw } = await (supabase.from("outreach_contacts") as any)

@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   // Load session, verify ownership, look up replica ID for the persona
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase.from("sessions") as any)
     .select("id, user_id, persona, status")

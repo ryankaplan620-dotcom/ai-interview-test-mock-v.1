@@ -31,17 +31,19 @@ import { formatInterviewType, formatSessionMode } from "@/lib/utils/session-labe
 type TabId = "perception" | "transcript" | "emotional" | "network";
 
 interface PageProps {
-  params: { id: string };
-  searchParams: { tab?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }
 
 // --------------------------------------------------------------------------
 // Page
 // --------------------------------------------------------------------------
 
-export default async function SessionInsightsPage({ params, searchParams }: PageProps) {
+export default async function SessionInsightsPage(props: PageProps) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const user = await requireUser();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // Load session + verify ownership
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

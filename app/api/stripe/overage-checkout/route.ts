@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireUser, getUserTier } from "@/lib/auth/server";
+import { getUser, getUserTier } from "@/lib/auth/server";
 import { createOverageCheckout } from "@/lib/stripe/checkout";
 
 const Input = z.object({
-  sessionId: z.string().uuid(),
+  sessionId: z.string().uuid().optional(),
 });
 
 /**
@@ -18,14 +18,19 @@ const Input = z.object({
  * Flow:
  *   1. Client calls startSession() → gets session_quota_exceeded + overageAvailable
  *   2. Client shows confirmation dialog with price
- *   3. On confirm, client calls this endpoint with the (pending) sessionId
+ *   3. On confirm, client calls this endpoint. No session exists yet, so
+ *      `sessionId` is omitted.
  *   4. User is redirected to Stripe Checkout
- *   5. Stripe webhook fires payment_intent.succeeded → overage_purchases row
- *   6. Stripe redirects user back to /session/[id]?overage=paid → interview starts
+ *   5. Stripe webhook fires payment_intent.succeeded → a `session_id`-less
+ *      overage_purchases row with status='succeeded' is recorded
+ *   6. Stripe redirects user back to /session/new?overage=paid → client calls
+ *      startSession({ overageAccepted: true }), which looks up that
+ *      unconsumed row, creates the session, and links the row to it
  */
 export async function POST(request: Request) {
   try {
-    const user = await requireUser();
+    const user = await getUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     const body = await request.json();
     const parsed = Input.safeParse(body);
 

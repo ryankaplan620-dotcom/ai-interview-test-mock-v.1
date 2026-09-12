@@ -4,7 +4,6 @@ const { withSentryConfig } = require("@sentry/nextjs");
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: false },
   images: {
     formats: ["image/avif", "image/webp"],

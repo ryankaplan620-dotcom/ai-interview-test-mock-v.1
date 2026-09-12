@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/server";
+import { getUser } from "@/lib/auth/server";
 import { fetchCompanyIntel } from "@/lib/intel/pipeline/fetch-company";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,8 @@ const ADMIN_EMAILS = (process.env.INTEL_ADMIN_EMAILS ?? "")
  */
 export async function GET(request: Request) {
   try {
-    const user = await requireUser();
+    const user = await getUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
     if (!user.email || !ADMIN_EMAILS.includes(user.email)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });

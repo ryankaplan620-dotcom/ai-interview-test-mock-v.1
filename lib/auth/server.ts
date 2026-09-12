@@ -8,7 +8,7 @@ import type { UserProfile, UserTier } from "@/types/supabase";
  * Cached per-request via React.cache so multiple calls in the same render hit Supabase once.
  */
 export const getUser = cache(async () => {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -35,7 +35,7 @@ export const getProfile = cache(async (): Promise<UserProfile | null> => {
   const user = await getUser();
   if (!user) return null;
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data } = await supabase.from("user_profiles").select("*").eq("id", user.id).single();
 
   return data;
@@ -49,7 +49,7 @@ export const getUserTier = cache(async (): Promise<UserTier | null> => {
   const user = await getUser();
   if (!user) return null;
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data } = await supabase.from("user_tiers").select("*").eq("user_id", user.id).single();
 
   if (data) return data;

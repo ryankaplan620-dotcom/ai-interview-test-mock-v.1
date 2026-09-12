@@ -92,9 +92,13 @@ export async function createSubscriptionCheckout({
  * their cycle quota and agreed to purchase additional sessions.
  *
  * Unlike the subscription checkout, this is payment-mode (single charge).
- * The session row has already been inserted server-side with is_overage=true;
- * this adds the payment record and, on webhook success, marks the
- * overage_purchases row as succeeded.
+ *
+ * `sessionId` is optional: no session exists yet at payment time (the
+ * session is only created after `startSession()` confirms a succeeded,
+ * unconsumed overage purchase). When omitted, the checkout redirects to a
+ * generic route and no `session_id` is attached to the Stripe metadata —
+ * the resulting `overage_purchases` row is linked to a session later, when
+ * it's consumed.
  */
 export async function createOverageCheckout({
   userId,
@@ -104,7 +108,7 @@ export async function createOverageCheckout({
 }: {
   userId: string;
   email: string;
-  sessionId: string;
+  sessionId?: string;
   tier: SubscriptionTier;
 }): Promise<{ url: string }> {
   const stripe = requireStripe();
@@ -119,12 +123,14 @@ export async function createOverageCheckout({
     customer: customerId,
     mode: "payment",
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${APP_URL}/session/${sessionId}?overage=paid`,
+    success_url: sessionId
+      ? `${APP_URL}/session/${sessionId}?overage=paid`
+      : `${APP_URL}/session/new?overage=paid`,
     cancel_url: `${APP_URL}/session/new?overage=canceled`,
     automatic_tax: { enabled: false },
     metadata: {
       user_id: userId,
-      session_id: sessionId,
+      ...(sessionId ? { session_id: sessionId } : {}),
       product_type: "overage_session",
       tier,
     },

@@ -7,14 +7,15 @@ import type { DrillType, DrillStatus } from "@/types/supabase";
 import { PracticeView } from "./practice-view";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const dynamic = "force-dynamic";
 
-export default async function DrillRoomPage({ params }: PageProps) {
+export default async function DrillRoomPage(props: PageProps) {
+  const params = await props.params;
   const user = await requireUser();
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: drillRaw } = await (supabase.from("drills") as any)

@@ -25,7 +25,7 @@ export async function markSessionStarted(sessionId: string) {
   const user = await getUser();
   if (!user) return { ok: false as const, error: "unauthorized" };
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sessions = supabase.from("sessions") as any;
 
@@ -83,7 +83,7 @@ export async function endSession(input: z.infer<typeof EndSessionInput>) {
 
   const { sessionId, finalStatus, actualDurationSeconds } = parsed.data;
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sessions = supabase.from("sessions") as any;
 

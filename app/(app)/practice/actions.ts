@@ -51,7 +51,7 @@ export async function startDrill(input: z.infer<typeof StartDrillInput>): Promis
     return { ok: false, error: "drill_type_not_implemented" };
   }
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: inserted, error } = await (supabase.from("drills") as any)
     .insert({
@@ -94,7 +94,7 @@ export async function abandonDrill(drillId: string): Promise<{ ok: boolean }> {
   const user = await getUser();
   if (!user) return { ok: false };
 
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: drillRaw } = await (supabase.from("drills") as any)
     .select("id, user_id, status")
