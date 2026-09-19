@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getUser } from "@/lib/auth/server";
 import { createServerClient } from "@/lib/db/server";
 import { getPersonaAvatarId } from "@/lib/personas";
+import { RATE_LIMITS } from "@/lib/rate-limit";
+import { withRateLimit, type AuthedContext } from "@/lib/rate-limit/middleware";
 import type { PersonaId } from "@/types/supabase";
 
 export const runtime = "nodejs";
@@ -19,11 +20,14 @@ const SessionInput = z.object({
 // --------------------------------------------------------------------------
 // Route
 // --------------------------------------------------------------------------
+//
+// This is the legacy fallback used when tavusConfigured() is false (persona
+// not registered under /api/tavus/conversation). It must stay behind the
+// same rate limit and register the same signed webhook callback_url as the
+// primary route — otherwise sessions started here never receive
+// system.shutdown / application.transcription_ready and can never complete.
 
-export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
+async function handler(req: NextRequest, { user }: AuthedContext) {
   const tavusApiKey = process.env.TAVUS_API_KEY;
   if (!tavusApiKey) {
     return NextResponse.json({ error: "tavus_not_configured" }, { status: 503 });
@@ -56,6 +60,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "replica_not_configured" }, { status: 503 });
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const webhookSecret = process.env.TAVUS_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("[Tavus] TAVUS_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "webhook_not_configured" }, { status: 503 });
+  }
+  const callbackUrl = `${baseUrl}/api/tavus/webhook/${encodeURIComponent(webhookSecret)}`;
+
   try {
     // Create a Tavus conversation
     const res = await fetch("https://tavusapi.com/v2/conversations", {
@@ -68,6 +80,7 @@ export async function POST(req: NextRequest) {
         replica_id: replicaId,
         // We handle the conversation logic ourselves — Tavus just renders
         conversation_name: `folio-${session.persona}-${Date.now()}`,
+        callback_url: callbackUrl,
       }),
     });
 
@@ -78,6 +91,20 @@ export async function POST(req: NextRequest) {
     }
 
     const tavusData = await res.json();
+
+    // Persist the conversation id/url — the webhook looks sessions up by
+    // tavus_conversation_id, so without this the session can never receive
+    // completion events and would be stuck in "in_progress" forever.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from("sessions") as any)
+      .update({
+        tavus_conversation_id: tavusData.conversation_id,
+        tavus_conversation_url: tavusData.conversation_url,
+        started_at: new Date().toISOString(),
+        status: "in_progress",
+      })
+      .eq("id", session.id);
+
     return NextResponse.json({
       conversationUrl: tavusData.conversation_url,
       conversationId: tavusData.conversation_id,
@@ -87,3 +114,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "tavus_session_failed" }, { status: 502 });
   }
 }
+
+export const POST = withRateLimit(RATE_LIMITS.tavus_conversation, handler);

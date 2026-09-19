@@ -6,6 +6,7 @@ import { createServerClient } from "@/lib/db/server";
 import { getUser, getUserTier } from "@/lib/auth/server";
 import { PERSONAS, isValidCombo } from "@/lib/personas";
 import { checkSessionStart } from "@/lib/gates/session";
+import { TIERS } from "@/lib/tiers";
 import type { PersonaId, InterviewType } from "@/types/supabase";
 import type { InterviewMode } from "@/lib/personas/types";
 
@@ -140,8 +141,49 @@ export async function startSession(
     };
   }
 
-  // ---- 6. Insert the session row
   const supabase = createServerClient();
+
+  // ---- 6. Atomically reserve a session slot before inserting.
+  // Within-quota: bump sessions_used_this_cycle (guarded by the tier's
+  // included allotment — see migration 0014). Overage: bump
+  // overages_used_this_cycle, uncapped (overage charge happens separately
+  // via /api/stripe/overage-checkout before redirect, not tracked here).
+  //
+  // This runs BEFORE the insert, and the guard is enforced inside the same
+  // UPDATE statement, so two concurrent requests (double-click, two tabs)
+  // can't both pass the quota check above and both consume the same last
+  // slot — the second one's UPDATE blocks on the row lock, then sees the
+  // updated count and no-ops instead of overshooting the quota.
+  const counterField = req.overageAccepted
+    ? "overages_used_this_cycle"
+    : "sessions_used_this_cycle";
+  const counterLimit = req.overageAccepted
+    ? null
+    : TIERS[effectiveTier].allotments.interviewSessions;
+
+  // In dev mode, skip the counter reservation (no subscription row exists)
+  if (!isDev) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: reserved, error: rpcError } = await (supabase.rpc as any)(
+        "increment_subscription_counter",
+        { p_user_id: user.id, p_field: counterField, p_limit: counterLimit },
+      );
+      if (rpcError) {
+        console.warn("[startSession] counter reservation failed (non-fatal):", rpcError);
+      } else if (reserved === false) {
+        return {
+          ok: false,
+          error: "You've used all your included sessions this cycle. Refresh to see options.",
+          code: "session_quota_exceeded",
+        };
+      }
+    } catch (err) {
+      console.warn("[startSession] counter reservation failed (non-fatal):", err);
+    }
+  }
+
+  // ---- 7. Insert the session row
   const persona = PERSONAS[req.personaId];
   const durationSeconds = persona.defaultDurationMinutes * 60;
 
@@ -180,27 +222,6 @@ export async function startSession(
       error: "Couldn't create the session. Try again.",
       code: "insert_failed",
     };
-  }
-
-  // ---- 7. Increment session-usage counter on the subscription row
-  // Within-quota: bump sessions_used_this_cycle
-  // Overage: bump overages_used_this_cycle (overage charge happens separately
-  // via /api/stripe/overage-checkout before redirect, not tracked here)
-  const counterField = req.overageAccepted
-    ? "overages_used_this_cycle"
-    : "sessions_used_this_cycle";
-
-  // In dev mode, skip the counter increment (no subscription row exists)
-  if (!isDev) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase.rpc as any)("increment_subscription_counter", {
-        p_user_id: user.id,
-        p_field: counterField,
-      });
-    } catch (err) {
-      console.warn("[startSession] counter increment failed (non-fatal):", err);
-    }
   }
 
   // ---- 8. Redirect into the room

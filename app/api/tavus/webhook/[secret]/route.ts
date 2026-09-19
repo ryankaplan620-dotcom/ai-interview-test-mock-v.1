@@ -286,30 +286,28 @@ async function handleTranscription(
   // Upload full transcript JSON to R2 (if configured)
   if (!shouldMockR2()) {
     try {
-      const jsonPayload = JSON.stringify(
-        {
-          version: "1",
-          sessionId: session.id,
-          persona: session.persona,
-          interviewType: session.interview_type,
-          mode: session.mode,
-          targetFirm: session.target_firm,
-          targetRole: session.target_role,
-          durationSeconds: session.duration_seconds,
-          startedAt: session.started_at,
-          endedAt: new Date().toISOString(),
-          source: "tavus",
-          turns: turns.map((t, i) => ({
-            role: t.role as "user" | "assistant",
-            content: t.content,
-            startedAtMs: i * approxGapMs,
-            endedAtMs: (i + 1) * approxGapMs,
-          })),
-        },
-        null,
-        2,
-      );
-      const url = await uploadTranscript(session.id, jsonPayload);
+      const transcriptPayload = {
+        version: "1",
+        sessionId: session.id,
+        persona: session.persona,
+        interviewType: session.interview_type,
+        mode: session.mode,
+        targetFirm: session.target_firm,
+        targetRole: session.target_role,
+        durationSeconds: session.duration_seconds,
+        startedAt: session.started_at,
+        endedAt: new Date().toISOString(),
+        source: "tavus",
+        turns: turns.map((t, i) => ({
+          role: t.role as "user" | "assistant",
+          content: t.content,
+          startedAtMs: i * approxGapMs,
+          endedAtMs: (i + 1) * approxGapMs,
+        })),
+      };
+      // uploadTranscript stringifies internally — pass the object, not a string,
+      // or the stored artifact ends up double-encoded (a JSON string of JSON).
+      const url = await uploadTranscript(session.id, transcriptPayload);
       await supabase.from("sessions").update({ transcript_url: url }).eq("id", session.id);
     } catch (err) {
       console.error("[tavus.webhook] R2 upload failed:", err);

@@ -509,8 +509,9 @@ export type Database = {
     };
     Functions: {
       increment_subscription_counter: {
-        Args: { p_user_id: string; p_field: string };
-        Returns: void;
+        Args: { p_user_id: string; p_field: string; p_limit?: number | null };
+        /** true if the counter was incremented, false if p_limit blocked it. */
+        Returns: boolean;
       };
       bump_memory_surfaced_count: {
         Args: { p_memory_ids: string[] };
